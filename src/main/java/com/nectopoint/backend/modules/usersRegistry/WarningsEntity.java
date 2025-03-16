@@ -22,9 +22,9 @@ public class WarningsEntity {
     @Indexed
     private TipoAviso tipo_aviso;
     @Indexed
-    private Instant data_aviso;
+    private Instant data_aviso = Instant.now();
     @Indexed
-    private TipoStatus status_aviso;
+    private TipoStatus status_aviso = TipoStatus.PENDENDE;
 
     private String mensagem;
     private List<PointRegistryEntity> pontos_marcados;

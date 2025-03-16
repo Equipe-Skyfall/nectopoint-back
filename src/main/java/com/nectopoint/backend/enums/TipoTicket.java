@@ -3,18 +3,17 @@ package com.nectopoint.backend.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum TipoCargo {
-    GERENTE,
-    COLABORADOR;
+public enum TipoTicket {
+    PONTOS_IMPAR;
 
     @JsonCreator
-    public static TipoCargo fromString(String value) {
-        for (TipoCargo tipo : TipoCargo.values()) {
+    public static TipoTicket fromString(String value) {
+        for (TipoTicket tipo : TipoTicket.values()) {
             if (tipo.name().equalsIgnoreCase(value)) {
                 return tipo;
             }
         }
-        throw new IllegalArgumentException("Valor para tipo_cargo inválido: " + value);
+        throw new IllegalArgumentException("Valor para tipo_ponto inválido: " + value);
     }
 
     @JsonValue
@@ -22,3 +21,6 @@ public enum TipoCargo {
         return name();
     }
 }
+
+// Esse Enum possui somente um valor pois está
+// previsto que haverá outros tipos de Tickets no futuro.

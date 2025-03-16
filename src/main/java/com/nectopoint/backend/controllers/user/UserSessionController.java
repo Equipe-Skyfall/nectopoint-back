@@ -1,14 +1,11 @@
 package com.nectopoint.backend.controllers.user;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
-import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 import com.nectopoint.backend.repositories.UserRepository;
 import com.nectopoint.backend.repositories.UserSessionRepository;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,12 +49,6 @@ public class UserSessionController {
     @GetMapping("/")
     public UserSessionEntity getUserSession(@RequestParam Long id) {
         return userSessionRepo.findByColaborador(id);
-    }
-
-    @GetMapping("/alertas/")
-    public List<WarningsEntity> getUserWarnings(@RequestParam Long id) {
-        UserSessionEntity currentUser = userSessionRepo.findByColaborador(id);
-        return currentUser.getAlertas_usuario();
     }
 
 }

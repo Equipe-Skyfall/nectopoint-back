@@ -39,11 +39,14 @@ public class UserEntity {
     @Column(unique = true,nullable = false)
     private String cpf;
    
-    @Length(max=20)
     private TipoCargo title;
     private String department;
     private String workJourneyType;
     private String employeeNumber;
     private Float bankOfHours;
     private Integer dailyHours;
+
+    public void missedWorkDay() {
+        this.bankOfHours = this.bankOfHours - this.dailyHours;
+    }
 }
