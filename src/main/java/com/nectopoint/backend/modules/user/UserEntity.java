@@ -1,7 +1,5 @@
 package com.nectopoint.backend.modules.user;
 
-import org.hibernate.validator.constraints.Length;
-
 import com.nectopoint.backend.enums.TipoCargo;
 
 import jakarta.persistence.Column;

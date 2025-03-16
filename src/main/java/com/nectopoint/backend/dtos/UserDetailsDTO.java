@@ -11,4 +11,12 @@ public class UserDetailsDTO {
     private String workJourneyType;
     private Float bankOfHours;
     private Integer dailyHours;
+
+    public UserDetailsDTO(TipoCargo title, String department, String workJourneyType, Float bankOfHours, Integer dailyHours) {
+        this.title = title;
+        this.department = department;
+        this.workJourneyType = workJourneyType;
+        this.bankOfHours = bankOfHours;
+        this.dailyHours = dailyHours;
+    }
 }

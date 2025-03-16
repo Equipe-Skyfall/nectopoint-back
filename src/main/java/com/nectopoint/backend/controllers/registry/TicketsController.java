@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.dtos.TicketDTO;
+import com.nectopoint.backend.enums.TipoStatus;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
 import com.nectopoint.backend.repositories.TicketsRepository;
+import com.nectopoint.backend.services.WarningsService;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,14 +32,22 @@ public class TicketsController {
     @Autowired
     private TicketsRepository ticketRepo;
 
+    @Autowired
+    private WarningsService warningsService;
+
     @PostMapping("/postar")
     public TicketsEntity postTicket(@RequestBody TicketDTO requestData) {
         TicketsEntity new_ticket = new TicketsEntity();
+        String id_aviso = Optional.ofNullable(requestData.getId_aviso()).orElse(null);
+
         new_ticket.setId_colaborador(requestData.getId_colaborador());
         new_ticket.setTipo_ticket(requestData.getTipo_ticket());
 
         new_ticket.setMensagem(Optional.ofNullable(requestData.getMensagem()).orElse(null));
-        new_ticket.setId_aviso(Optional.ofNullable(requestData.getId_aviso()).orElse(null));
+        if (id_aviso != null) {
+            new_ticket.setId_aviso(id_aviso);
+            warningsService.changeStatus(id_aviso, TipoStatus.EM_AGUARDO);
+        }
 
         return ticketRepo.save(new_ticket);
     }

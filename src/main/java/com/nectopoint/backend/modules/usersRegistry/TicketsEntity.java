@@ -2,13 +2,13 @@ package com.nectopoint.backend.modules.usersRegistry;
 
 import java.time.Instant;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.nectopoint.backend.enums.TipoStatus;
 import com.nectopoint.backend.enums.TipoTicket;
 
-import jakarta.persistence.Id;
 import lombok.Data;
 
 @Document(collection = "tickets")

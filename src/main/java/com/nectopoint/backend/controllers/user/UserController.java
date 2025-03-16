@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.dtos.UserDetailsDTO;
+import com.nectopoint.backend.enums.TipoCargo;
 import com.nectopoint.backend.exceptions.DuplicateException;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.repositories.UserRepository;
@@ -87,7 +88,6 @@ public class UserController {
         
         if (userOptional.isPresent()) {
             UserEntity existingUser = userOptional.get();
-            UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
           
             existingUser.setName(userDetails.getName());
             existingUser.setEmail(userDetails.getEmail());
@@ -95,16 +95,18 @@ public class UserController {
             existingUser.setCpf(userDetails.getCpf());
 
             existingUser.setTitle(userDetails.getTitle());
-            userDetailsDTO.setTitle(userDetails.getTitle());
+            TipoCargo title = userDetails.getTitle();
             existingUser.setDepartment(userDetails.getDepartment());
-            userDetailsDTO.setDepartment(userDetails.getDepartment());
+            String department = userDetails.getDepartment();
 
             existingUser.setWorkJourneyType(userDetails.getWorkJourneyType());
-            userDetailsDTO.setWorkJourneyType(userDetails.getWorkJourneyType());
+            String workJourneyType = userDetails.getWorkJourneyType();
             existingUser.setBankOfHours(userDetails.getBankOfHours());
-            userDetailsDTO.setBankOfHours(userDetails.getBankOfHours());
+            Float bankOfHours = userDetails.getBankOfHours();
             existingUser.setDailyHours(userDetails.getDailyHours());
-            userDetailsDTO.setDailyHours(userDetails.getDailyHours());
+            Integer dailyHours = userDetails.getDailyHours();
+
+            UserDetailsDTO userDetailsDTO = new UserDetailsDTO(title, department, workJourneyType, bankOfHours, dailyHours);
             
             existingUser.setEmployeeNumber(userDetails.getEmployeeNumber());
             

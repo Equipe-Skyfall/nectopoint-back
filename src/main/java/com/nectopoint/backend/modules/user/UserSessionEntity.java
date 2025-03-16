@@ -1,15 +1,16 @@
 package com.nectopoint.backend.modules.user;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.nectopoint.backend.enums.TipoCargo;
 import com.nectopoint.backend.enums.TipoPonto;
 import com.nectopoint.backend.modules.shared.WarningsSummary;
 
-import jakarta.persistence.Id;
 import lombok.Data;
 
 @Document(collection = "sessao-usuario")
@@ -20,7 +21,7 @@ public class UserSessionEntity {
     private Long id_colaborador;
     private DadosUsuario dados_usuario = new DadosUsuario();
     private JornadaTrabalho jornada_trabalho = new JornadaTrabalho();
-    private List<WarningsSummary> alertas_usuario;
+    private List<WarningsSummary> alertas_usuario = new ArrayList<>();
 
     @Data
     public static class DadosUsuario {
