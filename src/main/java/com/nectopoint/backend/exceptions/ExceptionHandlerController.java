@@ -24,13 +24,11 @@ public class ExceptionHandlerController {
     } 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<List<ErrorMessageDTO>> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception){
-        
+    public ResponseEntity<List<ErrorMessageDTO>> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         List<ErrorMessageDTO> dto = new ArrayList<>();
-
-
-
-        exception.getBindingResult().getFieldErrors().forEach(err ->{
+        
+        // Automatically extract field errors and messages
+        exception.getBindingResult().getFieldErrors().forEach(err -> {
             String message = messageSource.getMessage(err, LocaleContextHolder.getLocale());
             ErrorMessageDTO error = new ErrorMessageDTO(message, err.getField());
             dto.add(error);
@@ -38,6 +36,7 @@ public class ExceptionHandlerController {
 
         return new ResponseEntity<>(dto, HttpStatus.BAD_REQUEST);
     }
+
 
     @ExceptionHandler(InvalidFormatException.class)
     public ResponseEntity<ErrorMessageDTO> handleInvalidEnumValue(InvalidFormatException ex) {
@@ -48,5 +47,8 @@ public class ExceptionHandlerController {
 
         return new ResponseEntity<>(new ErrorMessageDTO(message, fieldName), HttpStatus.BAD_REQUEST);
     }
-
+    // @ExceptionHandler(DuplicateException.class)
+    // public ResponseEntity<ErrorMessageDTO> handleDuplicateException(DuplicateException ex) {
+    //     return new ResponseEntity<>(new ErrorMessageDTO(ex.getMessage(), "duplicated_value"), HttpStatus.BAD_REQUEST);
+    // }
 }
