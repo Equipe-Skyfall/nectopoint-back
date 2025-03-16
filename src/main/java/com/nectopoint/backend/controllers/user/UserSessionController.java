@@ -16,7 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+// Ao fazer Login "startSession" inicializa o usuário com os dados atualizados pegos do banco MySQL
+// porém da maneira que está implementado no momento o FRONT deve mandar o userID para /iniciar
 
+// Caso esse processo seja feito somente no BACKEND mova a lógica de "startSession" para "UserSessionService.java" no pacote "services"
 
 @RestController
 @RequestMapping("/sessao/usuario")
