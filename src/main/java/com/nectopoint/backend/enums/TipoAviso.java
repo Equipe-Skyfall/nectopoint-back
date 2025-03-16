@@ -3,16 +3,12 @@ package com.nectopoint.backend.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum TipoPonto {
-    ENTRADA, SAIDA;
-
-    public TipoPonto invert() {
-        return this == ENTRADA ? SAIDA : ENTRADA;
-    }
+public enum TipoAviso {
+    PONTOS_IMPAR;
 
     @JsonCreator
-    public static TipoPonto fromString(String value) {
-        for (TipoPonto tipo : TipoPonto.values()) {
+    public static TipoAviso fromString(String value) {
+        for (TipoAviso tipo : TipoAviso.values()) {
             if (tipo.name().equalsIgnoreCase(value)) {
                 return tipo;
             }
@@ -25,3 +21,6 @@ public enum TipoPonto {
         return name();
     }
 }
+
+// Esse Enum possui somente um valor pois está
+// previsto que haverá outros tipos de Alertas no futuro.

@@ -1,0 +1,49 @@
+package com.nectopoint.backend.services;
+
+import java.time.Instant;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.nectopoint.backend.dtos.UserDetailsDTO;
+import com.nectopoint.backend.enums.TipoPonto;
+import com.nectopoint.backend.modules.user.UserSessionEntity;
+import com.nectopoint.backend.repositories.UserSessionRepository;
+
+@Service
+public class UserSessionService {
+    
+    @Autowired
+    private UserSessionRepository userSessionRepo;
+
+    public void updateLastPunch(Long id_colaborador, TipoPonto batida_atual, Instant ultima_entrada) {
+        UserSessionEntity usuario = userSessionRepo.findByColaborador(id_colaborador);
+        if (usuario != null) {
+            if (batida_atual == TipoPonto.ENTRADA) {
+                usuario.getJornada_trabalho().getJornada_atual().setUltima_entrada(ultima_entrada);
+            }
+            usuario.getJornada_trabalho().getJornada_atual().setBatida_atual(batida_atual.invert());
+
+            userSessionRepo.save(usuario);
+        }
+    }
+
+    public void updateUser(Long id_colaborador, UserDetailsDTO newData) {
+        UserSessionEntity updateTarget = userSessionRepo.findByColaborador(id_colaborador);
+        
+        updateTarget.getDados_usuario().setCargo(newData.getTitle());
+        updateTarget.getDados_usuario().setDepartamento(newData.getDepartment());
+
+        updateTarget.getJornada_trabalho().setBanco_de_horas(newData.getBankOfHours());
+        updateTarget.getJornada_trabalho().setHoras_diarias(newData.getDailyHours());
+        updateTarget.getJornada_trabalho().setTipo_jornada(newData.getWorkJourneyType());
+
+        userSessionRepo.save(updateTarget);
+    }
+
+    public void deleteUserData(Long id_colaborador) {
+        UserSessionEntity deleteTarget = userSessionRepo.findByColaborador(id_colaborador);
+
+        userSessionRepo.delete(deleteTarget);
+    }
+}

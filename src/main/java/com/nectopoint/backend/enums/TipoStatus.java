@@ -3,16 +3,14 @@ package com.nectopoint.backend.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum TipoPonto {
-    ENTRADA, SAIDA;
-
-    public TipoPonto invert() {
-        return this == ENTRADA ? SAIDA : ENTRADA;
-    }
+public enum TipoStatus {
+    PENDENDE,
+    EM_AGUARDO, //EM_AGUARDO sinaliza que está aguardando uma resposta do gerente.
+    RESOLVIDO;
 
     @JsonCreator
-    public static TipoPonto fromString(String value) {
-        for (TipoPonto tipo : TipoPonto.values()) {
+    public static TipoStatus fromString(String value) {
+        for (TipoStatus tipo : TipoStatus.values()) {
             if (tipo.name().equalsIgnoreCase(value)) {
                 return tipo;
             }
@@ -25,3 +23,5 @@ public enum TipoPonto {
         return name();
     }
 }
+
+// Diferente de "TipoStatusUsuario" esse Enum será aplicado aos Tickets e Alertas

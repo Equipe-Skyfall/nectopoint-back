@@ -21,4 +21,5 @@ public class PointRegistryEntity {
     private TipoPonto tipo_ponto;
     @Indexed
     private Instant data_hora;
+    private Long horas_trabalhadas;
 }

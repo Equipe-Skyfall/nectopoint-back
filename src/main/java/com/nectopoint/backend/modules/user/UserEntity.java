@@ -1,7 +1,8 @@
 package com.nectopoint.backend.modules.user;
 
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.UniqueElements;
+
+import com.nectopoint.backend.enums.TipoCargo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,7 +10,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
@@ -40,10 +40,9 @@ public class UserEntity {
     private String cpf;
    
     @Length(max=20)
-    private String title;
+    private TipoCargo title;
     private String department;
     private String workJourneyType;
-    private String status;
     private String employeeNumber;
     private Float bankOfHours;
     private Integer dailyHours;

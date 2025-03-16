@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.exceptions.DuplicateException;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.repositories.UserRepository;
+import com.nectopoint.backend.services.UserSessionService;
 
 import jakarta.validation.Valid;
 
@@ -25,6 +27,9 @@ public class UserController {
     
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserSessionService userSessionService;
 
     //Cria Usuário
     @PostMapping("/")
@@ -46,6 +51,7 @@ public class UserController {
         
         if (userOptional.isPresent()) {
             this.userRepository.deleteById(id);
+            this.userSessionService.deleteUserData(id);
             // ResponseEntity é para retornar os 202,404,etc
             return ResponseEntity.noContent().build();
         } else {
@@ -81,21 +87,28 @@ public class UserController {
         
         if (userOptional.isPresent()) {
             UserEntity existingUser = userOptional.get();
-            
+            UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
           
             existingUser.setName(userDetails.getName());
             existingUser.setEmail(userDetails.getEmail());
             existingUser.setPassword(userDetails.getPassword());
             existingUser.setCpf(userDetails.getCpf());
+
             existingUser.setTitle(userDetails.getTitle());
+            userDetailsDTO.setTitle(userDetails.getTitle());
             existingUser.setDepartment(userDetails.getDepartment());
+            userDetailsDTO.setDepartment(userDetails.getDepartment());
+
             existingUser.setWorkJourneyType(userDetails.getWorkJourneyType());
-            existingUser.setStatus(userDetails.getStatus());
-            existingUser.setEmployeeNumber(userDetails.getEmployeeNumber());
+            userDetailsDTO.setWorkJourneyType(userDetails.getWorkJourneyType());
             existingUser.setBankOfHours(userDetails.getBankOfHours());
+            userDetailsDTO.setBankOfHours(userDetails.getBankOfHours());
             existingUser.setDailyHours(userDetails.getDailyHours());
+            userDetailsDTO.setDailyHours(userDetails.getDailyHours());
             
+            existingUser.setEmployeeNumber(userDetails.getEmployeeNumber());
             
+            this.userSessionService.updateUser(id, userDetailsDTO);
             UserEntity updatedUser = this.userRepository.save(existingUser);
             return ResponseEntity.ok(updatedUser);
         } else {

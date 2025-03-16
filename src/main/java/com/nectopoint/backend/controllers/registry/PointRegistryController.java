@@ -1,14 +1,27 @@
 package com.nectopoint.backend.controllers.registry;
 
+import java.time.Duration;
 import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.dtos.PointRegistryDTO;
+import com.nectopoint.backend.enums.TipoPonto;
+import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.repositories.PointRegistryRepository;
+import com.nectopoint.backend.repositories.UserSessionRepository;
+import com.nectopoint.backend.services.UserSessionService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,20 +36,48 @@ public class PointRegistryController {
     @Autowired
     private PointRegistryRepository registryRepo;
 
+    @Autowired
+    private UserSessionRepository userSessionRepo;
+
+    @Autowired
+    private UserSessionService userSessionService;
+
     @PostMapping("/bater-ponto")
-    public PointRegistryEntity create(@RequestBody PointRegistryDTO requestData) {
+    public PointRegistryEntity create(@Valid @RequestBody PointRegistryDTO requestData) {
+        UserSessionEntity user = userSessionRepo.findByColaborador(requestData.getId_colaborador());
         PointRegistryEntity record = new PointRegistryEntity();
 
-        record.setId_colaborador(requestData.getId_colaborador());
-        record.setTipo_ponto(requestData.getTipo_ponto());
-        record.setData_hora(Instant.now());
+        Long id_colaborador = requestData.getId_colaborador();
+        TipoPonto tipo_ponto = user.getJornada_trabalho().getJornada_atual().getBatida_atual();
+        Instant data_hora = Instant.now();
 
+        record.setId_colaborador(id_colaborador);
+        record.setTipo_ponto(tipo_ponto);
+        record.setData_hora(data_hora);
+        if (tipo_ponto == TipoPonto.SAIDA) {
+            Instant ultima_entrada = user.getJornada_trabalho().getJornada_atual().getUltima_entrada();
+            Long horas_trabalhadas = Duration.between(ultima_entrada, data_hora).toMinutes();
+            record.setHoras_trabalhadas(horas_trabalhadas);
+        }
+
+        userSessionService.updateLastPunch(id_colaborador, tipo_ponto, data_hora);
         return registryRepo.save(record);
     }
 
-    @GetMapping("/historico")
-    public String getMethodName(@RequestParam String param) {
-        return new String();
+    @GetMapping("/historico-todos")
+    public ResponseEntity<Page<PointRegistryEntity>> historicoTodos(@RequestParam int page, @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findAll(pageable);
+
+        return new ResponseEntity<>(pointRegistryPage, HttpStatus.OK);
+    }
+
+    @GetMapping("/historico-usuario")
+    public ResponseEntity<Page<PointRegistryEntity>> historicoUsuario(@RequestParam int page, @RequestParam int size, @RequestParam Long id_colaborador) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findByIdColaborador(id_colaborador, pageable);
+
+        return new ResponseEntity<>(pointRegistryPage, HttpStatus.OK);
     }
     
 }

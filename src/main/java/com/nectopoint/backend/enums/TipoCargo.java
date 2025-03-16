@@ -3,16 +3,13 @@ package com.nectopoint.backend.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum TipoPonto {
-    ENTRADA, SAIDA;
-
-    public TipoPonto invert() {
-        return this == ENTRADA ? SAIDA : ENTRADA;
-    }
+public enum TipoCargo {
+    GERENTE,
+    COLABORADOR;
 
     @JsonCreator
-    public static TipoPonto fromString(String value) {
-        for (TipoPonto tipo : TipoPonto.values()) {
+    public static TipoCargo fromString(String value) {
+        for (TipoCargo tipo : TipoCargo.values()) {
             if (tipo.name().equalsIgnoreCase(value)) {
                 return tipo;
             }
