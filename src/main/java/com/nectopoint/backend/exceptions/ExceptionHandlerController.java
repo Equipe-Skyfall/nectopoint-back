@@ -47,8 +47,5 @@ public class ExceptionHandlerController {
 
         return new ResponseEntity<>(new ErrorMessageDTO(message, fieldName), HttpStatus.BAD_REQUEST);
     }
-    // @ExceptionHandler(DuplicateException.class)
-    // public ResponseEntity<ErrorMessageDTO> handleDuplicateException(DuplicateException ex) {
-    //     return new ResponseEntity<>(new ErrorMessageDTO(ex.getMessage(), "duplicated_value"), HttpStatus.BAD_REQUEST);
-    // }
+
 }
