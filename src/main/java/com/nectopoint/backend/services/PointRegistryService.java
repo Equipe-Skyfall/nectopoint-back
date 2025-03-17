@@ -41,6 +41,7 @@ public class PointRegistryService {
     private UserSessionRepository userSessionRepo;
     @Autowired
     private WarningsRepository warningsRepo;
+    @Autowired
     private TicketsRepository ticketsRepo;
 
     @Autowired
@@ -48,9 +49,17 @@ public class PointRegistryService {
 
     public void correctPointPunch(Long id_colaborador, DadosTicket dados_ticket, PointRegistryEntity pointCorrection) {
         String id_aviso = dados_ticket.getId_aviso();
-        WarningsEntity warning = warningsRepo.findById(id_aviso).orElse(null);
-        TicketsEntity ticket = ticketsRepo.findById(dados_ticket.getId_ticket()).orElse(null);
+        String id_ticket = dados_ticket.getId_ticket();
+        
+        if (id_ticket != null) {
+            TicketsEntity ticket = ticketsRepo.findById(id_ticket).get();
+            ticket.setStatus_ticket(TipoStatus.RESOLVIDO);
+            ticketsRepo.save(ticket);
+        }
+
+        WarningsEntity warning = warningsRepo.findById(id_aviso).get();
         UserSessionEntity currentUser = userSessionRepo.findByColaborador(id_colaborador);
+        
         List<PointRegistryEntity> pontos_marcados = warning.getPontos_marcados();
         
         Instant ultima_entrada = pontos_marcados.get(pontos_marcados.size()-1).getData_hora();
@@ -61,9 +70,7 @@ public class PointRegistryService {
         pontos_marcados.add(pointCorrection);
         warning.setPontos_marcados(pontos_marcados);
         warning.setStatus_aviso(TipoStatus.RESOLVIDO);
-        ticket.setStatus_ticket(TipoStatus.RESOLVIDO);
 
-        ticketsRepo.save(ticket);
         warningsRepo.save(warning);
         registryRepo.save(pointCorrection);
 

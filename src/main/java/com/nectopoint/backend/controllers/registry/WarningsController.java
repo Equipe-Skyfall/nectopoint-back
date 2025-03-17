@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 import com.nectopoint.backend.repositories.WarningsRepository;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
@@ -25,8 +26,8 @@ public class WarningsController {
     @Autowired
     private WarningsRepository warningsRepo;
 
-    @GetMapping("/")
-    public WarningsEntity getWarningById(@RequestParam String id) {
+    @GetMapping("/{id}")
+    public WarningsEntity getWarningById(@PathVariable String id) {
         return warningsRepo.findById(id).get();
     }
 

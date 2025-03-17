@@ -26,6 +26,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
@@ -44,12 +45,11 @@ public class PointRegistryController {
     @Autowired
     private PointRegistryService registryService;
 
-    @PostMapping("/bater-ponto")
-    public PointRegistryEntity postPunch(@Valid @RequestBody PointRegistryDTO requestData) {
-        UserSessionEntity user = userSessionRepo.findByColaborador(requestData.getId_colaborador());
+    @PostMapping("/bater-ponto/{id_colaborador}")
+    public PointRegistryEntity postPunch(@PathVariable Long id_colaborador) {
+        UserSessionEntity user = userSessionRepo.findByColaborador(id_colaborador);
         PointRegistryEntity record = new PointRegistryEntity();
 
-        Long id_colaborador = requestData.getId_colaborador();
         TipoPonto tipo_ponto = user.getJornada_trabalho().getJornada_atual().getBatida_atual();
         Instant data_hora = record.getData_hora();
 
@@ -66,7 +66,7 @@ public class PointRegistryController {
     }
 
     @PostMapping("/bater-ponto/correcao")
-    public void postPunchCorrection(@RequestBody PointRegistryDTO requestData) {
+    public void postPunchCorrection(@Valid @RequestBody PointRegistryDTO requestData) {
         PointRegistryEntity record = new PointRegistryEntity();
 
         Long id_colaborador = requestData.getId_colaborador();
@@ -81,8 +81,8 @@ public class PointRegistryController {
     }
     
     
-    @GetMapping("/")
-    public PointRegistryEntity getPointById(@RequestParam String id) {
+    @GetMapping("/{id}")
+    public PointRegistryEntity getPointById(@PathVariable String id) {
         return registryRepo.findById(id).get();
     }
 

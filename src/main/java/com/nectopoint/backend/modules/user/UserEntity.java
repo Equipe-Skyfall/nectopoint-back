@@ -65,7 +65,7 @@ public class UserEntity {
     @NotNull(message = "O campo horas diárias não pode ser nulo")
     private Integer dailyHours;
     
-    private Float bankOfHours;
+    private Float bankOfHours = (float)0;
 
     @Column(nullable = false)
     @NotNull(message = "A data de nascimento não pode ser nula")

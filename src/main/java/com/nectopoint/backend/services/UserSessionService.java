@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.enums.TipoPonto;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
+import com.nectopoint.backend.repositories.UserRepository;
 import com.nectopoint.backend.repositories.UserSessionRepository;
 
 @Service
@@ -15,6 +16,35 @@ public class UserSessionService {
     
     @Autowired
     private UserSessionRepository userSessionRepo;
+    private UserRepository userRepo;
+
+    public void createSession(Long id, UserDetailsDTO userDetails) {
+        UserSessionEntity userSession = new UserSessionEntity();
+        userSession.setId_colaborador(id);
+
+        userSession.getDados_usuario().setCargo(userDetails.getTitle());
+        userSession.getDados_usuario().setDepartamento(userDetails.getDepartment());
+
+        userSession.getJornada_trabalho().setBanco_de_horas(userDetails.getBankOfHours());
+        userSession.getJornada_trabalho().setHoras_diarias(userDetails.getDailyHours());
+        userSession.getJornada_trabalho().setTipo_jornada(userDetails.getWorkJourneyType());
+
+        userSessionRepo.save(userSession);
+    }
+
+    public void startSession(Long id) {
+        UserDetailsDTO userDetails = userRepo.findUserDetailsById(id);
+        UserSessionEntity userSession = userSessionRepo.findByColaborador(id);
+
+        userSession.getDados_usuario().setCargo(userDetails.getTitle());
+        userSession.getDados_usuario().setDepartamento(userDetails.getDepartment());
+
+        userSession.getJornada_trabalho().setBanco_de_horas(userDetails.getBankOfHours());
+        userSession.getJornada_trabalho().setHoras_diarias(userDetails.getDailyHours());
+        userSession.getJornada_trabalho().setTipo_jornada(userDetails.getWorkJourneyType());
+
+        userSessionRepo.save(userSession);
+    }
 
     public void updateLastPunch(Long id_colaborador, TipoPonto batida_atual, Instant ultima_entrada) {
         UserSessionEntity usuario = userSessionRepo.findByColaborador(id_colaborador);

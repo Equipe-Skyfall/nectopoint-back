@@ -19,6 +19,7 @@ import com.nectopoint.backend.repositories.TicketsRepository;
 import com.nectopoint.backend.services.WarningsService;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,8 +54,8 @@ public class TicketsController {
     }
     
 
-    @GetMapping("/")
-    public TicketsEntity getTicketById(@RequestParam String id) {
+    @GetMapping("/{id}")
+    public TicketsEntity getTicketById(@PathVariable String id) {
         return ticketRepo.findById(id).get();
     }
     

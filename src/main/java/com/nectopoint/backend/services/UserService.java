@@ -2,6 +2,7 @@ package com.nectopoint.backend.services;
 
 import com.nectopoint.backend.BackendApplication;
 import com.nectopoint.backend.dtos.UserDetailsDTO;
+import com.nectopoint.backend.enums.TipoCargo;
 import com.nectopoint.backend.exceptions.DuplicateException;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.repositories.UserRepository;
@@ -34,7 +35,18 @@ public class UserService {
         userRepository.findByEmployeeNumber(userEntity.getEmployeeNumber())
             .ifPresent((_) -> { throw new DuplicateException("Número de funcionário já cadastrado"); });
 
-        return userRepository.save(userEntity);
+        TipoCargo title = userEntity.getTitle();
+        String department = userEntity.getDepartment();
+
+        String workJourneyType = userEntity.getWorkJourneyType();
+        Float bankOfHours = userEntity.getBankOfHours();
+        Integer dailyHours = userEntity.getDailyHours();
+
+        UserDetailsDTO userDetailsDTO = new UserDetailsDTO(title, department, workJourneyType, bankOfHours, dailyHours);
+        
+        UserEntity newUser = this.userRepository.save(userEntity);
+        this.userSessionService.createSession(newUser.getId(), userDetailsDTO);
+        return newUser;
     }
 
     // Deleta Usuário
