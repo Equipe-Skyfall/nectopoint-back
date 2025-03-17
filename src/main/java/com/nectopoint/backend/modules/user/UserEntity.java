@@ -1,6 +1,7 @@
 package com.nectopoint.backend.modules.user;
 
-import org.hibernate.validator.constraints.Length;
+
+import java.time.LocalDate;
 
 import com.nectopoint.backend.enums.TipoCargo;
 
@@ -10,7 +11,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
@@ -23,12 +26,13 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-increment
     private Long id;
 
-  
+    @Column(nullable = false)
+    @NotBlank(message = "O campo nome não pode ser nulo ou vazio")
     private String name;
 
     @Column(unique = true, nullable = false)
     @Email(message = "Email inválido")
-    @NotNull(message = "O email não pode ser nulo")
+    @NotBlank(message = "O email não pode ser nulo ou vazio")
     private String email;
 
     @Pattern(
@@ -36,15 +40,37 @@ public class UserEntity {
         message = "Senha deve conter pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número, 1 caractere especial e ter no mínimo 8 caracteres"
     )
     private String password;
+    
     @Column(unique = true,nullable = false)
+    @NotBlank(message = "O campo cpf não pode ser nulo ou vazio")
     private String cpf;
    
+    @Column(nullable = false)
+    @NotNull(message = "O campo cargo não pode ser nulo")
     private TipoCargo title;
+
+    @Column(nullable = false)
+    @NotBlank(message = "O campo departamento não pode ser nulo ou vazio")
     private String department;
+    
+    @Column(nullable = false)
+    @NotBlank(message = "O campo jornada de trabalho não pode ser nulo ou vazio")
     private String workJourneyType;
+    
+    @Column(nullable = false,unique=true)
+    @NotBlank(message = "O campo número do funcionário não pode ser nulo ou vazio")
     private String employeeNumber;
-    private Float bankOfHours;
+    
+    @Column(nullable = false)
+    @NotNull(message = "O campo horas diárias não pode ser nulo")
     private Integer dailyHours;
+    
+    private Float bankOfHours;
+
+    @Column(nullable = false)
+    @NotNull(message = "A data de nascimento não pode ser nula")
+    @Past(message = "A data de nascimento deve ser uma data passada")
+    private LocalDate birthDate;
 
     public void missedWorkDay() {
         this.bankOfHours = this.bankOfHours - this.dailyHours;
