@@ -1,5 +1,6 @@
 package com.nectopoint.backend.services;
 
+import com.nectopoint.backend.BackendApplication;
 import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.exceptions.DuplicateException;
 import com.nectopoint.backend.modules.user.UserEntity;
@@ -12,11 +13,17 @@ import java.util.Optional;
 @Service
 public class UserService {
 
+    private final BackendApplication backendApplication;
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private UserSessionService userSessionService;
+
+    UserService(BackendApplication backendApplication) {
+        this.backendApplication = backendApplication;
+    }
 
     // Cria Usuário
     public UserEntity createUser(UserEntity userEntity) {
@@ -61,27 +68,19 @@ public class UserService {
             UserEntity existingUser = userOptional.get();
             
             if (!existingUser.getCpf().equals(userDetails.getCpf())) {
-                System.out.println("CPF changed from " + existingUser.getCpf() + " to " + userDetails.getCpf());
                 userRepository.findByCpf(userDetails.getCpf())
-                    .ifPresent(user -> {
-                        System.out.println("Found duplicate CPF: " + user.getCpf());
-                        throw new DuplicateException("Cpf já cadastrado");
-                    });
+                    .ifPresent((_) -> { throw new DuplicateException("Cpf já cadastrado"); });
             }
-            // if (!existingUser.getEmail().equals(userDetails.getEmail()) &&
-            //     userRepository.findByEmail(userDetails.getEmail()).isPresent()) {
-            //     throw new DuplicateException("Email já cadastrado");
-            // }
-    
-            // if (!existingUser.getCpf().equals(userDetails.getCpf()) &&
-            //     userRepository.findByCpf(userDetails.getCpf()).isPresent()) {
-            //     throw new DuplicateException("Cpf já cadastrado");
-            // }
-    
-            // if (!existingUser.getEmployeeNumber().equals(userDetails.getEmployeeNumber()) &&
-            //     userRepository.findByEmployeeNumber(userDetails.getEmployeeNumber()).isPresent()) {
-            //     throw new DuplicateException("Número de funcionário já cadastrado");
-            // }
+            if(!existingUser.getEmail().equals(userDetails.getEmail())){
+                userRepository.findByEmail(userDetails.getEmail())
+                .ifPresent((_) -> { throw new DuplicateException("Email já cadastrado"); });
+            }
+            if(!existingUser.getEmployeeNumber().equals(userDetails.getEmployeeNumber())){
+                
+                userRepository.findByEmployeeNumber(userDetails.getEmployeeNumber())
+                .ifPresent((_) -> { throw new DuplicateException("Número de funcionário já cadastrado"); });
+            }
+
     
             // update na user entity
             existingUser.setName(userDetails.getName());
