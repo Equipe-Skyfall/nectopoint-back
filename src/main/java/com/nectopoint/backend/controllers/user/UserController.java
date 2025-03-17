@@ -1,5 +1,6 @@
 package com.nectopoint.backend.controllers.user;
 
+import com.nectopoint.backend.BackendApplication;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,14 +13,20 @@ import java.util.List;
 @RestController
 @RequestMapping("/usuario")
 public class UserController {
+
+    // private final BackendApplication backendApplication;
     
     @Autowired
     private UserService userService;
 
     // Cria Usuário
     @PostMapping("/")
-    public UserEntity create(@Valid @RequestBody UserEntity userEntity) {
-        return userService.createUser(userEntity);
+    public ResponseEntity<Object> create(@Valid @RequestBody UserEntity userEntity) {
+       try{
+
+           var result =  this.userService.createUser(userEntity);
+           return ResponseEntity.ok().body(result);
+        }catch(Exception e){return ResponseEntity.badRequest().body(e.getMessage());}
     }
 
     // Deleta Usuário
@@ -27,7 +34,7 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         try {
             userService.deleteUser(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
@@ -53,8 +60,11 @@ public class UserController {
 
     // Edita Usuário
     @PutMapping("/{id}")
-    public ResponseEntity<UserEntity> updateUser(@PathVariable Long id, @Valid @RequestBody UserEntity userDetails) {
-    UserEntity updatedUser = userService.updateUser(id, userDetails);
-    return ResponseEntity.ok(updatedUser);
+    public ResponseEntity<Object> updateUser(@PathVariable Long id, @Valid @RequestBody UserEntity userDetails) {
+    try{
+        UserEntity updatedUser = this.userService.updateUser(id, userDetails);
+        return ResponseEntity.ok().body(updatedUser);
+    }catch(Exception e){return ResponseEntity.badRequest().body(e.getMessage());}
+
 }
 }
