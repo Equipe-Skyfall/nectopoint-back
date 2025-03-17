@@ -1,6 +1,7 @@
 package com.nectopoint.backend.repositories;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,4 +22,7 @@ public interface WarningsRepository extends MongoRepository<WarningsEntity, Stri
     
     @Query("{ 'id_colaborador' : ?0, 'data_hora': { $gte: ?1, $lte: ?2 } }")
     Page<WarningsEntity> findByIdColaboradorAndDate(Long id_colaborador, Instant start, Instant end, Pageable pageable);
+
+    @Query("{ 'id_colaborador' : ?0 }")
+    List<WarningsEntity> findAllByIdColaborador(Long id_colaborador);
 }

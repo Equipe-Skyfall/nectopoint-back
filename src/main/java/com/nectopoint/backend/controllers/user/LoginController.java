@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nectopoint.backend.dtos.LoginRequestDTO;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.repositories.UserRepository;
 
@@ -23,7 +24,7 @@ public class LoginController {
     private UserRepository userRepository;
 
     @PostMapping
-public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
     String cpf = loginRequest.getCpf().replaceAll("\\D", ""); 
     String password = loginRequest.getPassword();
 

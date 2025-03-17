@@ -1,9 +1,9 @@
-package com.nectopoint.backend.controllers.user;
+package com.nectopoint.backend.dtos;
 
 import lombok.Data;
 
 @Data
-public class LoginRequest {
+public class LoginRequestDTO {
     private String cpf;
     private String password;
 

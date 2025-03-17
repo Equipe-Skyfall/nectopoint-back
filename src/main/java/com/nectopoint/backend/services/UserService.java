@@ -1,6 +1,5 @@
 package com.nectopoint.backend.services;
 
-import com.nectopoint.backend.BackendApplication;
 import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.enums.TipoCargo;
 import com.nectopoint.backend.exceptions.DuplicateException;
@@ -14,17 +13,11 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private final BackendApplication backendApplication;
-
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private UserSessionService userSessionService;
-
-    UserService(BackendApplication backendApplication) {
-        this.backendApplication = backendApplication;
-    }
 
     // Cria Usuário
     public UserEntity createUser(UserEntity userEntity) {

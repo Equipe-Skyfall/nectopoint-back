@@ -25,4 +25,7 @@ public interface PointRegistryRepository extends MongoRepository<PointRegistryEn
     
     @Query("{ 'id_colaborador' : ?0, 'data_hora': { $gte: ?1, $lte: ?2 } }")
     Page<PointRegistryEntity> findByIdColaboradorAndDate(Long id_colaborador, Instant start, Instant end, Pageable pageable);
+
+    @Query("{ 'id_colaborador' : ?0 }")
+    List<PointRegistryEntity> findAllByIdColaborador(Long id_colaborador);
 }

@@ -152,4 +152,11 @@ public class PointRegistryService {
         }
     }
 
+    //Deletar TODOS os registros de pontos de um usuário
+    //ESSA FUNÇÃO É APENAS PARA SINCRONIZAR OS BANCOS DURANTE DESENVOLVIMENTO
+    public void deleteAllByColaborador (Long id) {
+        List<PointRegistryEntity> records = registryRepo.findAllByIdColaborador(id);
+        registryRepo.deleteAll(records);
+    }
+
 }

@@ -1,6 +1,5 @@
 package com.nectopoint.backend.controllers.user;
 
-import com.nectopoint.backend.BackendApplication;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/usuario")
 public class UserController {
-
-    // private final BackendApplication backendApplication;
     
     @Autowired
     private UserService userService;

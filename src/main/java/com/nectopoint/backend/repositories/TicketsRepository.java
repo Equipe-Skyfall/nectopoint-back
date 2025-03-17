@@ -1,6 +1,7 @@
 package com.nectopoint.backend.repositories;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,4 +22,7 @@ public interface TicketsRepository extends MongoRepository<TicketsEntity, String
     
     @Query("{ 'id_colaborador' : ?0, 'data_hora': { $gte: ?1, $lte: ?2 } }")
     Page<TicketsEntity> findByIdColaboradorAndDate(Long id_colaborador, Instant start, Instant end, Pageable pageable);
+
+    @Query("{ 'id_colaborador' : ?0 }")
+    List<TicketsEntity> findAllByIdColaborador(Long id_colaborador);
 }

@@ -31,4 +31,11 @@ public class WarningsService {
         warningsRepo.save(updateTarget);
     }
 
+    //Deletar TODOS os registros de alerta de um usuário
+    //ESSA FUNÇÃO É APENAS PARA SINCRONIZAR OS BANCOS DURANTE DESENVOLVIMENTO
+    public void deleteAllByColaborador(Long id) {
+        List<WarningsEntity> warnings = warningsRepo.findAllByIdColaborador(id);
+        warningsRepo.deleteAll(warnings);
+    }
+
 }

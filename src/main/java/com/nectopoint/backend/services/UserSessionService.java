@@ -18,7 +18,14 @@ public class UserSessionService {
     private UserSessionRepository userSessionRepo;
     private UserRepository userRepo;
 
+    private SystemServices systemServices;
+
     public void createSession(Long id, UserDetailsDTO userDetails) {
+        UserSessionEntity checkSession = userSessionRepo.findByColaborador(id);
+        if (checkSession != null) {
+            userSessionRepo.delete(checkSession);
+            systemServices.clearUserData(id);
+        }
         UserSessionEntity userSession = new UserSessionEntity();
         userSession.setId_colaborador(id);
 
