@@ -72,7 +72,8 @@ public class PointRegistryService {
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void endOfDayProcesses(){
-        LocalDate previousDay = LocalDate.now().minusDays(1);
+        // LocalDate previousDay = LocalDate.now().minusDays(1);
+        LocalDate previousDay = LocalDate.now(); // A declaração acima é a correta! Mas use essa para testar
         Instant start = previousDay.atStartOfDay().toInstant(ZoneOffset.UTC);
         Instant end = previousDay.atTime(23, 59, 59).toInstant(ZoneOffset.UTC);
 

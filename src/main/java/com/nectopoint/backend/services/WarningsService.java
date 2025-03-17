@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.nectopoint.backend.enums.TipoAviso;
+import com.nectopoint.backend.enums.TipoStatus;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 import com.nectopoint.backend.repositories.WarningsRepository;
@@ -22,6 +23,12 @@ public class WarningsService {
         data.setTipo_aviso(tipo_aviso);
         data.setPontos_marcados(pontos_marcados);
         return warningsRepo.save(data);
+    }
+
+    public void changeStatus(String id_aviso, TipoStatus status_aviso) {
+        WarningsEntity updateTarget = warningsRepo.findById(id_aviso).get();
+        updateTarget.setStatus_aviso(status_aviso);
+        warningsRepo.save(updateTarget);
     }
 
 }

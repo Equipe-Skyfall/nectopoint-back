@@ -13,7 +13,7 @@ public enum TipoAviso {
                 return tipo;
             }
         }
-        throw new IllegalArgumentException("Valor para tipo_ponto inválido: " + value);
+        throw new IllegalArgumentException("Valor para tipo_aviso inválido: " + value);
     }
 
     @JsonValue

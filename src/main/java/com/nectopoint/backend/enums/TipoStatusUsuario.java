@@ -16,7 +16,7 @@ public enum TipoStatusUsuario {
                 return tipo;
             }
         }
-        throw new IllegalArgumentException("Valor para tipo_ponto inválido: " + value);
+        throw new IllegalArgumentException("Valor para tipo_status_usuario inválido: " + value);
     }
 
     @JsonValue
