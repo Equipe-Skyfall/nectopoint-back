@@ -84,12 +84,10 @@ mvn spring-boot:run
 - **title** é um enum dos valores "GERENTE" ou "COLABORADOR"
 - **employeeNumber** é único
 ---
----
 **DELETE:** Delete um usuário em http://localhost:8080/usuario/{id} | Exemplo:
 ```sh
 http://localhost:8080/usuario/1
 ```
----
 ---
 **GET:** Puxe uma lista com todos os usuários ***do banco relacional*** em http://localhost:8080/usuario/
 <details>
@@ -144,7 +142,6 @@ http://localhost:8080/usuario/1
 ❗️ **NOTA: Essa rota não é recomendada para dar display nas informações dos usuários no FRONTEND. Ela está sendo documentada aqui para o propósito de testes.**
 
 ---
----
 **GET:** Puxe as informações de um usuário específico ***do banco relacional*** em http://localhost:8080/usuario/{id}
 <details>
     <summary>Clique para ver o JSON retornado</summary>
@@ -169,7 +166,6 @@ http://localhost:8080/usuario/1
 
 ❗️ **NOTA: Essa rota não é recomendada para dar display nas informações dos usuários no FRONTEND. Ela está sendo documentada aqui para o propósito de testes.**
 
----
 ---
 **PUT:** Edite as informações do usuário em http://localhost:8080/usuario/{id} e formate seu JSON da seguinte maneira:
 ```sh
@@ -276,7 +272,6 @@ http://localhost:8080/usuario/1
 ❔ **Parâmetros:** ``` (int page), (int size) ```
 
 ---
----
 **GET:** Puxe as informações de um usuário específico em http://localhost:8080/sessao/usuario/{id}
 <details>
     <summary>Clique para ver o JSON retornado</summary>
@@ -313,12 +308,10 @@ http://localhost:8080/usuario/1
 </details>
 
 ---
----
 ### Rotas dos pontos
 
 **POST:** Marque um ponto com a rota http://localhost:8080/pontos/bater-ponto/{id_colaborador}
 
----
 ---
 **POST:** Para um gerente corrigir pontos ímpares use a rota http://localhost:8080/pontos/bater-ponto/correcao e formate seu JSON da seguinte maneira:
 
@@ -336,7 +329,6 @@ http://localhost:8080/usuario/1
 - **dados_ticket** é obrigatório!
 
 ---
----
 **GET:** Puxe as informações de um ponto específico em http://localhost:8080/pontos/{id}
 <details>
     <summary>Clique para ver o JSON retornado</summary>
@@ -353,7 +345,6 @@ http://localhost:8080/usuario/1
 
 </details>
 
----
 ---
 **GET:** Puxe o histórico de todos os pontos paginado e com opção de um intervalo de tempo. Exemplo: http://127.0.0.1:8080/pontos/historico-todos
 <details>
@@ -435,7 +426,6 @@ http://localhost:8080/usuario/1
 Ex: const now = new Date().toISOString();
 ```
 
----
 ---
 **GET:** Puxe o histórico de todos os pontos de um usuário específico paginado e com opção de um intervalo de tempo em http://127.0.0.1:8080/pontos/historico-usuario
 <details>
@@ -529,7 +519,6 @@ Ex: const now = new Date().toISOString();
 </details>
 
 ---
----
 **GET:** Puxe todos os alertas paginado e com filtro de data na rota http://127.0.0.1:8080/alertas/alertas-todos
 <details>
     <summary>Clique para ver o JSON retornado</summary>
@@ -611,7 +600,6 @@ Ex: const now = new Date().toISOString();
 
 ❔ **Parâmetros:** ``` (int page), (int size), (Date startDate), (Date endDate) ```
 
----
 ---
 **GET:** Puxe todos os alertas de um usuário específico paginado e com filtro de data em http://127.0.0.1:8080/alertas/alertas-usuario
 <details>
@@ -698,7 +686,6 @@ Ex: const now = new Date().toISOString();
 - **id_aviso** é obrigatório se tipo_ticket for PONTOS_IMPAR, caso contrário pode ser opcional.
 
 ---
----
 **GET:** Puxe um ticket específico em http://127.0.0.1:8080/tickets/{id}
 <details>
     <summary>Clique para ver o JSON retornado</summary>
@@ -717,7 +704,6 @@ Ex: const now = new Date().toISOString();
 
 </details>
 
----
 ---
 **GET:** Puxe todos os tickets paginados e com filtro de data em http://127.0.0.1:8080/tickets/tickets-todos
 <details>
@@ -777,7 +763,6 @@ Ex: const now = new Date().toISOString();
 
 ❔ **Parâmetros:** ``` (int page), (int size), (Date startDate), (Date endDate) ```
 
----
 ---
 **GET:** Puxe todos os tickets de um usuario paginado e com filtro de data em http://127.0.0.1:8080/tickets/tickets-usuario
 <details>
