@@ -29,7 +29,7 @@ public class UserSessionService {
         UserSessionEntity userSession = new UserSessionEntity();
         userSession.setId_colaborador(id);
 
-        userSession.getDados_usuario().setNome(userDetails.getNome());
+        userSession.getDados_usuario().setNome(userDetails.getName());
         userSession.getDados_usuario().setCpf(userDetails.getCpf());
         userSession.getDados_usuario().setCargo(userDetails.getTitle());
         userSession.getDados_usuario().setDepartamento(userDetails.getDepartment());
@@ -45,7 +45,7 @@ public class UserSessionService {
         UserDetailsDTO userDetails = userRepo.findUserDetailsById(id);
         UserSessionEntity userSession = userSessionRepo.findByColaborador(id);
 
-        userSession.getDados_usuario().setNome(userDetails.getNome());
+        userSession.getDados_usuario().setNome(userDetails.getName());
         userSession.getDados_usuario().setCpf(userDetails.getCpf());
         userSession.getDados_usuario().setCargo(userDetails.getTitle());
         userSession.getDados_usuario().setDepartamento(userDetails.getDepartment());

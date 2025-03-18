@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class UserDetailsDTO {
-    private String nome;
+    private String name;
     private String cpf;
     private TipoCargo title;
     private String department;
@@ -14,8 +14,8 @@ public class UserDetailsDTO {
     private Float bankOfHours;
     private Integer dailyHours;
 
-    public UserDetailsDTO(String nome, String cpf,TipoCargo title, String department, String workJourneyType, Float bankOfHours, Integer dailyHours) {
-        this.nome = nome;
+    public UserDetailsDTO(String name, String cpf,TipoCargo title, String department, String workJourneyType, Float bankOfHours, Integer dailyHours) {
+        this.name = name;
         this.cpf = cpf;
         this.title = title;
         this.department = department;
