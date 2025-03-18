@@ -1,5 +1,6 @@
 package com.nectopoint.backend.dtos;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -8,4 +9,5 @@ import lombok.Data;
 public class LoginRequestDTO {
     private String cpf;
     private String password;
+
 }

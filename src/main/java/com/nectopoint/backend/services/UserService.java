@@ -98,7 +98,6 @@ public class UserService {
             // update na user entity
             existingUser.setName(userDetails.getName());
             existingUser.setEmail(userDetails.getEmail());
-            existingUser.setPassword(userDetails.getPassword());
             existingUser.setCpf(userDetails.getCpf());
             existingUser.setTitle(userDetails.getTitle());
             existingUser.setDepartment(userDetails.getDepartment());
@@ -106,7 +105,8 @@ public class UserService {
             existingUser.setBankOfHours(userDetails.getBankOfHours());
             existingUser.setDailyHours(userDetails.getDailyHours());
             existingUser.setEmployeeNumber(userDetails.getEmployeeNumber());
-    
+            var encodedPassword = passwordEncoder.encode(userDetails.getPassword());
+            existingUser.setPassword(encodedPassword);
           //update na user session
             UserDetailsDTO userDetailsDTO = new UserDetailsDTO(
                 userDetails.getName(),
