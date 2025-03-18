@@ -34,7 +34,7 @@ public class UserService {
         String workJourneyType = userEntity.getWorkJourneyType();
         Float bankOfHours = userEntity.getBankOfHours();
         Integer dailyHours = userEntity.getDailyHours();
-
+        
         UserDetailsDTO userDetailsDTO = new UserDetailsDTO(title, department, workJourneyType, bankOfHours, dailyHours);
         
         UserEntity newUser = this.userRepository.save(userEntity);

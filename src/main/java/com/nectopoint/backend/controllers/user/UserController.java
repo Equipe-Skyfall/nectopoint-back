@@ -20,7 +20,6 @@ public class UserController {
     @PostMapping("/")
     public ResponseEntity<Object> create(@Valid @RequestBody UserEntity userEntity) {
        try{
-
            var result =  this.userService.createUser(userEntity);
            return ResponseEntity.ok().body(result);
         }catch(Exception e){return ResponseEntity.badRequest().body(e.getMessage());}
