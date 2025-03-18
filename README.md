@@ -59,10 +59,58 @@ mvn spring-boot:run
 ## ✅ Tudo pronto!
 ### Só acessar a rota **http://localhost:8080/** para começar
 <br><br>
+[ Rotas usuário CRUD (usar para cadastro, edição, login, etc.) ](#rotas-usuário-crud)
+```sh
+POST   http://localhost:8080/usuario/
+DELETE http://localhost:8080/usuario/{id}
+GET    http://localhost:8080/usuario/
+GET    http://localhost:8080/usuario/{id}
+PUT    http://localhost:8080/usuario/{id}
+```
 
+[ Rotas sessão usuário (usar para salvar informações relevantes do usuário nos cookies etc.) ](#rotas-sessão-usuário)
+```sh
+GET http://localhost:8080/sessao/usuario/
+GET http://localhost:8080/sessao/usuario/{id}
+```
+
+Rotas de login (em desenvolvimento, no momento usado somente para simular login)
+```sh
+POST http://localhost:8080/login
+```
+
+[ Rotas dos pontos ](#rotas-dos-pontos)
+```sh
+POST http://localhost:8080/pontos/bater-ponto/{id_colaborador}
+POST http://localhost:8080/pontos/bater-ponto/correcao
+GET  http://localhost:8080/pontos/{id}
+GET  http://localhost:8080/pontos/historico-todos
+GET  http://localhost:8080/pontos/historico-usuario
+```
+
+[ Rotas dos alertas ](#rotas-dos-alertas)
+```sh
+GET http://localhost:8080/alertas/{id}
+GET http://localhost:8080/alertas/alertas-todos
+GET http://localhost:8080/alertas/alertas-usuario
+```
+
+[ Rotas dos tickets ](#rotas-dos-tickets)
+```sh
+POST http://localhost:8080/tickets/postar
+GET  http://localhost:8080/tickets/{id}
+GET  http://localhost:8080/tickets/tickets-todos
+GET  http://localhost:8080/tickets/tickets-usuario
+```
+
+[ Rotas de teste ](#rotas-de-teste)
+```sh
+GET http://localhost:8080/test/finalizar-dia
+```
+<br><br>
 # Utilizando as Rotas
 
-### Rotas do usuário no banco relacional
+### Rotas usuário CRUD
 
 **POST:** Cadastre o usuário em http://localhost:8080/usuario/ e formate o json da seguinte maneira:
 ```sh
@@ -184,7 +232,7 @@ http://localhost:8080/usuario/1
 ```
 ---
 ---
-### Rotas do usuário no banco não-relacional
+### Rotas sessão usuário
 
 **GET:** Puxe uma lista paginada com todos os usuários em http://localhost:8080/sessao/usuario
 <details>
@@ -307,6 +355,7 @@ http://localhost:8080/usuario/1
 
 </details>
 
+---
 ---
 ### Rotas dos pontos
 

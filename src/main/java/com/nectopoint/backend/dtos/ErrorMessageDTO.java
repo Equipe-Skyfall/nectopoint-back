@@ -1,4 +1,4 @@
-package com.nectopoint.backend.exceptions;
+package com.nectopoint.backend.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
