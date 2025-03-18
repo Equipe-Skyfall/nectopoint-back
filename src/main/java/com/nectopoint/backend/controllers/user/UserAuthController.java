@@ -23,8 +23,7 @@ public class UserAuthController {
 
     @PostMapping("/usuario")
     public String create(@RequestBody LoginRequestDTO loginRequestDTO) throws AuthenticationException {
-        
-        
+    
         return this.authorizationService.execute(loginRequestDTO);
     }
     

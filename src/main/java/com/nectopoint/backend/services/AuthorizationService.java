@@ -30,14 +30,16 @@ public class AuthorizationService {
             throw new UsernameNotFoundException("usuário não encontrado");
         });
     
-       var passwordMatch =  this.passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword());
+        // Verifica se as senhas do usuário são iguais, se sim retorna um token
+        var passwordMatch =  this.passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword());
 
+        //Tratamento de erro caso as senhas não sejam iguais
         if(!passwordMatch){
-            throw new AuthenticationException();
+            throw new AuthenticationException(); //403 Forbidden
         }
     
 
-
+        //criação do token
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
        var token = JWT.create()
                     .withIssuer("Nectopoint")

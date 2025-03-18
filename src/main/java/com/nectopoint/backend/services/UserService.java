@@ -5,6 +5,7 @@ import com.nectopoint.backend.exceptions.DuplicateException;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,10 @@ public class UserService {
 
     @Autowired
     private UserSessionService userSessionService;
+
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Cria Usuário
     public UserEntity createUser(UserEntity userEntity) {
@@ -37,6 +42,8 @@ public class UserService {
                                     userEntity.getBankOfHours(),
                                     userEntity.getDailyHours()
                                 );
+        var encodedPassword = passwordEncoder.encode(userEntity.getPassword());
+        userEntity.setPassword(encodedPassword);
         
         UserEntity newUser = this.userRepository.save(userEntity);
         this.userSessionService.createSession(newUser.getId(), userDetailsDTO);
