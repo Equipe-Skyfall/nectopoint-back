@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.nectopoint.backend.dtos.ErrorMessageDTO;
 
 @ControllerAdvice
 public class ExceptionHandlerController {
