@@ -26,6 +26,7 @@ public class UserSessionEntity {
     @Data
     public static class DadosUsuario {
         private String nome;
+        private String cpf;
         private TipoCargo cargo;
         private String departamento;
         private String status;
