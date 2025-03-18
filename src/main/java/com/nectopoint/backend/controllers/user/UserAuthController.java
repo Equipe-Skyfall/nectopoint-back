@@ -2,6 +2,13 @@ package com.nectopoint.backend.controllers.user;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.nectopoint.backend.dtos.LoginRequestDTO;
+import com.nectopoint.backend.services.AuthorizationService;
+
+import javax.naming.AuthenticationException;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -11,11 +18,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class UserAuthController {
     
 
-    @PostMapping("/usu")
-    public String postMethodName(@RequestBody String entity) {
-        //TODO: process POST request
+    @Autowired
+    private AuthorizationService authorizationService;
+
+    @PostMapping("/usuario")
+    public String create(@RequestBody LoginRequestDTO loginRequestDTO) throws AuthenticationException {
         
-        return entity;
+        
+        return this.authorizationService.execute(loginRequestDTO);
     }
     
 
