@@ -13,25 +13,24 @@ public class JWTProvider {
     @Value("${security.token}")
     private String secretKey;
 
-
-
-    public DecodedJWT validateToken(String token){
-        token = token.replace("Bearer ","");
+    public DecodedJWT validateToken(String token) {
+        // Para usar com o token no header
+        // if (token.startsWith("Bearer ")) {
+        //     token = token.replace("Bearer ", "");
+        // }
+        
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
        
-        try  {
+        try {
             var decodedJWT = JWT.require(algorithm)
-            .withIssuer("Nectopoint")
-            .build()
-            .verify(token);
+                .withIssuer("Nectopoint")
+                .build()
+                .verify(token);
             System.out.println("✅ Token successfully validated! User ID: " + decodedJWT.getSubject());
-            // .getSubject();
             return decodedJWT;
         } catch (JWTVerificationException e) {
             e.printStackTrace();
             return null;
         }
-
-
     }
 }

@@ -66,6 +66,7 @@ DELETE http://localhost:8080/usuario/{id}
 GET    http://localhost:8080/usuario/
 GET    http://localhost:8080/usuario/{id}
 PUT    http://localhost:8080/usuario/{id}
+PUT    http://localhost:8080/usuario/{id}/senha
 ```
 
 [ Rotas sessão usuário (usar para salvar informações relevantes do usuário nos cookies etc.) ](#rotas-sessão-usuário)
@@ -230,6 +231,64 @@ http://localhost:8080/usuario/1
   "dailyHours": 8
 }
 ```
+---
+**PUT:** Edite a senha do usuário em http://localhost:8080/usuario/{id}/senha e formate seu JSON da seguinte maneira:
+```sh
+{
+
+  "oldPassword": "Charlie789!2025",
+  "newPassword":" newPassword@123"
+}
+```
+---
+### Rota Login/Autenticação
+
+**Post:** Autentique um usuário em http://localhost:8080/usuario/auth
+
+❗️ **NOTA: Essa rota retornará um cookie(expira em 2 horas) de autenticação para o FrontEnd que será necessário para todas as requisições.**
+
+
+formate seu JSON da seguinte maneira para autenticar o usuário:
+```sh
+{
+    "cpf": "123456789",
+    "password": "Teste@2025"
+}
+```
+    <summary>Clique para ver o JSON retornado</summary>
+<details>
+
+```sh
+{
+    "id_sessao": "67d75d8fc80bb31e40d611a5",
+    "id_colaborador": 1,
+    "dados_usuario": {
+        "cargo": "COLABORADOR",
+        "departamento": "Engineering",
+        "status": null
+    },
+    "jornada_trabalho": {
+        "tipo_jornada": "Full-time",
+        "banco_de_horas": 2.0,
+        "horas_diarias": 8,
+        "jornada_atual": {
+            "batida_atual": "ENTRADA",
+            "ultima_entrada": "2025-03-16T23:24:41.914Z"
+        }
+    },
+    "alertas_usuario": [
+        {
+            "id_aviso": "67d75dcfc80bb31e40d611ac",
+            "tipo_aviso": "PONTOS_IMPAR",
+            "data_aviso": "2025-03-16T23:25:03.632Z",
+            "status_aviso": "PENDENDE"
+        }
+    ]
+}
+```
+
+</details>
+
 ---
 ---
 ### Rotas sessão usuário

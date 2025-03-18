@@ -105,8 +105,8 @@ public class UserService {
             existingUser.setBankOfHours(userDetails.getBankOfHours());
             existingUser.setDailyHours(userDetails.getDailyHours());
             existingUser.setEmployeeNumber(userDetails.getEmployeeNumber());
-            var encodedPassword = passwordEncoder.encode(userDetails.getPassword());
-            existingUser.setPassword(encodedPassword);
+            // var encodedPassword = passwordEncoder.encode(userDetails.getPassword());
+            // existingUser.setPassword(encodedPassword);
           //update na user session
             UserDetailsDTO userDetailsDTO = new UserDetailsDTO(
                 userDetails.getName(),
@@ -124,5 +124,35 @@ public class UserService {
             throw new RuntimeException("User not found");
         }
     }
+    public void changePassword(Long id, String oldPassword, String newPassword) {
+        Optional<UserEntity> userOptional = userRepository.findById(id);
+        
+        boolean hasUppercase = newPassword.matches(".*[A-Z].*");
+    boolean hasLowercase = newPassword.matches(".*[a-z].*");
+    boolean hasDigit = newPassword.matches(".*\\d.*");
+    boolean hasSpecial = newPassword.matches(".*[^A-Za-z0-9].*");
+    boolean hasMinLength = newPassword.length() >= 8;
     
+    System.out.println("Password validation:");
+    System.out.println("Has Uppercase: " + hasUppercase);
+    System.out.println("Has Lowercase: " + hasLowercase);
+    System.out.println("Has Digit: " + hasDigit);
+    System.out.println("Has Special: " + hasSpecial);
+    System.out.println("Min Length (8): " + hasMinLength);
+
+        if (userOptional.isPresent()) {
+            UserEntity user = userOptional.get();
+            
+            // Verify old password
+            if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+                throw new RuntimeException("Senha atual incorreta");
+            }
+            
+            // Update password
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found");
+        }
+        }
 }

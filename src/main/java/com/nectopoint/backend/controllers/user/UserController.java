@@ -1,13 +1,17 @@
 package com.nectopoint.backend.controllers.user;
 
+import com.nectopoint.backend.dtos.PasswordChangeDTO;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/usuario")
@@ -40,6 +44,7 @@ public class UserController {
     @GetMapping("/")
     public ResponseEntity<List<UserEntity>> getAllUsers() {
         List<UserEntity> users = userService.getAllUsers();
+        System.out.println(users);
         return ResponseEntity.ok(users);
     }
 
@@ -62,5 +67,27 @@ public class UserController {
         return ResponseEntity.ok().body(updatedUser);
     }catch(Exception e){return ResponseEntity.badRequest().body(e.getMessage());}
 
+}
+    //Editar senha
+    @PutMapping("/{id}/senha")
+        public ResponseEntity<Object> changePassword(
+        @PathVariable Long id, 
+        @Valid @RequestBody PasswordChangeDTO passwordDTO,
+        BindingResult bindingResult) {
+    
+    if (bindingResult.hasErrors()) {
+        // Extract and return validation errors
+        List<String> errors = bindingResult.getAllErrors().stream()
+            .map(DefaultMessageSourceResolvable::getDefaultMessage)
+            .collect(Collectors.toList());
+        return ResponseEntity.badRequest().body(errors);
+    }
+    
+    try {
+        userService.changePassword(id, passwordDTO.getOldPassword(), passwordDTO.getNewPassword());
+        return ResponseEntity.ok().body("Senha atualizada com sucesso");
+    } catch (Exception e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
 }
 }

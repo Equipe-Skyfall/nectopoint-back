@@ -2,7 +2,6 @@ package com.nectopoint.backend.services;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
 
 import javax.naming.AuthenticationException;
 
@@ -17,6 +16,9 @@ import com.nectopoint.backend.dtos.LoginRequestDTO;
 import com.nectopoint.backend.dtos.LoginResponseDTO;
 import com.nectopoint.backend.repositories.UserRepository;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+
 @Service
 public class AuthorizationService {
 
@@ -28,39 +30,51 @@ public class AuthorizationService {
 
     @Value("${security.token}")
     private String secretKey;
+    
+    // Cookie configuration
+    private static final String COOKIE_NAME = "jwt_token";
+    private static final int COOKIE_MAX_AGE = 7200; // 2 hours in seconds
+    private static final String COOKIE_PATH = "/";
 
-
-    public LoginResponseDTO execute(LoginRequestDTO loginRequestDTO)throws AuthenticationException{
-        var user = this.userRepository.findByCpf(loginRequestDTO.getCpf()).orElseThrow(() ->{
+    //  LoginResponseDTO casa queira mandar o Bearer token sem ser por cookies 
+    public String execute(LoginRequestDTO loginRequestDTO, HttpServletResponse response) throws AuthenticationException {
+        var user = this.userRepository.findByCpf(loginRequestDTO.getCpf()).orElseThrow(() -> {
             throw new UsernameNotFoundException("usuário ou senha incorretos");
         });
         
-
-        System.out.println(user);
         // Verifica se as senhas do usuário são iguais, se sim retorna um token
-        var passwordMatch =  this.passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword());
-
-        //Tratamento de erro caso as senhas não sejam iguais
-        if(!passwordMatch){
-            throw new AuthenticationException(); //403 Forbidden
+        var passwordMatch = (boolean) this.passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword());
+        // Tratamento de erro caso as senhas não sejam iguais
+        if (!passwordMatch) {
+            throw new AuthenticationException(); // 403 Forbidden
         }
     
-        System.out.println("cargo" + user.getTitle().toString());
-        //criação do token
+        // Criação do token
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
-       var token = JWT.create()
+        var token = JWT.create()
                     .withExpiresAt(Instant.now().plus(Duration.ofHours(2)))
                     .withIssuer("Nectopoint")
                     .withSubject(user.getId().toString())
-                    .withClaim("roles",user.getTitle().toString())
+                    .withClaim("roles", user.getTitle().toString())
                     .sign(algorithm);
     
-        var userWithAccessToken = LoginResponseDTO.builder()
-                                                .access_token(token)
-                                                .build();
+        // Add token to cookie
+        Cookie cookie = new Cookie(COOKIE_NAME, token);
+        cookie.setHttpOnly(true); // Prevents JavaScript access
+        cookie.setSecure(false); 
+        cookie.setPath(COOKIE_PATH);
+        cookie.setMaxAge(COOKIE_MAX_AGE);
+        cookie.setAttribute("SameSite", "Lax");
         
-         return (LoginResponseDTO) userWithAccessToken;
-
-      }
+        // Add cookie to response
+        response.addCookie(cookie);
+        
+        // Still returning token in response body for backward compatibility
+        // You can remove this if you want to rely only on cookies
+        // var userWithAccessToken = LoginResponseDTO.builder()
+        //                                        .access_token(token)
+        //                                        .build();
+        
+        return user.getId().toString();
+    }
 }
-
