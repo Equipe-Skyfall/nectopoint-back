@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.nectopoint.backend.dtos.LoginRequestDTO;
-import com.nectopoint.backend.dtos.LoginResponseDTO;
 import com.nectopoint.backend.repositories.UserRepository;
 
 import jakarta.servlet.http.Cookie;

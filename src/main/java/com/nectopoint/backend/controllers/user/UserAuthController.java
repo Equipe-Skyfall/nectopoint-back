@@ -7,8 +7,6 @@ import com.nectopoint.backend.dtos.LoginRequestDTO;
 import com.nectopoint.backend.repositories.UserSessionRepository;
 import com.nectopoint.backend.services.AuthorizationService;
 
-import javax.naming.AuthenticationException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

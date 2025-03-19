@@ -34,7 +34,7 @@ public class SecurityUserFilter extends OncePerRequestFilter {
 
         SecurityContextHolder.getContext().setAuthentication(null);
         
-        if (request.getRequestURI().startsWith("/usuario") && !request.getRequestURI().equals("/usuario/auth")) {
+        if (request.getRequestURI().startsWith("/") && !request.getRequestURI().equals("/usuario/auth")) {
             String token = null;
             
             // Pegando o token do cookie
