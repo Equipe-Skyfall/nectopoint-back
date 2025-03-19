@@ -82,31 +82,29 @@ POST http://localhost:8080/login
 
 [ Rotas dos pontos ](#rotas-dos-pontos)
 ```sh
-POST http://localhost:8080/pontos/bater-ponto/{id_colaborador}
-POST http://localhost:8080/pontos/bater-ponto/correcao
-GET  http://localhost:8080/pontos/{id}
-GET  http://localhost:8080/pontos/historico-todos
-GET  http://localhost:8080/pontos/historico-usuario
+POST http://localhost:8080/turno/bater-ponto/{id_colaborador}
+POST http://localhost:8080/turno/bater-ponto/correcao
+GET  http://localhost:8080/turno/{id}
+GET  http://localhost:8080/turno/historico
 ```
 
 [ Rotas dos alertas ](#rotas-dos-alertas)
 ```sh
 GET http://localhost:8080/alertas/{id}
-GET http://localhost:8080/alertas/alertas-todos
-GET http://localhost:8080/alertas/alertas-usuario
+GET http://localhost:8080/alertas/listar
 ```
 
 [ Rotas dos tickets ](#rotas-dos-tickets)
 ```sh
 POST http://localhost:8080/tickets/postar
 GET  http://localhost:8080/tickets/{id}
-GET  http://localhost:8080/tickets/tickets-todos
-GET  http://localhost:8080/tickets/tickets-usuario
+GET  http://localhost:8080/tickets/listar
 ```
 
 [ Rotas de teste ](#rotas-de-teste)
 ```sh
 GET http://localhost:8080/test/finalizar-dia
+GET http://localhost:8080/test/sync-databases
 ```
 <br><br>
 # Utilizando as Rotas
@@ -248,11 +246,11 @@ http://localhost:8080/usuario/1
 ❗️ **NOTA: Essa rota retornará um cookie(expira em 2 horas) de autenticação para o FrontEnd que será necessário para todas as requisições.**
 
 
-formate seu JSON da seguinte maneira para autenticar o usuário:
+formate seu JSON da seguinte maneira para autenticar o usuário: (esse usuário gerente é padrão do sistema)
 ```sh
 {
-    "cpf": "123456789",
-    "password": "Teste@2025"
+    "cpf": "Necto-123",
+    "password": "Necto-123"
 }
 ```
     <summary>Clique para ver o JSON retornado</summary>
@@ -454,7 +452,7 @@ formate seu JSON da seguinte maneira para autenticar o usuário:
 </details>
 
 ---
-**GET:** Puxe o histórico de todos os pontos paginado e com opção de um intervalo de tempo. Exemplo: http://127.0.0.1:8080/pontos/historico-todos
+**GET:** Puxe o histórico de todos os turnos com filtros por parâmetros. Exemplo: http://127.0.0.1:8080/pontos/historico
 <details>
     <summary>Clique para ver o JSON retornado</summary>
 
@@ -527,67 +525,15 @@ formate seu JSON da seguinte maneira para autenticar o usuário:
 
 </details>
 
-❔ **Parâmetros:** ``` (int page), (int size), (Date startDate) (Date endDate) ```
+❔ **Parâmetros:** ```(int page), (int size), (Date startDate), (Date endDate), (str statusTurno), (int id_colaborador) ```
+```sh
+Enum statusTurno = TRABALHANDO, INTERVALO, ENCERRADO, NAO_COMPARECEU, IRREGULAR
+```
 
 ❗️ **NOTA: Formate a data corretamente para mandar no parâmetro, mais especificamente usando ISO 8601.**
 ```sh
 Ex: const now = new Date().toISOString();
 ```
-
----
-**GET:** Puxe o histórico de todos os pontos de um usuário específico paginado e com opção de um intervalo de tempo em http://127.0.0.1:8080/pontos/historico-usuario
-<details>
-    <summary>Clique para ver o JSON retornado</summary>
-
-```sh
-{
-    "content": [
-        {
-            "id_ponto": "67d75db9c80bb31e40d611a8",
-            "id_colaborador": 1,
-            "tipo_ponto": "ENTRADA",
-            "data_hora": "2025-03-16T23:24:41.914Z",
-            "horas_trabalhadas": null
-        },
-        {
-            "id_ponto": "67d78a01ffb1ba1013e574a8",
-            "id_colaborador": 1,
-            "tipo_ponto": "SAIDA",
-            "data_hora": "2025-03-16T23:55:03.632Z",
-            "horas_trabalhadas": 30
-        }
-    ],
-    "pageable": {
-        "pageNumber": 0,
-        "pageSize": 5,
-        "sort": {
-            "empty": true,
-            "sorted": false,
-            "unsorted": true
-        },
-        "offset": 0,
-        "paged": true,
-        "unpaged": false
-    },
-    "last": true,
-    "totalPages": 1,
-    "totalElements": 2,
-    "size": 5,
-    "number": 0,
-    "sort": {
-        "empty": true,
-        "sorted": false,
-        "unsorted": true
-    },
-    "first": true,
-    "numberOfElements": 2,
-    "empty": false
-}
-```
-
-</details>
-
-❔ **Parâmetros:** ``` (int page), (int size), (Date startDate), (Date endDate), (int id_colaborador) ```
 
 ---
 ---
@@ -627,7 +573,7 @@ Ex: const now = new Date().toISOString();
 </details>
 
 ---
-**GET:** Puxe todos os alertas paginado e com filtro de data na rota http://127.0.0.1:8080/alertas/alertas-todos
+**GET:** Puxe todos os alertas com filtros por parâmetro na rota http://127.0.0.1:8080/alertas/listar
 <details>
     <summary>Clique para ver o JSON retornado</summary>
 
@@ -706,72 +652,11 @@ Ex: const now = new Date().toISOString();
 
 </details>
 
-❔ **Parâmetros:** ``` (int page), (int size), (Date startDate), (Date endDate) ```
-
----
-**GET:** Puxe todos os alertas de um usuário específico paginado e com filtro de data em http://127.0.0.1:8080/alertas/alertas-usuario
-<details>
-    <summary>Clique para ver o JSON retornado</summary>
-
+❔ **Parâmetros:** ``` (int page), (int size), (Date startDate), (Date endDate), (str statusAviso), (str tipoAviso), (int id_colaborador) ```
 ```sh
-{
-    "content": [
-        {
-            "id_aviso": "67d75dcfc80bb31e40d611ac",
-            "id_colaborador": 1,
-            "tipo_aviso": "PONTOS_IMPAR",
-            "data_aviso": "2025-03-16T23:25:03.632Z",
-            "status_aviso": "RESOLVIDO",
-            "mensagem": null,
-            "pontos_marcados": [
-                {
-                    "id_ponto": "67d75db9c80bb31e40d611a8",
-                    "id_colaborador": 1,
-                    "tipo_ponto": "ENTRADA",
-                    "data_hora": "2025-03-16T23:24:41.914Z",
-                    "horas_trabalhadas": null
-                },
-                {
-                    "id_ponto": null,
-                    "id_colaborador": 1,
-                    "tipo_ponto": "SAIDA",
-                    "data_hora": "2025-03-16T23:55:03.632Z",
-                    "horas_trabalhadas": 30
-                }
-            ]
-        }
-    ],
-    "pageable": {
-        "pageNumber": 0,
-        "pageSize": 5,
-        "sort": {
-            "empty": true,
-            "sorted": false,
-            "unsorted": true
-        },
-        "offset": 0,
-        "paged": true,
-        "unpaged": false
-    },
-    "last": true,
-    "totalPages": 1,
-    "totalElements": 1,
-    "size": 5,
-    "number": 0,
-    "sort": {
-        "empty": true,
-        "sorted": false,
-        "unsorted": true
-    },
-    "first": true,
-    "numberOfElements": 1,
-    "empty": false
-}
+Enum statusAviso = PENDENTE, EM_AGUARDO, RESOLVIDO
+Enum tipoAviso = PONTOS_IMPAR, SEM_ALMOCO
 ```
-
-</details>
-
-❔ **Parâmetros:** ``` (int page), (int size), (Date startDate), (Date endDate), (int id_colaborador) ```
 
 ---
 ---
@@ -813,7 +698,7 @@ Ex: const now = new Date().toISOString();
 </details>
 
 ---
-**GET:** Puxe todos os tickets paginados e com filtro de data em http://127.0.0.1:8080/tickets/tickets-todos
+**GET:** Puxe todos os tickets paginados e com filtro de data em http://127.0.0.1:8080/tickets/listar
 <details>
     <summary>Clique para ver o JSON retornado</summary>
 
@@ -869,57 +754,11 @@ Ex: const now = new Date().toISOString();
 
 </details>
 
-❔ **Parâmetros:** ``` (int page), (int size), (Date startDate), (Date endDate) ```
-
----
-**GET:** Puxe todos os tickets de um usuario paginado e com filtro de data em http://127.0.0.1:8080/tickets/tickets-usuario
-<details>
-    <summary>Clique para ver o JSON retornado</summary>
-
+❔ **Parâmetros:** ``` (int page), (int size), (Date startDate), (Date endDate), (str statusTicket), (str tipoTicket), (int id_colaborador) ```
 ```sh
-{
-    "content": [
-        {
-            "id_ticket": "67d76026c80bb31e40d611b0",
-            "id_colaborador": 1,
-            "tipo_ticket": "PONTOS_IMPAR",
-            "data_ticket": "2025-03-16T23:35:02.939Z",
-            "status_ticket": "RESOLVIDO",
-            "id_aviso": "67d75dcfc80bb31e40d611ac",
-            "mensagem": null
-        }
-    ],
-    "pageable": {
-        "pageNumber": 0,
-        "pageSize": 5,
-        "sort": {
-            "empty": true,
-            "sorted": false,
-            "unsorted": true
-        },
-        "offset": 0,
-        "paged": true,
-        "unpaged": false
-    },
-    "last": true,
-    "totalPages": 1,
-    "totalElements": 1,
-    "size": 5,
-    "number": 0,
-    "sort": {
-        "empty": true,
-        "sorted": false,
-        "unsorted": true
-    },
-    "first": true,
-    "numberOfElements": 1,
-    "empty": false
-}
+Enum statusTicket = PENDENTE, EM_AGUARDO, RESOLVIDO
+Enum tipoTicket = PONTOS_IMPAR, SEM_ALMOCO
 ```
-
-</details>
-
-❔ **Parâmetros:** ``` (int page), (int size), (Date startDate), (Date endDate), (int id_colaborador) ```
 
 ---
 ---
@@ -928,3 +767,6 @@ Ex: const now = new Date().toISOString();
 **GET:** Execute os procedimentos que ocorrem ao final do dia (00:00h) usando a rota http://127.0.0.1:8080/test/finalizar-dia
 
 *No momento somente a contagem de pontos e geração de alertas está implementado nessa função*
+
+---
+**GET:** Sincronizar os usuários na tabela MySQL usando a rota http://127.0.0.1:8080/test/sync-databases

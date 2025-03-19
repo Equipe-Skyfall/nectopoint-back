@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nectopoint.backend.enums.TipoAviso;
+import com.nectopoint.backend.enums.TipoStatus;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 import com.nectopoint.backend.repositories.WarningsRepository;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,39 +33,19 @@ public class WarningsController {
         return warningsRepo.findById(id).get();
     }
 
-    @GetMapping("/alertas-todos")
+    @GetMapping("/listar")
     public ResponseEntity<Page<WarningsEntity>> getAllWarnings(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) Instant startDate,
-        @RequestParam(required = false) Instant endDate
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<WarningsEntity> warningPage;
-        if (startDate != null && endDate != null) {
-            warningPage = warningsRepo.findAllByDate(startDate, endDate, pageable);
-        } else {
-            warningPage = warningsRepo.findAll(pageable);
-        }
-
-        return new ResponseEntity<>(warningPage, HttpStatus.OK);
-    }
-
-    @GetMapping("/alertas-usuario")
-    public ResponseEntity<Page<WarningsEntity>> getUserWarnings(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "5") int size,
-        @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
-        @RequestParam Long id_colaborador
+        @RequestParam(required = false) TipoStatus statusAviso,
+        @RequestParam(required = false) TipoAviso tipoAviso,
+        @RequestParam(required = false) Long id_colaborador
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<WarningsEntity> warningPage;
-        if (startDate != null && endDate != null) {
-            warningPage = warningsRepo.findByIdColaboradorAndDate(id_colaborador, startDate, endDate, pageable);
-        } else {
-            warningPage = warningsRepo.findByIdColaborador(id_colaborador, pageable);
-        }
+
+        Page<WarningsEntity> warningPage = warningsRepo.findByParams(id_colaborador, startDate, endDate, statusAviso, tipoAviso, pageable);
 
         return new ResponseEntity<>(warningPage, HttpStatus.OK);
     }

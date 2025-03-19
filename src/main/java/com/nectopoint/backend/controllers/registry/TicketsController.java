@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.dtos.TicketDTO;
 import com.nectopoint.backend.enums.TipoStatus;
+import com.nectopoint.backend.enums.TipoTicket;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
 import com.nectopoint.backend.repositories.TicketsRepository;
 import com.nectopoint.backend.services.WarningsService;
@@ -59,39 +60,19 @@ public class TicketsController {
         return ticketRepo.findById(id).get();
     }
     
-    @GetMapping("/tickets-todos")
+    @GetMapping("/listar")
     public ResponseEntity<Page<TicketsEntity>> getAllTickets(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) Instant startDate,
-        @RequestParam(required = false) Instant endDate
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<TicketsEntity> ticketPage;
-        if (startDate != null && endDate != null) {
-            ticketPage = ticketRepo.findAllByDate(startDate, endDate, pageable);
-        } else {
-            ticketPage = ticketRepo.findAll(pageable);
-        }
-
-        return new ResponseEntity<>(ticketPage, HttpStatus.OK);
-    }
-    
-    @GetMapping("/tickets-usuario")
-    public ResponseEntity<Page<TicketsEntity>> getUserTickets(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "5") int size,
-        @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
-        @RequestParam Long id_colaborador
+        @RequestParam(required = false) TipoStatus statusTicket,
+        @RequestParam(required = false) TipoTicket tipoTicket,
+        @RequestParam(required = false) Long id_colaborador
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<TicketsEntity> ticketPage;
-        if (startDate != null && endDate != null) {
-            ticketPage = ticketRepo.findByIdColaboradorAndDate(id_colaborador, startDate, endDate, pageable);
-        } else {
-            ticketPage = ticketRepo.findByIdColaborador(id_colaborador, pageable);
-        }
+
+        Page<TicketsEntity> ticketPage = ticketRepo.findByParams(id_colaborador, startDate, endDate, statusTicket, tipoTicket, pageable);
 
         return new ResponseEntity<>(ticketPage, HttpStatus.OK);
     }
