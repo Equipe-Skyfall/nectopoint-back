@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class PointRegistryDTO {
     @NotNull(message = "O ID do colaborador é obrigatório!")
-    private Long id_colaborador;
+    private String id_registro;
 
     @NotNull(message = "A data e horário são obrigatórios!")
     private Instant data_hora;

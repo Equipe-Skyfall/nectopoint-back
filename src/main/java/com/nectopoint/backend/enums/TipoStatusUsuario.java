@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TipoStatusUsuario {
     ONLINE,
-    INVISIVEL,
-    OCUPADO,
-    AUSENTE;
+    OFFLINE;
 
     @JsonCreator
     public static TipoStatusUsuario fromString(String value) {

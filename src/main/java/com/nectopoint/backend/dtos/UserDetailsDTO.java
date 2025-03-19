@@ -11,10 +11,10 @@ public class UserDetailsDTO {
     private TipoCargo title;
     private String department;
     private String workJourneyType;
-    private Float bankOfHours;
+    private Long bankOfHours;
     private Integer dailyHours;
 
-    public UserDetailsDTO(String name, String cpf,TipoCargo title, String department, String workJourneyType, Float bankOfHours, Integer dailyHours) {
+    public UserDetailsDTO(String name, String cpf,TipoCargo title, String department, String workJourneyType, Long bankOfHours, Integer dailyHours) {
         this.name = name;
         this.cpf = cpf;
         this.title = title;

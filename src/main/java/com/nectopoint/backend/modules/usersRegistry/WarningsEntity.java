@@ -1,7 +1,6 @@
 package com.nectopoint.backend.modules.usersRegistry;
 
 import java.time.Instant;
-import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -27,5 +26,5 @@ public class WarningsEntity {
     private TipoStatus status_aviso = TipoStatus.PENDENDE;
 
     private String mensagem;
-    private List<PointRegistryEntity> pontos_marcados;
+    private PointRegistryEntity turno_irregular;
 }

@@ -2,33 +2,21 @@ package com.nectopoint.backend.services;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.nectopoint.backend.dtos.PointRegistryDTO.DadosTicket;
-import com.nectopoint.backend.enums.TipoAviso;
+import com.nectopoint.backend.dtos.PointRegistryDTO;
 import com.nectopoint.backend.enums.TipoPonto;
 import com.nectopoint.backend.enums.TipoStatus;
-import com.nectopoint.backend.modules.shared.WarningsSummary;
-import com.nectopoint.backend.modules.user.UserEntity;
+import com.nectopoint.backend.enums.TipoStatusTurno;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
-import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
-import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
+import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity.Ponto;
 import com.nectopoint.backend.repositories.PointRegistryRepository;
-import com.nectopoint.backend.repositories.TicketsRepository;
-import com.nectopoint.backend.repositories.UserRepository;
 import com.nectopoint.backend.repositories.UserSessionRepository;
-import com.nectopoint.backend.repositories.WarningsRepository;
 
 @Service
 public class PointRegistryService {
@@ -36,120 +24,87 @@ public class PointRegistryService {
     @Autowired
     private PointRegistryRepository registryRepo;
     @Autowired
-    private UserRepository userRepo;
-    @Autowired
     private UserSessionRepository userSessionRepo;
-    @Autowired
-    private WarningsRepository warningsRepo;
-    @Autowired
-    private TicketsRepository ticketsRepo;
 
+    @Autowired
+    private UserSessionService userSessionService;
     @Autowired
     private WarningsService warningsService;
+    @Autowired
+    private TicketsService ticketsService;
 
-    public void correctPointPunch(Long id_colaborador, DadosTicket dados_ticket, PointRegistryEntity pointCorrection) {
-        String id_aviso = dados_ticket.getId_aviso();
-        String id_ticket = dados_ticket.getId_ticket();
-        
-        if (id_ticket != null) {
-            TicketsEntity ticket = ticketsRepo.findById(id_ticket).get();
-            ticket.setStatus_ticket(TipoStatus.RESOLVIDO);
-            ticketsRepo.save(ticket);
-        }
-
-        WarningsEntity warning = warningsRepo.findById(id_aviso).get();
+    public PointRegistryEntity postPunch(Long id_colaborador) {
         UserSessionEntity currentUser = userSessionRepo.findByColaborador(id_colaborador);
+        PointRegistryEntity currentShift;
+
+        String checkShift = currentUser.getJornada_atual().getId_registro();
+        Instant data_hora = Instant.now();
         
-        List<PointRegistryEntity> pontos_marcados = warning.getPontos_marcados();
-        
-        Instant ultima_entrada = pontos_marcados.get(pontos_marcados.size()-1).getData_hora();
-        Instant ultima_saida = pointCorrection.getData_hora();
-        Long horas_trabalhadas = Duration.between(ultima_entrada, ultima_saida).toMinutes();
-        pointCorrection.setHoras_trabalhadas(horas_trabalhadas);
+        if (checkShift == "inativo") {
+            currentShift = new PointRegistryEntity(id_colaborador);
+            Ponto ponto_atual = new Ponto();
 
-        pontos_marcados.add(pointCorrection);
-        warning.setPontos_marcados(pontos_marcados);
-        warning.setStatus_aviso(TipoStatus.RESOLVIDO);
-
-        warningsRepo.save(warning);
-        registryRepo.save(pointCorrection);
-
-        calcularBancoDeHoras(currentUser, pontos_marcados);
-    }
-
-    @Scheduled(cron = "0 0 0 * * ?")
-    public void endOfDayProcesses(){
-        // LocalDate previousDay = LocalDate.now().minusDays(1);
-        LocalDate previousDay = LocalDate.now(); // A declaração acima é a correta! Mas use essa para testar
-        Instant start = previousDay.atStartOfDay().toInstant(ZoneOffset.UTC);
-        Instant end = previousDay.atTime(23, 59, 59).toInstant(ZoneOffset.UTC);
-
-        List<PointRegistryEntity> pointsFromPreviousDay = registryRepo.findAllByDateNoPage(start, end);
-
-        Map<Long, List<PointRegistryEntity>> groupByCollaborator = pointsFromPreviousDay.stream()
-        .collect(Collectors.groupingBy(
-            PointRegistryEntity::getId_colaborador,
-            TreeMap::new,
-            Collectors.collectingAndThen(
-                Collectors.toList(), list -> {
-                    list.sort(Comparator.comparing(PointRegistryEntity::getData_hora).reversed());
-                    return list;
-                }
-            )
-        ));
-
-        for (Map.Entry<Long, List<PointRegistryEntity>> collaboratorRecords : groupByCollaborator.entrySet()) {
-            Long id_colaborador = collaboratorRecords.getKey();
-            List<PointRegistryEntity> pontos_marcados = collaboratorRecords.getValue();
-            UserSessionEntity currentUser = userSessionRepo.findByColaborador(id_colaborador);
-            
-            if(!pontos_marcados.isEmpty() && pontos_marcados.get(0).getTipo_ponto() == TipoPonto.ENTRADA) {
-                WarningsEntity warning = warningsService.registerWarning(id_colaborador, TipoAviso.PONTOS_IMPAR, pontos_marcados);
-                WarningsSummary warningSummary = new WarningsSummary();
-
-                warningSummary.setId_aviso(warning.getId_aviso());
-                warningSummary.setData_aviso(warning.getData_aviso());
-                warningSummary.setStatus_aviso(warning.getStatus_aviso());
-                warningSummary.setTipo_aviso(warning.getTipo_aviso());
-
-                currentUser.getAlertas_usuario().add(warningSummary);
-                currentUser.getJornada_trabalho().getJornada_atual().setBatida_atual(TipoPonto.ENTRADA);
-                userSessionRepo.save(currentUser);
-            } else {
-                calcularBancoDeHoras(currentUser, pontos_marcados);
-            }
-        }
-    }
-
-    private void calcularBancoDeHoras(UserSessionEntity currentUser, List<PointRegistryEntity> pontos_marcados) {
-        Float banco_de_horas_atual = currentUser.getJornada_trabalho().getBanco_de_horas();
-        Integer horas_diarias = currentUser.getJornada_trabalho().getHoras_diarias();
-        UserEntity userRelational = userRepo.findById(currentUser.getId_colaborador()).get();
-
-        if (pontos_marcados.isEmpty()) {
-            currentUser.getJornada_trabalho().setBanco_de_horas(banco_de_horas_atual - horas_diarias);
-            currentUser.getJornada_trabalho().getJornada_atual().setBatida_atual(TipoPonto.ENTRADA);
-            userSessionRepo.save(currentUser);
-
-            userRelational.missedWorkDay();
-            userRepo.save(userRelational);
+            currentShift.setInicio_turno(data_hora);
+            ponto_atual.setData_hora(data_hora);
+            ponto_atual.setTipo_ponto(TipoPonto.ENTRADA);
+            currentShift.getPontos_marcados().add(ponto_atual);
+            currentShift.setStatus_turno(TipoStatusTurno.TRABALHANDO);
         } else {
-            Float totalHours = (float)0;
-
-            for (PointRegistryEntity ponto : pontos_marcados) {
-                if (ponto.getTipo_ponto() == TipoPonto.SAIDA) {
-                    totalHours += ponto.getHoras_trabalhadas();
-                }
-            }
-
-            Float banco_de_horas = banco_de_horas_atual + (totalHours - horas_diarias);
-            currentUser.getJornada_trabalho().setBanco_de_horas(banco_de_horas);
-            currentUser.getJornada_trabalho().getJornada_atual().setBatida_atual(TipoPonto.ENTRADA);
-            userSessionRepo.save(currentUser);
-            
-            userRelational.setBankOfHours(banco_de_horas);
-            userRepo.save(userRelational);
+            currentShift = processNewEntry(registryRepo.findById(checkShift).get(), data_hora, false);
         }
+
+        currentUser.setJornada_atual(currentShift);
+
+        userSessionRepo.save(currentUser);
+        return registryRepo.save(currentShift);
+    }
+
+    public void correctPointPunch(PointRegistryDTO correctionData) {
+        String id_registro = correctionData.getId_registro();
+        String id_aviso = correctionData.getDados_ticket().getId_aviso();
+        String id_ticket = correctionData.getDados_ticket().getId_ticket();
+
+        Instant data_hora = correctionData.getData_hora();
+        TipoStatus status_resolvido = TipoStatus.RESOLVIDO;
+
+        PointRegistryEntity targetShift = processNewEntry(registryRepo.findById(id_registro).get(), data_hora, true);
+
+        userSessionService.finishShift(targetShift);
+
+        ticketsService.changeStatus(id_ticket, status_resolvido);
+        warningsService.changeStatus(id_aviso, status_resolvido);
+
+        registryRepo.save(targetShift);
+    }
+
+    @Scheduled(cron = "0 0 22 * * ?")
+    public void endOfDayProcesses(){
+        
+    }
+
+    private PointRegistryEntity processNewEntry(PointRegistryEntity targetShift, Instant date_time, Boolean close_shift) {
+        Ponto newPoint = new Ponto();
+
+        int last_index = targetShift.getPontos_marcados().size()-1;
+        Ponto last_entry = targetShift.getPontos_marcados().get(last_index);
+        
+        newPoint.setData_hora(date_time);
+        newPoint.setTipo_ponto(last_entry.getTipo_ponto().invert());
+
+        Instant time_last_entry = last_entry.getData_hora();
+        Long time_between = Duration.between(time_last_entry, date_time).toMinutes();
+
+        if (newPoint.getTipo_ponto() == TipoPonto.SAIDA) {
+            targetShift.setTempo_trabalhado_min(targetShift.getTempo_trabalhado_min()+time_between);
+            targetShift.setStatus_turno(!close_shift ? TipoStatusTurno.INTERVALO : TipoStatusTurno.ENCERRADO);
+        } else {
+            targetShift.setTempo_intervalo_min(targetShift.getTempo_intervalo_min()+time_between);
+            targetShift.setStatus_turno(TipoStatusTurno.TRABALHANDO);
+        }
+
+        targetShift.getPontos_marcados().add(newPoint);
+
+        return targetShift;
     }
 
     //Deletar TODOS os registros de pontos de um usuário

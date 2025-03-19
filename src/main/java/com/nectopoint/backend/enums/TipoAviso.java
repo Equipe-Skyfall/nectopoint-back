@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TipoAviso {
-    PONTOS_IMPAR;
+    PONTOS_IMPAR,
+    SEM_ALMOCO;
 
     @JsonCreator
     public static TipoAviso fromString(String value) {

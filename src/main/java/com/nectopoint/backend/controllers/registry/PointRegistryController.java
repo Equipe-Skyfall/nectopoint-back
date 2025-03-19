@@ -1,6 +1,5 @@
 package com.nectopoint.backend.controllers.registry;
 
-import java.time.Duration;
 import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.dtos.PointRegistryDTO;
-import com.nectopoint.backend.enums.TipoPonto;
-import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.repositories.PointRegistryRepository;
-import com.nectopoint.backend.repositories.UserSessionRepository;
 import com.nectopoint.backend.services.PointRegistryService;
-import com.nectopoint.backend.services.UserSessionService;
 
 import jakarta.validation.Valid;
 
@@ -32,52 +27,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
-@RequestMapping("/pontos")
+@RequestMapping("/turno")
 public class PointRegistryController {
     
     @Autowired
     private PointRegistryRepository registryRepo;
     @Autowired
-    private UserSessionRepository userSessionRepo;
-
-    @Autowired
-    private UserSessionService userSessionService;
-    @Autowired
     private PointRegistryService registryService;
 
     @PostMapping("/bater-ponto/{id_colaborador}")
     public PointRegistryEntity postPunch(@PathVariable Long id_colaborador) {
-        UserSessionEntity user = userSessionRepo.findByColaborador(id_colaborador);
-        PointRegistryEntity record = new PointRegistryEntity();
-
-        TipoPonto tipo_ponto = user.getJornada_trabalho().getJornada_atual().getBatida_atual();
-        Instant data_hora = record.getData_hora();
-
-        record.setId_colaborador(id_colaborador);
-        record.setTipo_ponto(tipo_ponto);
-        if (tipo_ponto == TipoPonto.SAIDA) {
-            Instant ultima_entrada = user.getJornada_trabalho().getJornada_atual().getUltima_entrada();
-            Long horas_trabalhadas = Duration.between(ultima_entrada, data_hora).toMinutes();
-            record.setHoras_trabalhadas(horas_trabalhadas);
-        }
-
-        userSessionService.updateLastPunch(id_colaborador, tipo_ponto, data_hora);
-        return registryRepo.save(record);
+        return registryService.postPunch(id_colaborador);
     }
 
     @PostMapping("/bater-ponto/correcao")
     public void postPunchCorrection(@Valid @RequestBody PointRegistryDTO requestData) {
-        PointRegistryEntity record = new PointRegistryEntity();
-
-        Long id_colaborador = requestData.getId_colaborador();
-        TipoPonto tipo_ponto = TipoPonto.SAIDA;
-        Instant data_hora = requestData.getData_hora();
-
-        record.setId_colaborador(id_colaborador);
-        record.setTipo_ponto(tipo_ponto);
-        record.setData_hora(data_hora);
-
-        registryService.correctPointPunch(id_colaborador, requestData.getDados_ticket(), record);
+        registryService.correctPointPunch(requestData);
     }
     
     
