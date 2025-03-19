@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.dtos.PointRegistryDTO;
+import com.nectopoint.backend.enums.TipoStatusTurno;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.repositories.PointRegistryRepository;
 import com.nectopoint.backend.services.PointRegistryService;
@@ -37,6 +38,7 @@ public class PointRegistryController {
 
     @PostMapping("/bater-ponto/{id_colaborador}")
     public PointRegistryEntity postPunch(@PathVariable Long id_colaborador) {
+        System.out.println("Received ID: " + id_colaborador);
         return registryService.postPunch(id_colaborador);
     }
 
@@ -51,39 +53,18 @@ public class PointRegistryController {
         return registryRepo.findById(id).get();
     }
 
-    @GetMapping("/historico-todos")
+    @GetMapping("/historico")
     public ResponseEntity<Page<PointRegistryEntity>> historicoTodos(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) Instant startDate,
-        @RequestParam(required = false) Instant endDate
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<PointRegistryEntity> pointRegistryPage;
-        if (startDate != null && endDate != null) {
-            pointRegistryPage = registryRepo.findAllByDate(startDate, endDate, pageable);
-        } else {
-            pointRegistryPage = registryRepo.findAll(pageable);
-        }
-
-        return new ResponseEntity<>(pointRegistryPage, HttpStatus.OK);
-    }
-
-    @GetMapping("/historico-usuario")
-    public ResponseEntity<Page<PointRegistryEntity>> historicoUsuario(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "5") int size,
-        @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
+        @RequestParam(required = false) TipoStatusTurno statusTurno,
         @RequestParam Long id_colaborador
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<PointRegistryEntity> pointRegistryPage;
-        if (startDate != null && endDate != null) {
-            pointRegistryPage = registryRepo.findByIdColaboradorAndDate(id_colaborador, startDate, endDate, pageable);
-        } else {
-            pointRegistryPage = registryRepo.findByIdColaborador(id_colaborador, pageable);
-        }
+
+        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findByParams(id_colaborador, startDate, endDate, statusTurno, pageable);
 
         return new ResponseEntity<>(pointRegistryPage, HttpStatus.OK);
     }

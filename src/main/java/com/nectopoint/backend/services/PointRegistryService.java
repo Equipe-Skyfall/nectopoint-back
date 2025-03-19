@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.nectopoint.backend.dtos.PointRegistryDTO;
@@ -40,7 +39,7 @@ public class PointRegistryService {
         String checkShift = currentUser.getJornada_atual().getId_registro();
         Instant data_hora = Instant.now();
         
-        if (checkShift == "inativo") {
+        if ("inativo".equals(checkShift)) {
             currentShift = new PointRegistryEntity(id_colaborador);
             Ponto ponto_atual = new Ponto();
 
@@ -53,10 +52,11 @@ public class PointRegistryService {
             currentShift = processNewEntry(registryRepo.findById(checkShift).get(), data_hora, false);
         }
 
+        registryRepo.save(currentShift);
         currentUser.setJornada_atual(currentShift);
 
         userSessionRepo.save(currentUser);
-        return registryRepo.save(currentShift);
+        return currentShift;
     }
 
     public void correctPointPunch(PointRegistryDTO correctionData) {
@@ -77,9 +77,12 @@ public class PointRegistryService {
         registryRepo.save(targetShift);
     }
 
-    @Scheduled(cron = "0 0 22 * * ?")
-    public void endOfDayProcesses(){
-        
+    public void endDayShifts() {
+        List<UserSessionEntity> userSessions = userSessionRepo.findAll();
+
+        for (UserSessionEntity user : userSessions) {
+            userSessionService.finishShift(user.getJornada_atual());
+        }
     }
 
     private PointRegistryEntity processNewEntry(PointRegistryEntity targetShift, Instant date_time, Boolean close_shift) {

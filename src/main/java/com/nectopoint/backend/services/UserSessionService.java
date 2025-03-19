@@ -1,5 +1,7 @@
 package com.nectopoint.backend.services;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import com.nectopoint.backend.enums.TipoStatusTurno;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
+import com.nectopoint.backend.repositories.PointRegistryRepository;
 import com.nectopoint.backend.repositories.UserRepository;
 import com.nectopoint.backend.repositories.UserSessionRepository;
 
@@ -21,6 +24,8 @@ public class UserSessionService {
     private UserSessionRepository userSessionRepo;
     @Autowired
     private UserRepository userRepo;
+    @Autowired
+    private PointRegistryRepository registryRepo;
 
     @Autowired
     private SystemServices systemServices;
@@ -29,40 +34,69 @@ public class UserSessionService {
 
 
     public void finishShift(PointRegistryEntity targetShift) {
-        Long id_colaborador = targetShift.getId_colaborador();
         Boolean register_warning = false;
+        String mensagem="";
+        TipoAviso tipo_aviso=TipoAviso.PONTOS_IMPAR;
 
+        Long id_colaborador = targetShift.getId_colaborador();
+        String id_registro = targetShift.getId_registro();
         UserSessionEntity targetUser = userSessionRepo.findByColaborador(id_colaborador);
         UserEntity targetUserSQL = userRepo.findById(id_colaborador).get();
 
-        if (targetUser.getJornada_atual().getId_registro() == targetShift.getId_registro()) {
-            targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador));
-            targetUser.getJornada_atual().setId_registro("inativo");
-        } else {
-            targetUser.getJornadas_irregulares().removeIf(jornada -> jornada.getId_registro().equals(targetShift.getId_registro()));
-        }
+        if ("inativo".equals(id_registro)) {
+            targetShift = new PointRegistryEntity(id_colaborador);
+            targetShift.setInicio_turno(Instant.now());
+            targetShift.setStatus_turno(TipoStatusTurno.NAO_COMPARECEU);
 
-        Long intervalo_turno = targetShift.getTempo_intervalo_min();
-        Long horas_trabalhadas_turno = targetShift.getTempo_trabalhado_min();
-
-        if (intervalo_turno < 60) {
+            targetUserSQL.missedWorkDay();
+            targetUser.missedWorkDay();
+        } else if (targetShift.getPontos_marcados().size()%2 != 0) {
+            if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
+                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador));
+                targetUser.getJornada_atual().setId_registro("inativo");
+            }
             targetShift.setStatus_turno(TipoStatusTurno.IRREGULAR);
             targetUser.getJornadas_irregulares().add(targetShift);
+
             register_warning = true;
+            mensagem = "Pontos ímpares registrados!";
+            tipo_aviso = TipoAviso.PONTOS_IMPAR;
+        } else {
+
+            if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
+                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador));
+                targetUser.getJornada_atual().setId_registro("inativo");
+            } else {
+                targetUser.getJornadas_irregulares().removeIf(jornada -> jornada.getId_registro().equals(id_registro));
+            }
+
+            Long intervalo_turno = targetShift.getTempo_intervalo_min();
+            Long horas_trabalhadas_turno = targetShift.getTempo_trabalhado_min();
+            Long horas_diarias = (long)targetUser.getJornada_trabalho().getHoras_diarias() * 60;
+
+            targetShift.setStatus_turno(TipoStatusTurno.ENCERRADO);
+
+            if (intervalo_turno < 60 && Math.abs(horas_trabalhadas_turno - horas_diarias) < 60) {
+                targetShift.setStatus_turno(TipoStatusTurno.IRREGULAR);
+                targetUser.getJornadas_irregulares().add(targetShift);
+
+                register_warning = true;
+                mensagem = "Turno finalizado sem almoço!";
+                tipo_aviso = TipoAviso.SEM_ALMOCO;
+            }
+
+            Long novo_banco_de_horas = targetUser.getJornada_trabalho().getBanco_de_horas() + (horas_trabalhadas_turno - horas_diarias);
+
+            targetUser.getJornada_trabalho().setBanco_de_horas(novo_banco_de_horas);
+            targetUserSQL.setBankOfHours(novo_banco_de_horas);
         }
-
-        Long horas_diarias = (long)targetUser.getJornada_trabalho().getHoras_diarias() * 60;
-        Long novo_banco_de_horas = targetUser.getJornada_trabalho().getBanco_de_horas() + (horas_trabalhadas_turno - horas_diarias);
-
-        targetUser.getJornada_trabalho().setBanco_de_horas(novo_banco_de_horas);
-        targetUserSQL.setBankOfHours(novo_banco_de_horas);
-
+        
+        registryRepo.save(targetShift);
         userRepo.save(targetUserSQL);
         userSessionRepo.save(targetUser);
         if (register_warning) {
-            String mensagem = "Turno finalizado sem horário de almoço.";
             warningsService.registerWarning(id_colaborador,
-                                            TipoAviso.SEM_ALMOCO,
+                                            tipo_aviso,
                                             Optional.ofNullable(mensagem),
                                             Optional.ofNullable(targetShift));
         }
@@ -121,5 +155,23 @@ public class UserSessionService {
         UserSessionEntity deleteTarget = userSessionRepo.findByColaborador(id_colaborador);
 
         userSessionRepo.delete(deleteTarget);
+    }
+
+    public void syncUsersWithSessions() {
+        List<UserEntity> allUsers = userRepo.findAll();
+        for (UserEntity user : allUsers) {
+            UserDetailsDTO userDetailsDTO =
+                                new UserDetailsDTO(
+                                    user.getName(),
+                                    user.getCpf(),
+                                    user.getTitle(),
+                                    user.getDepartment(),
+                                    user.getWorkJourneyType(),
+                                    user.getBankOfHours(),
+                                    user.getDailyHours()
+                                );
+            
+            createSession(user.getId(), userDetailsDTO);
+        }
     }
 }

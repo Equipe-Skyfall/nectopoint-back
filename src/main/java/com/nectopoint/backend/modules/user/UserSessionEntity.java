@@ -45,4 +45,8 @@ public class UserSessionEntity {
         this.jornada_atual = new PointRegistryEntity(id_colaborador);
         this.jornada_atual.setId_registro("inativo");
     }
+
+    public void missedWorkDay() {
+        this.jornada_trabalho.banco_de_horas = this.jornada_trabalho.banco_de_horas - this.jornada_trabalho.horas_diarias;
+    }
 }

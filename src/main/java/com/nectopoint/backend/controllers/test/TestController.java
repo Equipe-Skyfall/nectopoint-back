@@ -4,8 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nectopoint.backend.services.PointRegistryService;
+import com.nectopoint.backend.services.SystemServices;
+import com.nectopoint.backend.services.UserSessionService;
+
 import org.springframework.web.bind.annotation.GetMapping;
+
 
 
 @RestController
@@ -13,12 +16,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class TestController {
     
     @Autowired
-    private PointRegistryService pointRegistryService;
+    private UserSessionService userSessionService;
+    @Autowired
+    private SystemServices systemServices;
 
     @GetMapping("/finalizar-dia")
     public String testEndOfDayProcess() {
-        pointRegistryService.endOfDayProcesses();
+        systemServices.endOfDayProcesses();
         return "Testing complete!";
+    }
+    
+    @GetMapping("/sync-databases")
+    public String syncDatabases() {
+        userSessionService.syncUsersWithSessions();
+        return "Databases synced!";
     }
     
 }

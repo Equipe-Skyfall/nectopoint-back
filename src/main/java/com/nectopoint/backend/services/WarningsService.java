@@ -35,16 +35,16 @@ public class WarningsService {
             warning.setTurno_irregular(turno_irregular.get());
         }
         
-        syncWithUserAdd(id_colaborador, warning);
         warningsRepo.save(warning);
+        syncWithUserAdd(id_colaborador, warning);
     }
     
     public void changeStatus(String id_aviso, TipoStatus status_aviso) {
         WarningsEntity updateTarget = warningsRepo.findById(id_aviso).get();
         updateTarget.setStatus_aviso(status_aviso);
 
-        syncWithUserStatus(updateTarget.getId_colaborador(), id_aviso, status_aviso);
         warningsRepo.save(updateTarget);
+        syncWithUserStatus(updateTarget.getId_colaborador(), id_aviso, status_aviso);
     }
     
     private void syncWithUserAdd(Long id_colaborador, WarningsEntity warning) {

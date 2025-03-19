@@ -7,6 +7,7 @@ public enum TipoStatusTurno {
     TRABALHANDO,
     INTERVALO,
     ENCERRADO,
+    NAO_COMPARECEU,
     IRREGULAR;
 
     @JsonCreator
