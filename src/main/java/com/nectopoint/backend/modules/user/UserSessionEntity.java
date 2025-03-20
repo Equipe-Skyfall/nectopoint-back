@@ -18,6 +18,7 @@ public class UserSessionEntity {
     @Id
     private String id_sessao;
     private Long id_colaborador;
+    private String nome;
     private DadosUsuario dados_usuario = new DadosUsuario();
     private JornadaTrabalho jornada_trabalho = new JornadaTrabalho();
     private PointRegistryEntity jornada_atual;
@@ -27,7 +28,6 @@ public class UserSessionEntity {
     
     @Data
     public static class DadosUsuario {
-        private String nome;
         private String cpf;
         private TipoCargo cargo;
         private String departamento;
@@ -41,10 +41,10 @@ public class UserSessionEntity {
         private Integer horas_diarias;
     }
 
-    public UserSessionEntity(Long id_colaborador, String nome_colaborador) {
+    public UserSessionEntity(Long id_colaborador, String nome) {
         this.id_colaborador = id_colaborador;
-        this.dados_usuario.nome = nome_colaborador;
-        this.jornada_atual = new PointRegistryEntity(id_colaborador, nome_colaborador);
+        this.nome = nome;
+        this.jornada_atual = new PointRegistryEntity(id_colaborador, nome);
         this.jornada_atual.setId_registro("inativo");
     }
 
