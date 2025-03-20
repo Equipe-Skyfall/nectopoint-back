@@ -50,7 +50,7 @@ public class SystemServices {
             superUser.setName("Super User");
             superUser.setEmail("necto@necto.com");
             superUser.setPassword("Necto-123");
-            superUser.setCpf("Necto-123");
+            superUser.setCpf("00000000000");
             superUser.setTitle(TipoCargo.GERENTE);
             superUser.setDepartment("Super department");
             superUser.setWorkJourneyType("When the world most needs him.");
