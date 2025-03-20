@@ -8,6 +8,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,10 +38,17 @@ public class PointRegistryController {
     @Autowired
     private PointRegistryService registryService;
 
-    @PostMapping("/bater-ponto/{id_colaborador}")
-    public PointRegistryEntity postPunch(@PathVariable Long id_colaborador) {
-        System.out.println("Received ID: " + id_colaborador);
-        return registryService.postPunch(id_colaborador);
+    @PostMapping("/bater-ponto")
+    public ResponseEntity<PointRegistryEntity> postPunch() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long id_colaborador = Long.parseLong(authentication.getPrincipal().toString());
+        
+        return ResponseEntity.ok(registryService.postPunch(id_colaborador));
     }
 
     @PostMapping("/bater-ponto/correcao")
