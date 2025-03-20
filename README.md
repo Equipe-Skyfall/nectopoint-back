@@ -73,6 +73,7 @@ PUT    http://localhost:8080/usuario/{id}/senha
 ```sh
 GET http://localhost:8080/sessao/usuario/
 GET http://localhost:8080/sessao/usuario/{id}
+GET http://localhost:8080/sessao/usuario/me
 ```
 
 Rotas de login (em desenvolvimento, no momento usado somente para simular login)
@@ -413,13 +414,49 @@ formate seu JSON da seguinte maneira para autenticar o usuário: (esse usuário 
 </details>
 
 ---
+**GET:** Puxe as informações do usuário logado em http://localhost:8080/sessao/usuario/me
+<details>
+    <summary>Clique para ver o JSON retornado</summary>
+
+```sh
+{
+    "id_sessao": "67d75d8fc80bb31e40d611a5",
+    "id_colaborador": 1,
+    "dados_usuario": {
+        "cargo": "COLABORADOR",
+        "departamento": "Engineering",
+        "status": null
+    },
+    "jornada_trabalho": {
+        "tipo_jornada": "Full-time",
+        "banco_de_horas": 2.0,
+        "horas_diarias": 8,
+        "jornada_atual": {
+            "batida_atual": "ENTRADA",
+            "ultima_entrada": "2025-03-16T23:24:41.914Z"
+        }
+    },
+    "alertas_usuario": [
+        {
+            "id_aviso": "67d75dcfc80bb31e40d611ac",
+            "tipo_aviso": "PONTOS_IMPAR",
+            "data_aviso": "2025-03-16T23:25:03.632Z",
+            "status_aviso": "PENDENDE"
+        }
+    ]
+}
+```
+
+</details>
+
+---
 ---
 ### Rotas dos pontos
 
-**POST:** Marque um ponto com a rota http://localhost:8080/pontos/bater-ponto/{id_colaborador}
+**POST:** Marque um ponto com a rota http://localhost:8080/turno/bater-ponto/{id_colaborador}
 
 ---
-**POST:** Para um gerente corrigir pontos ímpares use a rota http://localhost:8080/pontos/bater-ponto/correcao e formate seu JSON da seguinte maneira:
+**POST:** Para um gerente corrigir pontos ímpares use a rota http://localhost:8080/turno/bater-ponto/correcao e formate seu JSON da seguinte maneira:
 
 ```sh
 {
@@ -435,7 +472,7 @@ formate seu JSON da seguinte maneira para autenticar o usuário: (esse usuário 
 - **dados_ticket** é obrigatório!
 
 ---
-**GET:** Puxe as informações de um ponto específico em http://localhost:8080/pontos/{id}
+**GET:** Puxe as informações de um ponto específico em http://localhost:8080/turno/{id}
 <details>
     <summary>Clique para ver o JSON retornado</summary>
 
@@ -452,7 +489,7 @@ formate seu JSON da seguinte maneira para autenticar o usuário: (esse usuário 
 </details>
 
 ---
-**GET:** Puxe o histórico de todos os turnos com filtros por parâmetros. Exemplo: http://127.0.0.1:8080/pontos/historico
+**GET:** Puxe o histórico de todos os turnos com filtros por parâmetros. Exemplo: http://127.0.0.1:8080/turno/historico
 <details>
     <summary>Clique para ver o JSON retornado</summary>
 
