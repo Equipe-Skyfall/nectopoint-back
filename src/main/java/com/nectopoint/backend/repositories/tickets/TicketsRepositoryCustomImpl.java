@@ -31,21 +31,20 @@ public class TicketsRepositoryCustomImpl implements TicketsRepositoryCustom {
             query.addCriteria(Criteria.where("id_colaborador").is(id_colaborador));
         }
 
-        // For the date field 'data_aviso'
         if (start != null && end != null) {
-            query.addCriteria(Criteria.where("data_aviso").gte(start).lte(end));
+            query.addCriteria(Criteria.where("data_ticket").gte(start).lte(end));
         } else if (start != null) {
-            query.addCriteria(Criteria.where("data_aviso").gte(start));
+            query.addCriteria(Criteria.where("data_ticket").gte(start));
         } else if (end != null) {
-            query.addCriteria(Criteria.where("data_aviso").lte(end));
+            query.addCriteria(Criteria.where("data_ticket").lte(end));
         }
 
         if (status_ticket != null) {
-            query.addCriteria(Criteria.where("status_aviso").is(status_ticket));
+            query.addCriteria(Criteria.where("status_ticket").is(status_ticket));
         }
 
         if (tipo_ticket != null) {
-            query.addCriteria(Criteria.where("tipo_aviso").is(tipo_ticket));
+            query.addCriteria(Criteria.where("tipo_ticket").is(tipo_ticket));
         }
 
         long total = mongoTemplate.count(query, TicketsEntity.class);

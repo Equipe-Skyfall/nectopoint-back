@@ -14,8 +14,8 @@ import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.repositories.UserRepository;
-import com.nectopoint.backend.repositories.UserSessionRepository;
 import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
 
 @Service
 public class UserSessionService {

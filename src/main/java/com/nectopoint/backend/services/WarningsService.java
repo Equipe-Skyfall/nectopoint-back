@@ -12,7 +12,7 @@ import com.nectopoint.backend.modules.shared.WarningsSummary;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
-import com.nectopoint.backend.repositories.UserSessionRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
 import com.nectopoint.backend.repositories.warnings.WarningsRepository;
 
 @Service

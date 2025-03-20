@@ -59,12 +59,12 @@ public class PointRegistryController {
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
-        @RequestParam(required = false) TipoStatusTurno statusTurno,
+        @RequestParam(required = false) TipoStatusTurno status_turno,
         @RequestParam(required = false) Long id_colaborador
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findByParamsDynamic(id_colaborador, startDate, endDate, statusTurno, pageable);
+        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findByParamsDynamic(id_colaborador, startDate, endDate, status_turno, pageable);
 
         return new ResponseEntity<>(pointRegistryPage, HttpStatus.OK);
     }

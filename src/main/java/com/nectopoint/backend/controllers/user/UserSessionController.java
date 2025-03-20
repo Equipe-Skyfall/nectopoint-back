@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.modules.user.UserSessionEntity;
-import com.nectopoint.backend.repositories.UserSessionRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,7 +25,7 @@ public class UserSessionController {
     @Autowired
     private UserSessionRepository userSessionRepo;
 
-    @GetMapping("/")
+    @GetMapping("/todos")
     public ResponseEntity<Page<UserSessionEntity>> getUsersList(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size,
@@ -33,7 +34,7 @@ public class UserSessionController {
         Pageable pageable = PageRequest.of(page, size);
         Page<UserSessionEntity> userSessionPage;
 
-        userSessionPage = userSessionRepo.findAllWithSearch(cpf, pageable);
+        userSessionPage = userSessionRepo.findByParamsDynamic(cpf, pageable);
 
         return new ResponseEntity<>(userSessionPage, HttpStatus.OK);
     }

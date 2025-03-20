@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.dtos.LoginRequestDTO;
-import com.nectopoint.backend.repositories.UserSessionRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
 import com.nectopoint.backend.services.AuthorizationService;
 
 import org.springframework.beans.factory.annotation.Autowired;

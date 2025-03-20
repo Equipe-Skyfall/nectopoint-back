@@ -16,8 +16,8 @@ import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity.Ponto;
-import com.nectopoint.backend.repositories.UserSessionRepository;
 import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
 
 @Service
 public class PointRegistryService {

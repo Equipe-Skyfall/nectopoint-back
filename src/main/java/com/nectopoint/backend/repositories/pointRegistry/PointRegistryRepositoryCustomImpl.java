@@ -28,17 +28,16 @@ public class PointRegistryRepositoryCustomImpl implements PointRegistryRepositor
             query.addCriteria(Criteria.where("id_colaborador").is(id_colaborador));
         }
 
-        // For the date field 'data_aviso'
         if (start != null && end != null) {
-            query.addCriteria(Criteria.where("data_aviso").gte(start).lte(end));
+            query.addCriteria(Criteria.where("inicio_turno").gte(start).lte(end));
         } else if (start != null) {
-            query.addCriteria(Criteria.where("data_aviso").gte(start));
+            query.addCriteria(Criteria.where("inicio_turno").gte(start));
         } else if (end != null) {
-            query.addCriteria(Criteria.where("data_aviso").lte(end));
+            query.addCriteria(Criteria.where("inicio_turno").lte(end));
         }
 
         if (status_turno != null) {
-            query.addCriteria(Criteria.where("status_aviso").is(status_turno));
+            query.addCriteria(Criteria.where("status_turno").is(status_turno));
         }
 
         long total = mongoTemplate.count(query, PointRegistryEntity.class);
