@@ -35,6 +35,7 @@ public class UserService {
 
         UserDetailsDTO userDetailsDTO =
                                 new UserDetailsDTO(
+                                    userEntity.getId(),
                                     userEntity.getName(),
                                     userEntity.getCpf(),
                                     userEntity.getTitle(),
@@ -47,7 +48,7 @@ public class UserService {
         userEntity.setPassword(encodedPassword);
         
         UserEntity newUser = this.userRepository.save(userEntity);
-        this.userSessionService.createSession(newUser.getId(), userDetailsDTO);
+        this.userSessionService.createSession(userDetailsDTO);
         return newUser;
     }
 
@@ -110,6 +111,7 @@ public class UserService {
             // existingUser.setPassword(encodedPassword);
           //update na user session
             UserDetailsDTO userDetailsDTO = new UserDetailsDTO(
+                userDetails.getId(),
                 userDetails.getName(),
                 userDetails.getCpf(),
                 userDetails.getTitle(),
@@ -119,7 +121,7 @@ public class UserService {
                 userDetails.getDailyHours()
             );
     
-            userSessionService.updateUser(id, userDetailsDTO);
+            userSessionService.updateUser(userDetailsDTO);
             return userRepository.save(existingUser);
         } else {
             throw new RuntimeException("User not found");

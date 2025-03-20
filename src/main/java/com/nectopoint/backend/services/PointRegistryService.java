@@ -42,7 +42,7 @@ public class PointRegistryService {
         Instant data_hora = Instant.now();
         
         if ("inativo".equals(checkShift)) {
-            currentShift = new PointRegistryEntity(id_colaborador, currentUser.getNome());
+            currentShift = new PointRegistryEntity(id_colaborador, currentUser.getDados_usuario().getNome());
             Ponto ponto_atual = new Ponto();
 
             currentShift.setInicio_turno(data_hora);

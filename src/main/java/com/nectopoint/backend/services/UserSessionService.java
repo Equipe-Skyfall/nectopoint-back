@@ -44,7 +44,7 @@ public class UserSessionService {
         UserEntity targetUserSQL = userRepo.findById(id_colaborador).get();
 
         if ("inativo".equals(id_registro)) {
-            targetShift = new PointRegistryEntity(id_colaborador, targetUser.getNome());
+            targetShift = new PointRegistryEntity(id_colaborador, targetUser.getDados_usuario().getNome());
             targetShift.setInicio_turno(Instant.now());
             targetShift.setStatus_turno(TipoStatusTurno.NAO_COMPARECEU);
 
@@ -54,7 +54,7 @@ public class UserSessionService {
             targetUser.missedWorkDay();
         } else if (targetShift.getPontos_marcados().size()%2 != 0) {
             if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
-                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador, targetUser.getNome()));
+                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador, targetUser.getDados_usuario().getNome()));
                 targetUser.getJornada_atual().setId_registro("inativo");
             }
             targetShift.setStatus_turno(TipoStatusTurno.IRREGULAR);
@@ -66,7 +66,7 @@ public class UserSessionService {
         } else {
 
             if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
-                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador, targetUser.getNome()));
+                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador, targetUser.getDados_usuario().getNome()));
                 targetUser.getJornada_atual().setId_registro("inativo");
             } else {
                 targetUser.getJornadas_irregulares().removeIf(jornada -> jornada.getId_registro().equals(id_registro));
@@ -106,15 +106,21 @@ public class UserSessionService {
         }
     }
 
-    public void createSession(Long id, UserDetailsDTO userDetails) {
-        UserSessionEntity checkSession = userSessionRepo.findByColaborador(id);
+    public void createSession(UserDetailsDTO userDetails) {
+        UserSessionEntity checkSession = userSessionRepo.findByColaborador(userDetails.getId());
         if (checkSession != null) {
             userSessionRepo.delete(checkSession);
-            systemServices.clearUserData(id);
+            systemServices.clearUserData(userDetails.getId());
         }
-        UserSessionEntity userSession = new UserSessionEntity(id, userDetails.getName());
+        UserSessionEntity userSession = UserSessionEntity.fromUserDetailsDTO(userDetails);
 
-        userSession.setNome(userDetails.getName());
+        userSessionRepo.save(userSession);
+    }
+
+    public void startSession(UserDetailsDTO userDetails) {
+        UserSessionEntity userSession = userSessionRepo.findByColaborador(userDetails.getId());
+
+        userSession.getDados_usuario().setNome(userDetails.getName());
         userSession.getDados_usuario().setCpf(userDetails.getCpf());
         userSession.getDados_usuario().setCargo(userDetails.getTitle());
         userSession.getDados_usuario().setDepartamento(userDetails.getDepartment());
@@ -126,24 +132,8 @@ public class UserSessionService {
         userSessionRepo.save(userSession);
     }
 
-    public void startSession(Long id) {
-        UserDetailsDTO userDetails = userRepo.findUserDetailsById(id);
-        UserSessionEntity userSession = userSessionRepo.findByColaborador(id);
-
-        userSession.setNome(userDetails.getName());
-        userSession.getDados_usuario().setCpf(userDetails.getCpf());
-        userSession.getDados_usuario().setCargo(userDetails.getTitle());
-        userSession.getDados_usuario().setDepartamento(userDetails.getDepartment());
-
-        userSession.getJornada_trabalho().setBanco_de_horas(userDetails.getBankOfHours());
-        userSession.getJornada_trabalho().setHoras_diarias(userDetails.getDailyHours());
-        userSession.getJornada_trabalho().setTipo_jornada(userDetails.getWorkJourneyType());
-
-        userSessionRepo.save(userSession);
-    }
-
-    public void updateUser(Long id_colaborador, UserDetailsDTO newData) {
-        UserSessionEntity updateTarget = userSessionRepo.findByColaborador(id_colaborador);
+    public void updateUser(UserDetailsDTO newData) {
+        UserSessionEntity updateTarget = userSessionRepo.findByColaborador(newData.getId());
         
         updateTarget.getDados_usuario().setCargo(newData.getTitle());
         updateTarget.getDados_usuario().setDepartamento(newData.getDepartment());
@@ -166,6 +156,7 @@ public class UserSessionService {
         for (UserEntity user : allUsers) {
             UserDetailsDTO userDetailsDTO =
                                 new UserDetailsDTO(
+                                    user.getId(),
                                     user.getName(),
                                     user.getCpf(),
                                     user.getTitle(),
@@ -175,7 +166,7 @@ public class UserSessionService {
                                     user.getDailyHours()
                                 );
             
-            createSession(user.getId(), userDetailsDTO);
+            createSession(userDetailsDTO);
         }
     }
 }

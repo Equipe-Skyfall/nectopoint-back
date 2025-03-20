@@ -4,8 +4,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TipoStatusUsuario {
-    ONLINE,
-    OFFLINE;
+    TRABALHANDO("Trabalhando"),
+    EM_FERIAS("Em Férias"),
+    LICENCA_MEDICA("Licença Médica"),
+    LICENCA_MATERNIDADE("Licença Maternidade"),
+    LICENCA_PATERNIDADE("Licença Paternidade"),
+    LICENCA_NAO_REMUNERADA("Licença Não Remunerada"),
+    OUTROS("Outros");
 
     @JsonCreator
     public static TipoStatusUsuario fromString(String value) {
@@ -16,12 +21,19 @@ public enum TipoStatusUsuario {
         }
         throw new IllegalArgumentException("Valor para tipo_status_usuario inválido: " + value);
     }
-
+    
     @JsonValue
     public String toValue() {
         return name();
     }
-}
 
-// ESSE ENUM AINDA NÃO ESTÁ SENDO USADO ! ! !
-// Criei para diferenciar do Enum "TipoStatus"
+    private final String descricao;
+
+    TipoStatusUsuario(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+}

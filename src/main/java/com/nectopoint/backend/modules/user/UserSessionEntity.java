@@ -6,7 +6,9 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.enums.TipoCargo;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.modules.shared.WarningsSummary;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 
@@ -18,9 +20,8 @@ public class UserSessionEntity {
     @Id
     private String id_sessao;
     private Long id_colaborador;
-    private String nome;
-    private DadosUsuario dados_usuario = new DadosUsuario();
-    private JornadaTrabalho jornada_trabalho = new JornadaTrabalho();
+    private DadosUsuario dados_usuario;
+    private JornadaTrabalho jornada_trabalho;
     private PointRegistryEntity jornada_atual;
     private List<PointRegistryEntity> jornadas_historico = new ArrayList<>();
     private List<PointRegistryEntity> jornadas_irregulares = new ArrayList<>();
@@ -28,10 +29,19 @@ public class UserSessionEntity {
     
     @Data
     public static class DadosUsuario {
+        private String nome;
         private String cpf;
         private TipoCargo cargo;
         private String departamento;
-        private String status;
+        private TipoStatusUsuario status;
+
+        public DadosUsuario(String nome, String cpf, TipoCargo cargo, String departamento) {
+            this.nome = nome;
+            this.cpf = cpf;
+            this.cargo = cargo;
+            this.departamento = departamento;
+            this.status = TipoStatusUsuario.TRABALHANDO;
+        }
     }
     
     @Data
@@ -39,13 +49,31 @@ public class UserSessionEntity {
         private String tipo_jornada;
         private Long banco_de_horas;
         private Integer horas_diarias;
+
+        public JornadaTrabalho(String tipo_jornada, Long banco_de_horas, Integer horas_diarias) {
+            this.tipo_jornada = tipo_jornada;
+            this.banco_de_horas = banco_de_horas;
+            this.horas_diarias = horas_diarias;
+        }
     }
 
-    public UserSessionEntity(Long id_colaborador, String nome) {
-        this.id_colaborador = id_colaborador;
-        this.nome = nome;
-        this.jornada_atual = new PointRegistryEntity(id_colaborador, nome);
-        this.jornada_atual.setId_registro("inativo");
+    public static UserSessionEntity fromUserDetailsDTO(UserDetailsDTO userDetails) {
+        UserSessionEntity session = new UserSessionEntity();
+        session.id_colaborador = userDetails.getId();
+        session.dados_usuario = new DadosUsuario(
+            userDetails.getName(), 
+            userDetails.getCpf(), 
+            userDetails.getTitle(), 
+            userDetails.getDepartment()
+        );
+        session.jornada_trabalho = new JornadaTrabalho(
+            userDetails.getWorkJourneyType(), 
+            userDetails.getBankOfHours(), 
+            userDetails.getDailyHours()
+        );
+        session.jornada_atual = new PointRegistryEntity(userDetails.getId(), userDetails.getName());
+        session.jornada_atual.setId_registro("inativo");
+        return session;
     }
 
     public void missedWorkDay() {
