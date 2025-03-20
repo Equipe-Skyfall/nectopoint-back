@@ -33,22 +33,24 @@ public class UserService {
         userRepository.findByEmployeeNumber(userEntity.getEmployeeNumber())
             .ifPresent((_) -> { throw new DuplicateException("Número de funcionário já cadastrado"); });
 
-        UserDetailsDTO userDetailsDTO =
-                                new UserDetailsDTO(
-                                    userEntity.getId(),
-                                    userEntity.getName(),
-                                    userEntity.getCpf(),
-                                    userEntity.getTitle(),
-                                    userEntity.getDepartment(),
-                                    userEntity.getWorkJourneyType(),
-                                    userEntity.getBankOfHours(),
-                                    userEntity.getDailyHours()
-                                );
         var encodedPassword = passwordEncoder.encode(userEntity.getPassword());
         userEntity.setPassword(encodedPassword);
         
         UserEntity newUser = this.userRepository.save(userEntity);
+
+        UserDetailsDTO userDetailsDTO =
+                                new UserDetailsDTO(
+                                    newUser.getId(),
+                                    newUser.getName(),
+                                    newUser.getCpf(),
+                                    newUser.getTitle(),
+                                    newUser.getDepartment(),
+                                    newUser.getWorkJourneyType(),
+                                    newUser.getBankOfHours(),
+                                    newUser.getDailyHours()
+                                );
         this.userSessionService.createSession(userDetailsDTO);
+
         return newUser;
     }
 
