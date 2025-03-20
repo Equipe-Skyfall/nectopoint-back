@@ -60,7 +60,7 @@ public class PointRegistryController {
         @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
         @RequestParam(required = false) TipoStatusTurno statusTurno,
-        @RequestParam Long id_colaborador
+        @RequestParam(required = false) Long id_colaborador
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
