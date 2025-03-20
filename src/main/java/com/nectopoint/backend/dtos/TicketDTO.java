@@ -8,9 +8,6 @@ import lombok.Data;
 
 @Data
 public class TicketDTO {
-    @NotNull(message = "O ID do colaborador é obrigatório!")
-    private Long id_colaborador;
-
     @NotNull(message = "O tipo do ticket é obrigatório!")
     private TipoTicket tipo_ticket;
 

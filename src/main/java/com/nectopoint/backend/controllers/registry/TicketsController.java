@@ -9,6 +9,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +20,8 @@ import com.nectopoint.backend.enums.TipoTicket;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
 import com.nectopoint.backend.repositories.tickets.TicketsRepository;
 import com.nectopoint.backend.services.WarningsService;
+
+import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,10 +42,17 @@ public class TicketsController {
     private WarningsService warningsService;
 
     @PostMapping("/postar")
-    public TicketsEntity postTicket(@RequestBody TicketDTO requestData) {
+    public ResponseEntity<TicketsEntity> postTicket(@Valid @RequestBody TicketDTO requestData) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long id_colaborador = Long.parseLong(authentication.getPrincipal().toString());
         TicketsEntity new_ticket = new TicketsEntity();
 
-        new_ticket.setId_colaborador(requestData.getId_colaborador());
+        new_ticket.setId_colaborador(id_colaborador);
         new_ticket.setTipo_ticket(requestData.getTipo_ticket());
 
         new_ticket.setMensagem(Optional.ofNullable(requestData.getMensagem()).orElse(null));
@@ -50,7 +61,7 @@ public class TicketsController {
             warningsService.changeStatus(requestData.getAviso_atrelado(), TipoStatus.EM_AGUARDO);
         }
 
-        return ticketRepo.save(new_ticket);
+        return ResponseEntity.ok(ticketRepo.save(new_ticket));
     }
     
 
