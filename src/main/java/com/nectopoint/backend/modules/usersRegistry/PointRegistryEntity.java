@@ -24,6 +24,8 @@ public class PointRegistryEntity {
     @Indexed
     private Instant inicio_turno;
 
+    private String nome_colaborador;
+
     private TipoStatusTurno status_turno;
 
     private Long tempo_trabalhado_min = (long)0;
@@ -35,9 +37,11 @@ public class PointRegistryEntity {
     public static class Ponto {
         private TipoPonto tipo_ponto;
         private Instant data_hora;
+        private Long tempo_entre_pontos;
     }
 
-    public PointRegistryEntity(Long id_colaborador) {
+    public PointRegistryEntity(Long id_colaborador, String nome_colaborador) {
         this.id_colaborador = id_colaborador;
+        this.nome_colaborador = nome_colaborador;
     }
 }

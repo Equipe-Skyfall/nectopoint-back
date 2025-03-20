@@ -42,7 +42,7 @@ public class PointRegistryService {
         Instant data_hora = Instant.now();
         
         if ("inativo".equals(checkShift)) {
-            currentShift = new PointRegistryEntity(id_colaborador);
+            currentShift = new PointRegistryEntity(id_colaborador, currentUser.getDados_usuario().getNome());
             Ponto ponto_atual = new Ponto();
 
             currentShift.setInicio_turno(data_hora);
@@ -98,6 +98,7 @@ public class PointRegistryService {
 
         Instant time_last_entry = last_entry.getData_hora();
         Long time_between = Duration.between(time_last_entry, date_time).toMinutes();
+        newPoint.setTempo_entre_pontos(time_between);
 
         if (newPoint.getTipo_ponto() == TipoPonto.SAIDA) {
             targetShift.setTempo_trabalhado_min(targetShift.getTempo_trabalhado_min()+time_between);

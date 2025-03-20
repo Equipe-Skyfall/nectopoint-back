@@ -44,7 +44,7 @@ public class UserSessionService {
         UserEntity targetUserSQL = userRepo.findById(id_colaborador).get();
 
         if ("inativo".equals(id_registro)) {
-            targetShift = new PointRegistryEntity(id_colaborador);
+            targetShift = new PointRegistryEntity(id_colaborador, targetUser.getDados_usuario().getNome());
             targetShift.setInicio_turno(Instant.now());
             targetShift.setStatus_turno(TipoStatusTurno.NAO_COMPARECEU);
 
@@ -54,7 +54,7 @@ public class UserSessionService {
             targetUser.missedWorkDay();
         } else if (targetShift.getPontos_marcados().size()%2 != 0) {
             if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
-                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador));
+                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador, targetUser.getDados_usuario().getNome()));
                 targetUser.getJornada_atual().setId_registro("inativo");
             }
             targetShift.setStatus_turno(TipoStatusTurno.IRREGULAR);
@@ -66,7 +66,7 @@ public class UserSessionService {
         } else {
 
             if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
-                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador));
+                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador, targetUser.getDados_usuario().getNome()));
                 targetUser.getJornada_atual().setId_registro("inativo");
             } else {
                 targetUser.getJornadas_irregulares().removeIf(jornada -> jornada.getId_registro().equals(id_registro));
@@ -112,7 +112,7 @@ public class UserSessionService {
             userSessionRepo.delete(checkSession);
             systemServices.clearUserData(id);
         }
-        UserSessionEntity userSession = new UserSessionEntity(id);
+        UserSessionEntity userSession = new UserSessionEntity(id, userDetails.getName());
 
         userSession.getDados_usuario().setNome(userDetails.getName());
         userSession.getDados_usuario().setCpf(userDetails.getCpf());

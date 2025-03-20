@@ -41,9 +41,10 @@ public class UserSessionEntity {
         private Integer horas_diarias;
     }
 
-    public UserSessionEntity(Long id_colaborador) {
+    public UserSessionEntity(Long id_colaborador, String nome_colaborador) {
         this.id_colaborador = id_colaborador;
-        this.jornada_atual = new PointRegistryEntity(id_colaborador);
+        this.dados_usuario.nome = nome_colaborador;
+        this.jornada_atual = new PointRegistryEntity(id_colaborador, nome_colaborador);
         this.jornada_atual.setId_registro("inativo");
     }
 
