@@ -13,9 +13,9 @@ import com.nectopoint.backend.enums.TipoStatusTurno;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
-import com.nectopoint.backend.repositories.PointRegistryRepository;
 import com.nectopoint.backend.repositories.UserRepository;
 import com.nectopoint.backend.repositories.UserSessionRepository;
+import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
 
 @Service
 public class UserSessionService {
@@ -47,6 +47,8 @@ public class UserSessionService {
             targetShift = new PointRegistryEntity(id_colaborador);
             targetShift.setInicio_turno(Instant.now());
             targetShift.setStatus_turno(TipoStatusTurno.NAO_COMPARECEU);
+
+            targetUser.getJornadas_historico().add(targetShift);
 
             targetUserSQL.missedWorkDay();
             targetUser.missedWorkDay();
@@ -83,6 +85,8 @@ public class UserSessionService {
                 register_warning = true;
                 mensagem = "Turno finalizado sem almoço!";
                 tipo_aviso = TipoAviso.SEM_ALMOCO;
+            } else {
+                targetUser.getJornadas_historico().add(targetShift);
             }
 
             Long novo_banco_de_horas = targetUser.getJornada_trabalho().getBanco_de_horas() + (horas_trabalhadas_turno - horas_diarias);

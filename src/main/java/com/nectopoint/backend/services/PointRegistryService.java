@@ -13,9 +13,11 @@ import com.nectopoint.backend.enums.TipoStatus;
 import com.nectopoint.backend.enums.TipoStatusTurno;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
+import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
+import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity.Ponto;
-import com.nectopoint.backend.repositories.PointRegistryRepository;
 import com.nectopoint.backend.repositories.UserSessionRepository;
+import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
 
 @Service
 public class PointRegistryService {
@@ -60,19 +62,19 @@ public class PointRegistryService {
     }
 
     public void correctPointPunch(PointRegistryDTO correctionData) {
-        String id_registro = correctionData.getId_registro();
-        String id_aviso = correctionData.getDados_ticket().getId_aviso();
-        String id_ticket = correctionData.getDados_ticket().getId_ticket();
+        PointRegistryEntity targetShift = correctionData.getTicket().getAviso_atrelado().getTurno_irregular();
+        WarningsEntity targetAviso = correctionData.getTicket().getAviso_atrelado();
+        TicketsEntity targetTicket = correctionData.getTicket();
 
         Instant data_hora = correctionData.getData_hora();
         TipoStatus status_resolvido = TipoStatus.RESOLVIDO;
 
-        PointRegistryEntity targetShift = processNewEntry(registryRepo.findById(id_registro).get(), data_hora, true);
+        targetShift = processNewEntry(targetShift, data_hora, true);
 
         userSessionService.finishShift(targetShift);
 
-        ticketsService.changeStatus(id_ticket, status_resolvido);
-        warningsService.changeStatus(id_aviso, status_resolvido);
+        ticketsService.changeStatus(targetTicket, status_resolvido);
+        warningsService.changeStatus(targetAviso, status_resolvido);
 
         registryRepo.save(targetShift);
     }

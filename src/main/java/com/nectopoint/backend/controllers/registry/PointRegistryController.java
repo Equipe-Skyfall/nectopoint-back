@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nectopoint.backend.dtos.PointRegistryDTO;
 import com.nectopoint.backend.enums.TipoStatusTurno;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
-import com.nectopoint.backend.repositories.PointRegistryRepository;
+import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
 import com.nectopoint.backend.services.PointRegistryService;
 
 import jakarta.validation.Valid;
@@ -64,7 +64,7 @@ public class PointRegistryController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findByParams(id_colaborador, startDate, endDate, statusTurno, pageable);
+        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findByParamsDynamic(id_colaborador, startDate, endDate, statusTurno, pageable);
 
         return new ResponseEntity<>(pointRegistryPage, HttpStatus.OK);
     }

@@ -27,15 +27,17 @@ public class UserSessionController {
     @GetMapping("/")
     public ResponseEntity<Page<UserSessionEntity>> getUsersList(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "5") int size
+        @RequestParam(defaultValue = "5") int size,
+        @RequestParam(required = false) String cpf
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<UserSessionEntity> userSessionPage;
 
-        userSessionPage = userSessionRepo.findAll(pageable);
+        userSessionPage = userSessionRepo.findAllWithSearch(cpf, pageable);
 
         return new ResponseEntity<>(userSessionPage, HttpStatus.OK);
     }
+
     @GetMapping("/{id}")
     public UserSessionEntity getMethodName(@PathVariable Long id) {
         return userSessionRepo.findByColaborador(id);

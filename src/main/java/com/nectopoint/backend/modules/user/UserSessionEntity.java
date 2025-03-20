@@ -21,6 +21,7 @@ public class UserSessionEntity {
     private DadosUsuario dados_usuario = new DadosUsuario();
     private JornadaTrabalho jornada_trabalho = new JornadaTrabalho();
     private PointRegistryEntity jornada_atual;
+    private List<PointRegistryEntity> jornadas_historico = new ArrayList<>();
     private List<PointRegistryEntity> jornadas_irregulares = new ArrayList<>();
     private List<WarningsSummary> alertas_usuario = new ArrayList<>();
     

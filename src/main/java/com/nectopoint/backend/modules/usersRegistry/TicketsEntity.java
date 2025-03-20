@@ -24,8 +24,8 @@ public class TicketsEntity {
     private Instant data_ticket = Instant.now();
     @Indexed
     private TipoStatus status_ticket = TipoStatus.EM_AGUARDO;
-    
-    private String id_aviso;
 
     private String mensagem;
+
+    private WarningsEntity aviso_atrelado;
 }

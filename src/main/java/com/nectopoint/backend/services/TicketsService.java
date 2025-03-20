@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.nectopoint.backend.enums.TipoStatus;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
-import com.nectopoint.backend.repositories.TicketsRepository;
+import com.nectopoint.backend.repositories.tickets.TicketsRepository;
 
 @Service
 public class TicketsService {
@@ -15,10 +15,12 @@ public class TicketsService {
     @Autowired
     private TicketsRepository ticketsRepo;
 
-    public TicketsEntity changeStatus(String id_ticket, TipoStatus status_ticket) {
-        TicketsEntity updateTarget = ticketsRepo.findById(id_ticket).get();
-        updateTarget.setStatus_ticket(status_ticket);
-        return ticketsRepo.save(updateTarget);
+    public TicketsEntity changeStatus(TicketsEntity ticket, TipoStatus status_ticket) {
+        ticket.setStatus_ticket(status_ticket);
+        if (status_ticket == TipoStatus.RESOLVIDO && ticket.getAviso_atrelado() != null) {
+            ticket.getAviso_atrelado().setStatus_aviso(status_ticket);
+        }
+        return ticketsRepo.save(ticket);
     }
 
     //Deletar TODOS os tickets de um usuário

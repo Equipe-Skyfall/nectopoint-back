@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nectopoint.backend.enums.TipoAviso;
 import com.nectopoint.backend.enums.TipoStatus;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
-import com.nectopoint.backend.repositories.WarningsRepository;
+import com.nectopoint.backend.repositories.warnings.WarningsRepository;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,7 +46,7 @@ public class WarningsController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<WarningsEntity> warningPage = warningsRepo.findByParams(id_colaborador, startDate, endDate, statusAviso, tipoAviso, pageable);
+        Page<WarningsEntity> warningPage = warningsRepo.findByParamsDynamic(id_colaborador, startDate, endDate, statusAviso, tipoAviso, pageable);
 
         return new ResponseEntity<>(warningPage, HttpStatus.OK);
     }

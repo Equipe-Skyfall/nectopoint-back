@@ -16,7 +16,7 @@ import com.nectopoint.backend.dtos.TicketDTO;
 import com.nectopoint.backend.enums.TipoStatus;
 import com.nectopoint.backend.enums.TipoTicket;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
-import com.nectopoint.backend.repositories.TicketsRepository;
+import com.nectopoint.backend.repositories.tickets.TicketsRepository;
 import com.nectopoint.backend.services.WarningsService;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,15 +40,14 @@ public class TicketsController {
     @PostMapping("/postar")
     public TicketsEntity postTicket(@RequestBody TicketDTO requestData) {
         TicketsEntity new_ticket = new TicketsEntity();
-        String id_aviso = Optional.ofNullable(requestData.getId_aviso()).orElse(null);
 
         new_ticket.setId_colaborador(requestData.getId_colaborador());
         new_ticket.setTipo_ticket(requestData.getTipo_ticket());
 
         new_ticket.setMensagem(Optional.ofNullable(requestData.getMensagem()).orElse(null));
-        if (id_aviso != null) {
-            new_ticket.setId_aviso(id_aviso);
-            warningsService.changeStatus(id_aviso, TipoStatus.EM_AGUARDO);
+        if (requestData.getAviso_atrelado() != null) {
+            new_ticket.setAviso_atrelado(requestData.getAviso_atrelado());
+            warningsService.changeStatus(requestData.getAviso_atrelado(), TipoStatus.EM_AGUARDO);
         }
 
         return ticketRepo.save(new_ticket);
@@ -72,7 +71,7 @@ public class TicketsController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<TicketsEntity> ticketPage = ticketRepo.findByParams(id_colaborador, startDate, endDate, statusTicket, tipoTicket, pageable);
+        Page<TicketsEntity> ticketPage = ticketRepo.findByParamsDynamic(id_colaborador, startDate, endDate, statusTicket, tipoTicket, pageable);
 
         return new ResponseEntity<>(ticketPage, HttpStatus.OK);
     }

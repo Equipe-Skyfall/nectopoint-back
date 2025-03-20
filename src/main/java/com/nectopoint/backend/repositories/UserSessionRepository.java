@@ -9,7 +9,8 @@ import com.nectopoint.backend.modules.user.UserSessionEntity;
 
 public interface UserSessionRepository extends MongoRepository<UserSessionEntity, String> {
     
-    Page<UserSessionEntity> findAll(Pageable pageable);
+    @Query("{ $or: [ { 'dados_usuario.cpf': ?0 }, { ?0: null } ] }")
+    Page<UserSessionEntity> findAllWithSearch(String cpf, Pageable pageable);
 
     @Query("{ 'id_colaborador': ?0 }")
     UserSessionEntity findByColaborador(Long id_colaborador);

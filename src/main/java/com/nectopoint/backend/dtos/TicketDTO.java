@@ -1,6 +1,7 @@
 package com.nectopoint.backend.dtos;
 
 import com.nectopoint.backend.enums.TipoTicket;
+import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -15,5 +16,5 @@ public class TicketDTO {
 
     private String mensagem;
 
-    private String id_aviso;
+    private WarningsEntity aviso_atrelado;
 }

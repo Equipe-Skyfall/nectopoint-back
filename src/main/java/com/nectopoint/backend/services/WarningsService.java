@@ -13,7 +13,7 @@ import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 import com.nectopoint.backend.repositories.UserSessionRepository;
-import com.nectopoint.backend.repositories.WarningsRepository;
+import com.nectopoint.backend.repositories.warnings.WarningsRepository;
 
 @Service
 public class WarningsService {
@@ -39,12 +39,13 @@ public class WarningsService {
         syncWithUserAdd(id_colaborador, warning);
     }
     
-    public void changeStatus(String id_aviso, TipoStatus status_aviso) {
-        WarningsEntity updateTarget = warningsRepo.findById(id_aviso).get();
-        updateTarget.setStatus_aviso(status_aviso);
-
-        warningsRepo.save(updateTarget);
-        syncWithUserStatus(updateTarget.getId_colaborador(), id_aviso, status_aviso);
+    public void changeStatus(WarningsEntity warning, TipoStatus status_aviso) {
+        warning.setStatus_aviso(status_aviso);
+        if (status_aviso == TipoStatus.RESOLVIDO && warning.getTurno_irregular() != null) {
+            warning.setTurno_irregular(null);
+        }
+        warningsRepo.save(warning);
+        syncWithUserStatus(warning, status_aviso);
     }
     
     private void syncWithUserAdd(Long id_colaborador, WarningsEntity warning) {
@@ -60,11 +61,11 @@ public class WarningsService {
         userSessionRepo.save(user);
     }
 
-    private void syncWithUserStatus(Long id_colaborador, String id_aviso, TipoStatus status_aviso) {
-        UserSessionEntity user = userSessionRepo.findByColaborador(id_colaborador);
+    private void syncWithUserStatus(WarningsEntity warning, TipoStatus status_aviso) {
+        UserSessionEntity user = userSessionRepo.findByColaborador(warning.getId_colaborador());
 
         WarningsSummary warning_summary = user.getAlertas_usuario().stream()
-                                         .filter(w -> w.getId_aviso().equals(id_aviso))
+                                         .filter(w -> w.getId_aviso().equals(warning.getId_aviso()))
                                          .findFirst().get();
         if (status_aviso == TipoStatus.RESOLVIDO) {
             user.getAlertas_usuario().remove(warning_summary);
