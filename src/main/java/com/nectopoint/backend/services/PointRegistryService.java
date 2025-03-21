@@ -55,7 +55,7 @@ public class PointRegistryService {
         }
 
         registryRepo.save(currentShift);
-        currentUser.setJornada_atual(currentShift);
+        currentUser.setJornada_atual(currentShift.toPointRegistryStripped());
 
         userSessionRepo.save(currentUser);
         return currentShift;
@@ -83,7 +83,10 @@ public class PointRegistryService {
         List<UserSessionEntity> userSessions = userSessionRepo.findAll();
 
         for (UserSessionEntity user : userSessions) {
-            userSessionService.finishShift(user.getJornada_atual());
+            Long id_colaborador = user.getId_colaborador();
+            String nome_colaborador = user.getDados_usuario().getNome();
+            PointRegistryEntity entity = user.getJornada_atual().toPointRegistryEntity(id_colaborador, nome_colaborador);
+            userSessionService.finishShift(entity);
         }
     }
 

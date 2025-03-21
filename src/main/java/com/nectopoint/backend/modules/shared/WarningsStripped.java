@@ -8,7 +8,7 @@ import com.nectopoint.backend.enums.TipoStatus;
 import lombok.Data;
 
 @Data
-public class WarningsSummary {
+public class WarningsStripped {
     private String id_aviso;
     private TipoAviso tipo_aviso;
     private Instant data_aviso;

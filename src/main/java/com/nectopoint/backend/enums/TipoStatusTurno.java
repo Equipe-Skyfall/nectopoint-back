@@ -8,6 +8,7 @@ public enum TipoStatusTurno {
     INTERVALO,
     ENCERRADO,
     NAO_COMPARECEU,
+    NAO_INICIADO,
     IRREGULAR;
 
     @JsonCreator

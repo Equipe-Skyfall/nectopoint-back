@@ -4,12 +4,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.nectopoint.backend.enums.TipoPonto;
 import com.nectopoint.backend.enums.TipoStatusTurno;
+import com.nectopoint.backend.modules.shared.PointRegistryStripped;
 
 import lombok.Data;
 
@@ -38,6 +40,11 @@ public class PointRegistryEntity {
         private TipoPonto tipo_ponto;
         private Instant data_hora;
         private Long tempo_entre_pontos;
+    }
+
+    public PointRegistryStripped toPointRegistryStripped() {
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(this, PointRegistryStripped.class);
     }
 
     public PointRegistryEntity(Long id_colaborador, String nome_colaborador) {

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.enums.TipoAviso;
 import com.nectopoint.backend.enums.TipoStatusTurno;
+import com.nectopoint.backend.modules.shared.PointRegistryStripped;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
@@ -48,17 +49,16 @@ public class UserSessionService {
             targetShift.setInicio_turno(Instant.now());
             targetShift.setStatus_turno(TipoStatusTurno.NAO_COMPARECEU);
 
-            targetUser.getJornadas_historico().add(targetShift);
+            targetUser.getJornadas_historico().add(targetShift.toPointRegistryStripped());
 
             targetUserSQL.missedWorkDay();
             targetUser.missedWorkDay();
         } else if (targetShift.getPontos_marcados().size()%2 != 0) {
             if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
-                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador, targetUser.getDados_usuario().getNome()));
-                targetUser.getJornada_atual().setId_registro("inativo");
+                targetUser.setJornada_atual(new PointRegistryStripped());
             }
             targetShift.setStatus_turno(TipoStatusTurno.IRREGULAR);
-            targetUser.getJornadas_irregulares().add(targetShift);
+            targetUser.getJornadas_irregulares().add(targetShift.toPointRegistryStripped());
 
             register_warning = true;
             mensagem = "Pontos ímpares registrados!";
@@ -66,8 +66,7 @@ public class UserSessionService {
         } else {
 
             if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
-                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador, targetUser.getDados_usuario().getNome()));
-                targetUser.getJornada_atual().setId_registro("inativo");
+                targetUser.setJornada_atual(new PointRegistryStripped());
             } else {
                 targetUser.getJornadas_irregulares().removeIf(jornada -> jornada.getId_registro().equals(id_registro));
             }
@@ -80,13 +79,13 @@ public class UserSessionService {
 
             if (intervalo_turno < 60 && Math.abs(horas_trabalhadas_turno - horas_diarias) < 60) {
                 targetShift.setStatus_turno(TipoStatusTurno.IRREGULAR);
-                targetUser.getJornadas_irregulares().add(targetShift);
+                targetUser.getJornadas_irregulares().add(targetShift.toPointRegistryStripped());
 
                 register_warning = true;
                 mensagem = "Turno finalizado sem almoço!";
                 tipo_aviso = TipoAviso.SEM_ALMOCO;
             } else {
-                targetUser.getJornadas_historico().add(targetShift);
+                targetUser.getJornadas_historico().add(targetShift.toPointRegistryStripped());
             }
 
             Long novo_banco_de_horas = targetUser.getJornada_trabalho().getBanco_de_horas() + (horas_trabalhadas_turno - horas_diarias);
@@ -112,7 +111,7 @@ public class UserSessionService {
             userSessionRepo.delete(checkSession);
             systemServices.clearUserData(userDetails.getId());
         }
-        UserSessionEntity userSession = UserSessionEntity.fromUserDetailsDTO(userDetails);
+        UserSessionEntity userSession = userDetails.toUserSessionEntity();
 
         userSessionRepo.save(userSession);
     }
@@ -154,17 +153,7 @@ public class UserSessionService {
     public void syncUsersWithSessions() {
         List<UserEntity> allUsers = userRepo.findAll();
         for (UserEntity user : allUsers) {
-            UserDetailsDTO userDetailsDTO =
-                                new UserDetailsDTO(
-                                    user.getId(),
-                                    user.getName(),
-                                    user.getCpf(),
-                                    user.getTitle(),
-                                    user.getDepartment(),
-                                    user.getWorkJourneyType(),
-                                    user.getBankOfHours(),
-                                    user.getDailyHours()
-                                );
+            UserDetailsDTO userDetailsDTO = user.toUserDetailsDTO();
             
             createSession(userDetailsDTO);
         }

@@ -6,11 +6,10 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.enums.TipoCargo;
 import com.nectopoint.backend.enums.TipoStatusUsuario;
-import com.nectopoint.backend.modules.shared.WarningsSummary;
-import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
+import com.nectopoint.backend.modules.shared.PointRegistryStripped;
+import com.nectopoint.backend.modules.shared.WarningsStripped;
 
 import lombok.Data;
 
@@ -22,10 +21,10 @@ public class UserSessionEntity {
     private Long id_colaborador;
     private DadosUsuario dados_usuario;
     private JornadaTrabalho jornada_trabalho;
-    private PointRegistryEntity jornada_atual;
-    private List<PointRegistryEntity> jornadas_historico = new ArrayList<>();
-    private List<PointRegistryEntity> jornadas_irregulares = new ArrayList<>();
-    private List<WarningsSummary> alertas_usuario = new ArrayList<>();
+    private PointRegistryStripped jornada_atual = new PointRegistryStripped();
+    private List<PointRegistryStripped> jornadas_historico = new ArrayList<>();
+    private List<PointRegistryStripped> jornadas_irregulares = new ArrayList<>();
+    private List<WarningsStripped> alertas_usuario = new ArrayList<>();
     
     @Data
     public static class DadosUsuario {
@@ -55,25 +54,6 @@ public class UserSessionEntity {
             this.banco_de_horas = banco_de_horas;
             this.horas_diarias = horas_diarias;
         }
-    }
-
-    public static UserSessionEntity fromUserDetailsDTO(UserDetailsDTO userDetails) {
-        UserSessionEntity session = new UserSessionEntity();
-        session.id_colaborador = userDetails.getId();
-        session.dados_usuario = new DadosUsuario(
-            userDetails.getName(), 
-            userDetails.getCpf(), 
-            userDetails.getTitle(), 
-            userDetails.getDepartment()
-        );
-        session.jornada_trabalho = new JornadaTrabalho(
-            userDetails.getWorkJourneyType(), 
-            userDetails.getBankOfHours(), 
-            userDetails.getDailyHours()
-        );
-        session.jornada_atual = new PointRegistryEntity(userDetails.getId(), userDetails.getName());
-        session.jornada_atual.setId_registro("inativo");
-        return session;
     }
 
     public void missedWorkDay() {

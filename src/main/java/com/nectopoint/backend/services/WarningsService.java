@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.nectopoint.backend.enums.TipoAviso;
 import com.nectopoint.backend.enums.TipoStatus;
-import com.nectopoint.backend.modules.shared.WarningsSummary;
+import com.nectopoint.backend.modules.shared.WarningsStripped;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
@@ -50,21 +50,16 @@ public class WarningsService {
     
     private void syncWithUserAdd(Long id_colaborador, WarningsEntity warning) {
         UserSessionEntity user = userSessionRepo.findByColaborador(id_colaborador);
-        
-        WarningsSummary warning_summary = new WarningsSummary();
-        warning_summary.setId_aviso(warning.getId_aviso());
-        warning_summary.setData_aviso(warning.getData_aviso());
-        warning_summary.setStatus_aviso(warning.getStatus_aviso());
-        warning_summary.setTipo_aviso(warning.getTipo_aviso());
 
-        user.getAlertas_usuario().add(warning_summary);
+        user.getAlertas_usuario().add(warning.toWarningsStripped());
+
         userSessionRepo.save(user);
     }
 
     private void syncWithUserStatus(WarningsEntity warning, TipoStatus status_aviso) {
         UserSessionEntity user = userSessionRepo.findByColaborador(warning.getId_colaborador());
 
-        WarningsSummary warning_summary = user.getAlertas_usuario().stream()
+        WarningsStripped warning_summary = user.getAlertas_usuario().stream()
                                          .filter(w -> w.getId_aviso().equals(warning.getId_aviso()))
                                          .findFirst().get();
         if (status_aviso == TipoStatus.RESOLVIDO) {
