@@ -2,6 +2,7 @@ package com.nectopoint.backend.modules.usersRegistry;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -23,32 +24,51 @@ public class PointRegistryEntity {
     private String id_registro;
     @Indexed
     private Long id_colaborador;
+
     @Indexed
     private Instant inicio_turno;
+    private Instant fim_turno;
 
     private String nome_colaborador;
+    private String cpf_colaborador;
 
     private TipoStatusTurno status_turno;
 
     private Long tempo_trabalhado_min = (long)0;
-    private Long tempo_intervalo_min = (long)0;
+    private Boolean tirou_almoco = false;
 
     private List<Ponto> pontos_marcados = new ArrayList<>();
+
+    private Abono abono;
+
+    private String id_aviso;
 
     @Data
     public static class Ponto {
         private TipoPonto tipo_ponto;
         private Instant data_hora;
         private Long tempo_entre_pontos;
+        private Boolean almoco;
+    }
+
+    @Data
+    public static class Abono {
+        String motivo_abono;
+        String horarios_abono;
     }
 
     public PointRegistryStripped toPointRegistryStripped() {
         ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(this, PointRegistryStripped.class);
     }
+    
+    public void sortPontos() {
+        pontos_marcados.sort(Comparator.comparing(Ponto::getData_hora));
+    }
 
-    public PointRegistryEntity(Long id_colaborador, String nome_colaborador) {
+    public PointRegistryEntity(Long id_colaborador, String nome_colaborador, String cpf_colaborador) {
         this.id_colaborador = id_colaborador;
         this.nome_colaborador = nome_colaborador;
+        this.cpf_colaborador = cpf_colaborador;
     }
 }

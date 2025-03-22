@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -19,6 +20,7 @@ public class PointRegistryRepositoryCustomImpl implements PointRegistryRepositor
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    @Override
     public Page<PointRegistryEntity> findByParamsDynamic(Long id_colaborador, Instant start, Instant end,
                                                     TipoStatusTurno status_turno, Pageable pageable
     ) {
@@ -40,11 +42,21 @@ public class PointRegistryRepositoryCustomImpl implements PointRegistryRepositor
             query.addCriteria(Criteria.where("status_turno").is(status_turno));
         }
 
+        query.with(Sort.by(Sort.Order.desc("inicio_turno")));
+
         long total = mongoTemplate.count(query, PointRegistryEntity.class);
 
         query.with(pageable);
 
         List<PointRegistryEntity> registry = mongoTemplate.find(query, PointRegistryEntity.class);
         return new PageImpl<>(registry, pageable, total);
+    }
+
+    public List<PointRegistryEntity> findByDateCriterias(List<Criteria> criterias) {
+        Criteria combinedCriteria = new Criteria().orOperator(criterias.toArray(new Criteria[0]));
+
+        Query query = new Query(combinedCriteria);
+
+        return mongoTemplate.find(query, PointRegistryEntity.class);
     }
 }

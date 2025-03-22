@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TipoTicket {
     PONTOS_IMPAR,
-    SEM_ALMOCO;
+    SEM_ALMOCO,
+    PEDIR_FERIAS,
+    PEDIR_ABONO;
 
     @JsonCreator
     public static TipoTicket fromString(String value) {
@@ -22,6 +24,3 @@ public enum TipoTicket {
         return name();
     }
 }
-
-// Esse Enum possui somente um valor pois está
-// previsto que haverá outros tipos de Tickets no futuro.

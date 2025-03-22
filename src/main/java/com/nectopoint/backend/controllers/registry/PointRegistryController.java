@@ -13,16 +13,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nectopoint.backend.dtos.PointRegistryDTO;
 import com.nectopoint.backend.enums.TipoStatusTurno;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
 import com.nectopoint.backend.services.PointRegistryService;
 
-import jakarta.validation.Valid;
-
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,12 +46,6 @@ public class PointRegistryController {
         
         return ResponseEntity.ok(registryService.postPunch(id_colaborador));
     }
-
-    @PostMapping("/bater-ponto/correcao")
-    public void postPunchCorrection(@Valid @RequestBody PointRegistryDTO requestData) {
-        registryService.correctPointPunch(requestData);
-    }
-    
     
     @GetMapping("/{id}")
     public PointRegistryEntity getPointById(@PathVariable String id) {

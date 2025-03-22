@@ -1,9 +1,11 @@
 package com.nectopoint.backend.repositories.pointRegistry;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.query.Criteria;
 
 import com.nectopoint.backend.enums.TipoStatusTurno;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
@@ -11,4 +13,6 @@ import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 public interface PointRegistryRepositoryCustom {
     Page<PointRegistryEntity> findByParamsDynamic(Long id_colaborador, Instant start, Instant end,
                                                     TipoStatusTurno status_turno, Pageable pageable);
+
+    List<PointRegistryEntity> findByDateCriterias(List<Criteria> criterias);
 }

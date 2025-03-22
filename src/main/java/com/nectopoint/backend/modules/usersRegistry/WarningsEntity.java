@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.nectopoint.backend.enums.TipoAviso;
-import com.nectopoint.backend.enums.TipoStatus;
+import com.nectopoint.backend.enums.TipoStatusAlerta;
 import com.nectopoint.backend.modules.shared.WarningsStripped;
 
 import lombok.Data;
@@ -20,15 +20,16 @@ public class WarningsEntity {
     private String id_aviso;
     @Indexed
     private Long id_colaborador;
+    private String nome_colaborador;
+    private String cpf_colaborador;
     @Indexed
     private TipoAviso tipo_aviso;
     @Indexed
     private Instant data_aviso = Instant.now();
     @Indexed
-    private TipoStatus status_aviso = TipoStatus.PENDENDE;
-
-    private String mensagem;
-    private PointRegistryEntity turno_irregular;
+    private TipoStatusAlerta status_aviso = TipoStatusAlerta.PENDENTE;
+    
+    private String id_ticket;
 
     public WarningsStripped toWarningsStripped() {
         ModelMapper modelMapper = new ModelMapper();
