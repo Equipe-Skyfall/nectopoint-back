@@ -46,9 +46,10 @@ public class PointRegistryService {
         Instant data_hora = Instant.now();
         
         if ("inativo".equals(checkShift)) {
-            currentShift = new PointRegistryEntity(id_colaborador, 
-                                                   currentUser.getDados_usuario().getNome(),
-                                                   currentUser.getDados_usuario().getCpf());
+            currentShift = new PointRegistryEntity();
+            currentShift.setId_colaborador(id_colaborador);
+            currentShift.setNome_colaborador(currentUser.getDados_usuario().getNome());
+            currentShift.setCpf_colaborador(currentUser.getDados_usuario().getCpf());
             Ponto ponto_atual = new Ponto();
 
             currentShift.setInicio_turno(data_hora);
@@ -67,11 +68,11 @@ public class PointRegistryService {
         return currentShift;
     }
 
-    public void correctPointPunch(String id_registro, LocalTime horario_saida) {
+    public void correctPointPunch(String id_registro, Instant horario_saida) {
         PointRegistryEntity targetShift = registryRepo.findById(id_registro).get();
 
         Instant dataHoraTurno = targetShift.getInicio_turno();
-        Instant data_hora = localTimeToInstant(dataHoraTurno, horario_saida);
+        Instant data_hora = joinDateTime(dataHoraTurno, horario_saida);
 
         targetShift = processNewEntry(targetShift, data_hora, true);
 
@@ -80,13 +81,13 @@ public class PointRegistryService {
         registryRepo.save(targetShift);
     }
 
-    public void addLunchTime(String id_registro, LocalTime inicio_intervalo, LocalTime fim_intervalo) {
+    public void addLunchTime(String id_registro, Instant inicio_intervalo, Instant fim_intervalo) {
         PointRegistryEntity targetShift = registryRepo.findById(id_registro).get();
         UserSessionEntity targetUser = userSessionRepo.findByColaborador(targetShift.getId_colaborador());
 
         Instant dataHoraTurno = targetShift.getInicio_turno();
-        Instant saida_instant = localTimeToInstant(dataHoraTurno, inicio_intervalo);
-        Instant entrada_instant = localTimeToInstant(dataHoraTurno, fim_intervalo);
+        Instant saida_instant = joinDateTime(dataHoraTurno, inicio_intervalo);
+        Instant entrada_instant = joinDateTime(dataHoraTurno, fim_intervalo);
 
         Long time_between_entrada = Duration.between(saida_instant, entrada_instant).toMinutes();
         Ponto entrada = new Ponto();
@@ -122,7 +123,7 @@ public class PointRegistryService {
         userRepo.save(userSQL);
     }
 
-    public void processExcusedAbsence(Long id_colaborador, String motivo_abono, List<LocalDate> dias_abono, LocalTime hora_inicio, LocalTime hora_final) {
+    public void processExcusedAbsence(Long id_colaborador, String motivo_abono, List<Instant> dias_abono, Instant hora_inicio, Instant hora_final) {
         ZoneId zoneId = ZoneId.of("America/Sao_Paulo");
         List<Criteria> criteriaList = new ArrayList<>();
 
@@ -132,16 +133,18 @@ public class PointRegistryService {
 
         UserEntity targetUserSql = userRepo.findById(id_colaborador).get();
 
-        for (LocalDate date : dias_abono) {
-            Instant startOfDay = date.atStartOfDay(zoneId).toInstant();
-            Instant endOfDay = date.plusDays(1).atStartOfDay(zoneId).minusNanos(1).toInstant();
-        
+        for (Instant date : dias_abono) {
+            LocalDate localDate = date.atZone(zoneId).toLocalDate();
+            Instant startOfDay = localDate.atStartOfDay(zoneId).toInstant();
+            Instant endOfDay = localDate.plusDays(1).atStartOfDay(zoneId).toInstant().minusNanos(1);
+    
             Criteria dateCriteria = Criteria.where("inicio_turno").gte(startOfDay).lte(endOfDay);
             criteriaList.add(dateCriteria);
-        };
+        }
 
         List<PointRegistryEntity> registryList = registryRepo.findByDateCriterias(criteriaList);
         Long duracao_abono = Duration.between(hora_inicio, hora_final).toMinutes();
+        
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 
         registryList.forEach(registry -> {
@@ -153,7 +156,9 @@ public class PointRegistryService {
                 targetUser.getJornada_trabalho().setBanco_de_horas(banco_atual + horas_diarias);
                 targetUserSql.setBankOfHours(banco_atual + horas_diarias);
             } else {
-                String horarios_string = String.format("%s-%s", hora_inicio.format(formatter), hora_final.format(formatter));
+                LocalTime localTimeInicio = hora_inicio.atZone(zoneId).toLocalTime();
+                LocalTime localTimeFinal = hora_final.atZone(zoneId).toLocalTime();
+                String horarios_string = String.format("%s-%s", localTimeInicio.format(formatter), localTimeFinal.format(formatter));
                 registry.getAbono().setHorarios_abono(horarios_string);
 
                 targetUser.getJornada_trabalho().setBanco_de_horas(banco_atual + duracao_abono);
@@ -207,14 +212,18 @@ public class PointRegistryService {
         return targetShift;
     }
 
-    private Instant localTimeToInstant(Instant dia, LocalTime hora) {
-        ZoneId zone_id = ZoneId.of("America/Sao_Paulo");
-        LocalDate diaToDate = dia.atZone(zone_id).toLocalTime().isAfter(hora) ? 
-                                 dia.atZone(zone_id).plusDays(1).toLocalDate() :
-                                 dia.atZone(zone_id).toLocalDate();
-        LocalDateTime diaHora = LocalDateTime.of(diaToDate, hora);
-
-        return diaHora.atZone(zone_id).toInstant();
+    private Instant joinDateTime(Instant dia, Instant hora) {
+        ZoneId zone = ZoneId.of("America/Sao_Paulo");
+    
+        // Extract the date part from 'dia' and the time part from 'hora'
+        LocalDate datePart = dia.atZone(zone).toLocalDate();
+        LocalTime timePart = hora.atZone(zone).toLocalTime();
+        
+        // Combine them into a LocalDateTime
+        LocalDateTime combined = LocalDateTime.of(datePart, timePart);
+        
+        // Convert back to an Instant
+        return combined.atZone(zone).toInstant();
     }
 
     //Deletar TODOS os registros de pontos de um usuário

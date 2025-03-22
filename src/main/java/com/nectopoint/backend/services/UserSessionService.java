@@ -1,7 +1,7 @@
 package com.nectopoint.backend.services;
 
+import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +49,10 @@ public class UserSessionService {
         UserEntity targetUserSQL = userRepo.findById(id_colaborador).get();
 
         if ("inativo".equals(id_registro)) {
-            targetShift = new PointRegistryEntity(id_colaborador,
-                                                  targetUser.getDados_usuario().getNome(),
-                                                  targetUser.getDados_usuario().getCpf());
+            targetShift = new PointRegistryEntity();
+            targetShift.setId_colaborador(id_colaborador);
+            targetShift.setNome_colaborador(nome_colaborador);
+            targetShift.setCpf_colaborador(cpf_colaborador);
 
             targetShift.setInicio_turno(Instant.now());
             targetShift.setStatus_turno(TipoStatusTurno.NAO_COMPARECEU);
@@ -125,10 +126,11 @@ public class UserSessionService {
         }
     }
 
-    public void approveVacation(Long id_colaborador, LocalDate dataInicioFerias, Integer diasFerias) {
+    public void approveVacation(Long id_colaborador, Instant dataInicioFerias, Integer diasFerias) {
         UserSessionEntity targetUser = userSessionRepo.findByColaborador(id_colaborador);
         targetUser.getDados_usuario().setFerias_inicio(dataInicioFerias);
-        targetUser.getDados_usuario().setFerias_final(dataInicioFerias.plusDays(diasFerias));
+        Instant feriasFinal = dataInicioFerias.plus(Duration.ofDays(diasFerias));
+        targetUser.getDados_usuario().setFerias_final(feriasFinal);
         userSessionRepo.save(targetUser);
     }
 
@@ -138,7 +140,8 @@ public class UserSessionService {
             userSessionRepo.delete(checkSession);
             systemServices.clearUserData(userDetails.getId());
         }
-        UserSessionEntity userSession = userDetails.toUserSessionEntity();
+        UserSessionEntity userSession = new UserSessionEntity();
+        userSession = userDetails.toUserSessionEntity();
 
         userSessionRepo.save(userSession);
     }

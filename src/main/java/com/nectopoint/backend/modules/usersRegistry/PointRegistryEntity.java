@@ -65,10 +65,4 @@ public class PointRegistryEntity {
     public void sortPontos() {
         pontos_marcados.sort(Comparator.comparing(Ponto::getData_hora));
     }
-
-    public PointRegistryEntity(Long id_colaborador, String nome_colaborador, String cpf_colaborador) {
-        this.id_colaborador = id_colaborador;
-        this.nome_colaborador = nome_colaborador;
-        this.cpf_colaborador = cpf_colaborador;
-    }
 }

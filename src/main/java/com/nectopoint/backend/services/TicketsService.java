@@ -75,6 +75,7 @@ public class TicketsService {
 
             userSessionRepo.save(colaborador);
         } else {
+            ticketsRepo.save(ticket);
             switch (ticket.getTipo_ticket()) {
                 case PONTOS_IMPAR:
                     registryService.correctPointPunch(ticket.getId_registro(), ticket.getHorario_saida());

@@ -38,6 +38,7 @@ public class TicketsController {
     @Autowired
     private TicketsRepository ticketRepo;
 
+    @Autowired
     private TicketsService ticketsService;
 
     @PostMapping("/postar")

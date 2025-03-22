@@ -1,7 +1,6 @@
 package com.nectopoint.backend.dtos;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -20,22 +19,22 @@ public class TicketDTO {
     private TipoTicket tipo_ticket;
 
     // Usado para resolver tipo PONTOS_IMPAR
-    private LocalTime horario_saida;
+    private Instant horario_saida;
 
     // Usado para resolver tipo SEM_ALMOCO
-    private LocalTime inicio_intervalo;
-    private LocalTime fim_intervalo;
+    private Instant inicio_intervalo;
+    private Instant fim_intervalo;
 
     // Usado para PEDIR_FERIAS
-    private LocalDate data_inicio_ferias;
+    private Instant data_inicio_ferias;
     private Integer dias_ferias;
 
     // Usado para PEDIR_ABONO, informando dia ou dias de abono,
     // o intervalo de horas (00:00h às 23:59h caso seja um dia inteiro) e o motivo
     private String motivo_abono;
-    private List<LocalDate> dias_abono;
-    private LocalTime abono_inicio;
-    private LocalTime abono_final;
+    private List<Instant> dias_abono;
+    private Instant abono_inicio;
+    private Instant abono_final;
 
     private String mensagem;
 

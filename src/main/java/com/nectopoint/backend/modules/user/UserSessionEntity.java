@@ -1,6 +1,6 @@
 package com.nectopoint.backend.modules.user;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,16 +38,8 @@ public class UserSessionEntity {
         private TipoCargo cargo;
         private String departamento;
         private TipoStatusUsuario status;
-        private LocalDate ferias_inicio;
-        private LocalDate ferias_final;
-
-        public DadosUsuario(String nome, String cpf, TipoCargo cargo, String departamento) {
-            this.nome = nome;
-            this.cpf = cpf;
-            this.cargo = cargo;
-            this.departamento = departamento;
-            this.status = TipoStatusUsuario.TRABALHANDO;
-        }
+        private Instant ferias_inicio;
+        private Instant ferias_final;
     }
     
     @Data
@@ -55,12 +47,6 @@ public class UserSessionEntity {
         private String tipo_jornada;
         private Long banco_de_horas;
         private Integer horas_diarias;
-
-        public JornadaTrabalho(String tipo_jornada, Long banco_de_horas, Integer horas_diarias) {
-            this.tipo_jornada = tipo_jornada;
-            this.banco_de_horas = banco_de_horas;
-            this.horas_diarias = horas_diarias;
-        }
     }
 
     public void updateRegistry(PointRegistryStripped registryStripped) {
