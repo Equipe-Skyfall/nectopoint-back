@@ -1,16 +1,17 @@
 package com.nectopoint.backend.modules.user;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.enums.TipoCargo;
 import com.nectopoint.backend.enums.TipoStatusUsuario;
-import com.nectopoint.backend.modules.shared.WarningsSummary;
-import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
+import com.nectopoint.backend.modules.shared.PointRegistryStripped;
+import com.nectopoint.backend.modules.shared.TicketsStripped;
+import com.nectopoint.backend.modules.shared.WarningsStripped;
 
 import lombok.Data;
 
@@ -22,10 +23,13 @@ public class UserSessionEntity {
     private Long id_colaborador;
     private DadosUsuario dados_usuario;
     private JornadaTrabalho jornada_trabalho;
-    private PointRegistryEntity jornada_atual;
-    private List<PointRegistryEntity> jornadas_historico = new ArrayList<>();
-    private List<PointRegistryEntity> jornadas_irregulares = new ArrayList<>();
-    private List<WarningsSummary> alertas_usuario = new ArrayList<>();
+
+    private PointRegistryStripped jornada_atual = new PointRegistryStripped();
+    private List<PointRegistryStripped> jornadas_historico = new ArrayList<>();
+    private List<PointRegistryStripped> jornadas_irregulares = new ArrayList<>();
+
+    private List<TicketsStripped> tickets_usuario = new ArrayList<>();
+    private List<WarningsStripped> alertas_usuario = new ArrayList<>();
     
     @Data
     public static class DadosUsuario {
@@ -34,14 +38,8 @@ public class UserSessionEntity {
         private TipoCargo cargo;
         private String departamento;
         private TipoStatusUsuario status;
-
-        public DadosUsuario(String nome, String cpf, TipoCargo cargo, String departamento) {
-            this.nome = nome;
-            this.cpf = cpf;
-            this.cargo = cargo;
-            this.departamento = departamento;
-            this.status = TipoStatusUsuario.TRABALHANDO;
-        }
+        private Instant ferias_inicio;
+        private Instant ferias_final;
     }
     
     @Data
@@ -49,31 +47,34 @@ public class UserSessionEntity {
         private String tipo_jornada;
         private Long banco_de_horas;
         private Integer horas_diarias;
-
-        public JornadaTrabalho(String tipo_jornada, Long banco_de_horas, Integer horas_diarias) {
-            this.tipo_jornada = tipo_jornada;
-            this.banco_de_horas = banco_de_horas;
-            this.horas_diarias = horas_diarias;
-        }
     }
 
-    public static UserSessionEntity fromUserDetailsDTO(UserDetailsDTO userDetails) {
-        UserSessionEntity session = new UserSessionEntity();
-        session.id_colaborador = userDetails.getId();
-        session.dados_usuario = new DadosUsuario(
-            userDetails.getName(), 
-            userDetails.getCpf(), 
-            userDetails.getTitle(), 
-            userDetails.getDepartment()
-        );
-        session.jornada_trabalho = new JornadaTrabalho(
-            userDetails.getWorkJourneyType(), 
-            userDetails.getBankOfHours(), 
-            userDetails.getDailyHours()
-        );
-        session.jornada_atual = new PointRegistryEntity(userDetails.getId(), userDetails.getName());
-        session.jornada_atual.setId_registro("inativo");
-        return session;
+    public void updateRegistry(PointRegistryStripped registryStripped) {
+        PointRegistryStripped target = jornadas_historico.stream()
+        .filter(registry -> registry.getId_registro().equals(registryStripped.getId_registro()))
+        .findFirst().get();
+
+        jornadas_historico.set(jornadas_historico.indexOf(target), registryStripped);
+    }
+
+    public void updateTicket(TicketsStripped ticketStripped) {
+        TicketsStripped target = tickets_usuario.stream()
+        .filter(ticket -> ticket.getId_ticket().equals(ticketStripped.getId_ticket()))
+        .findFirst().get();
+
+        tickets_usuario.set(tickets_usuario.indexOf(target), ticketStripped);
+    }
+
+    public void updateWarning(WarningsStripped warningsStripped) {
+        WarningsStripped target = alertas_usuario.stream()
+        .filter(warning -> warning.getId_aviso().equals(warningsStripped.getId_aviso()))
+        .findFirst().get();
+
+        alertas_usuario.set(alertas_usuario.indexOf(target), warningsStripped);
+    }
+
+    public void removeWarning(WarningsStripped warningsStripped) {
+        alertas_usuario.remove(warningsStripped);
     }
 
     public void missedWorkDay() {

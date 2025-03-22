@@ -3,14 +3,14 @@ package com.nectopoint.backend.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum TipoStatus {
-    PENDENDE,
+public enum TipoStatusTicket {
     EM_AGUARDO, //EM_AGUARDO sinaliza que está aguardando uma resposta do gerente.
-    RESOLVIDO;
+    APROVADO,
+    REPROVADO;
 
     @JsonCreator
-    public static TipoStatus fromString(String value) {
-        for (TipoStatus tipo : TipoStatus.values()) {
+    public static TipoStatusTicket fromString(String value) {
+        for (TipoStatusTicket tipo : TipoStatusTicket.values()) {
             if (tipo.name().equalsIgnoreCase(value)) {
                 return tipo;
             }
@@ -23,5 +23,3 @@ public enum TipoStatus {
         return name();
     }
 }
-
-// Diferente de "TipoStatusUsuario" esse Enum será aplicado aos Tickets e Alertas

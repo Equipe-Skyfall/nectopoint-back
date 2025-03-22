@@ -1,7 +1,6 @@
 package com.nectopoint.backend.controllers.registry;
 
 import java.time.Instant;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,12 +13,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nectopoint.backend.dtos.TicketAnswerDTO;
 import com.nectopoint.backend.dtos.TicketDTO;
-import com.nectopoint.backend.enums.TipoStatus;
+import com.nectopoint.backend.enums.TipoStatusTicket;
 import com.nectopoint.backend.enums.TipoTicket;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
 import com.nectopoint.backend.repositories.tickets.TicketsRepository;
-import com.nectopoint.backend.services.WarningsService;
+import com.nectopoint.backend.services.TicketsService;
 
 import jakarta.validation.Valid;
 
@@ -39,10 +39,10 @@ public class TicketsController {
     private TicketsRepository ticketRepo;
 
     @Autowired
-    private WarningsService warningsService;
+    private TicketsService ticketsService;
 
     @PostMapping("/postar")
-    public ResponseEntity<TicketsEntity> postTicket(@Valid @RequestBody TicketDTO requestData) {
+    public ResponseEntity<TicketsEntity> postTicket(@Valid @RequestBody TicketDTO ticketDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || authentication.getPrincipal() == null) {
@@ -50,20 +50,23 @@ public class TicketsController {
         }
 
         Long id_colaborador = Long.parseLong(authentication.getPrincipal().toString());
-        TicketsEntity new_ticket = new TicketsEntity();
 
-        new_ticket.setId_colaborador(id_colaborador);
-        new_ticket.setTipo_ticket(requestData.getTipo_ticket());
+        return ResponseEntity.ok(ticketsService.postTicket(id_colaborador, ticketDTO));
+    }
 
-        new_ticket.setMensagem(Optional.ofNullable(requestData.getMensagem()).orElse(null));
-        if (requestData.getAviso_atrelado() != null) {
-            new_ticket.setAviso_atrelado(requestData.getAviso_atrelado());
-            warningsService.changeStatus(requestData.getAviso_atrelado(), TipoStatus.EM_AGUARDO);
+    @PostMapping("/responder")
+    public ResponseEntity<String> answerTicket(@Valid @RequestBody TicketAnswerDTO ticketAnswer) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        return ResponseEntity.ok(ticketRepo.save(new_ticket));
+        Long id_gerente = Long.parseLong(authentication.getPrincipal().toString());
+
+        ticketsService.answerTicket(id_gerente, ticketAnswer);
+        return ResponseEntity.ok("Resposta enviada com sucesso!");
     }
-    
 
     @GetMapping("/{id}")
     public TicketsEntity getTicketById(@PathVariable String id) {
@@ -76,7 +79,7 @@ public class TicketsController {
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
-        @RequestParam(required = false) TipoStatus statusTicket,
+        @RequestParam(required = false) TipoStatusTicket statusTicket,
         @RequestParam(required = false) TipoTicket tipoTicket,
         @RequestParam(required = false) Long id_colaborador
     ) {

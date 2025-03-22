@@ -1,8 +1,8 @@
 package com.nectopoint.backend.services;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.enums.TipoAviso;
 import com.nectopoint.backend.enums.TipoStatusTurno;
+import com.nectopoint.backend.modules.shared.PointRegistryStripped;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
+import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 import com.nectopoint.backend.repositories.UserRepository;
 import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
 import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
@@ -34,76 +36,102 @@ public class UserSessionService {
 
 
     public void finishShift(PointRegistryEntity targetShift) {
-        Boolean register_warning = false;
-        String mensagem="";
-        TipoAviso tipo_aviso=TipoAviso.PONTOS_IMPAR;
+        WarningsEntity warning;
+        TipoAviso tipo_aviso;
 
         Long id_colaborador = targetShift.getId_colaborador();
         String id_registro = targetShift.getId_registro();
+
         UserSessionEntity targetUser = userSessionRepo.findByColaborador(id_colaborador);
+        String nome_colaborador = targetUser.getDados_usuario().getNome();
+        String cpf_colaborador = targetUser.getDados_usuario().getCpf();
+
         UserEntity targetUserSQL = userRepo.findById(id_colaborador).get();
 
         if ("inativo".equals(id_registro)) {
-            targetShift = new PointRegistryEntity(id_colaborador, targetUser.getDados_usuario().getNome());
+            targetShift = new PointRegistryEntity();
+            targetShift.setId_colaborador(id_colaborador);
+            targetShift.setNome_colaborador(nome_colaborador);
+            targetShift.setCpf_colaborador(cpf_colaborador);
+
             targetShift.setInicio_turno(Instant.now());
             targetShift.setStatus_turno(TipoStatusTurno.NAO_COMPARECEU);
+            registryRepo.save(targetShift);
 
-            targetUser.getJornadas_historico().add(targetShift);
+            targetUser.getJornadas_historico().add(targetShift.toPointRegistryStripped());
 
             targetUserSQL.missedWorkDay();
             targetUser.missedWorkDay();
+
+            userRepo.save(targetUserSQL);
+            userSessionRepo.save(targetUser);
         } else if (targetShift.getPontos_marcados().size()%2 != 0) {
             if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
-                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador, targetUser.getDados_usuario().getNome()));
-                targetUser.getJornada_atual().setId_registro("inativo");
+                targetUser.setJornada_atual(new PointRegistryStripped());
             }
+
             targetShift.setStatus_turno(TipoStatusTurno.IRREGULAR);
-            targetUser.getJornadas_irregulares().add(targetShift);
-
-            register_warning = true;
-            mensagem = "Pontos ímpares registrados!";
             tipo_aviso = TipoAviso.PONTOS_IMPAR;
-        } else {
+            warning = warningsService.registerWarning(id_colaborador, nome_colaborador, cpf_colaborador, tipo_aviso);
+            targetShift.setId_aviso(warning.getId_aviso());
 
+            registryRepo.save(targetShift);
+
+            targetUser.getJornadas_irregulares().add(targetShift.toPointRegistryStripped());
+            targetUser.getAlertas_usuario().add(warning.toWarningsStripped());
+
+            userSessionRepo.save(targetUser);
+        } else {
             if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
-                targetUser.setJornada_atual(new PointRegistryEntity(id_colaborador, targetUser.getDados_usuario().getNome()));
-                targetUser.getJornada_atual().setId_registro("inativo");
+                targetUser.setJornada_atual(new PointRegistryStripped());
             } else {
                 targetUser.getJornadas_irregulares().removeIf(jornada -> jornada.getId_registro().equals(id_registro));
             }
 
-            Long intervalo_turno = targetShift.getTempo_intervalo_min();
             Long horas_trabalhadas_turno = targetShift.getTempo_trabalhado_min();
             Long horas_diarias = (long)targetUser.getJornada_trabalho().getHoras_diarias() * 60;
+            Instant fim_turno = targetShift.getPontos_marcados().get(targetShift.getPontos_marcados().size()-1).getData_hora();
 
             targetShift.setStatus_turno(TipoStatusTurno.ENCERRADO);
+            targetShift.setFim_turno(fim_turno);
 
-            if (intervalo_turno < 60 && Math.abs(horas_trabalhadas_turno - horas_diarias) < 60) {
+            if (targetShift.getTirou_almoco() == false && Math.abs(horas_trabalhadas_turno - horas_diarias) < 60) {
                 targetShift.setStatus_turno(TipoStatusTurno.IRREGULAR);
-                targetUser.getJornadas_irregulares().add(targetShift);
-
-                register_warning = true;
-                mensagem = "Turno finalizado sem almoço!";
                 tipo_aviso = TipoAviso.SEM_ALMOCO;
+                warning = warningsService.registerWarning(id_colaborador, nome_colaborador, cpf_colaborador, tipo_aviso);
+                targetShift.setId_aviso(warning.getId_aviso());
+
+                registryRepo.save(targetShift);
+
+                targetUser.getJornadas_irregulares().add(targetShift.toPointRegistryStripped());
+                targetUser.getAlertas_usuario().add(warning.toWarningsStripped());
+
+                Long novo_banco_de_horas = targetUser.getJornada_trabalho().getBanco_de_horas() + (horas_trabalhadas_turno - horas_diarias);
+                targetUser.getJornada_trabalho().setBanco_de_horas(novo_banco_de_horas);
+                targetUserSQL.setBankOfHours(novo_banco_de_horas);
+
+                userSessionRepo.save(targetUser);
             } else {
-                targetUser.getJornadas_historico().add(targetShift);
+                registryRepo.save(targetShift);
+
+                targetUser.getJornadas_historico().add(targetShift.toPointRegistryStripped());
+
+                Long novo_banco_de_horas = targetUser.getJornada_trabalho().getBanco_de_horas() + (horas_trabalhadas_turno - horas_diarias);
+                targetUser.getJornada_trabalho().setBanco_de_horas(novo_banco_de_horas);
+                targetUserSQL.setBankOfHours(novo_banco_de_horas);
+
+                userRepo.save(targetUserSQL);
+                userSessionRepo.save(targetUser);
             }
-
-            Long novo_banco_de_horas = targetUser.getJornada_trabalho().getBanco_de_horas() + (horas_trabalhadas_turno - horas_diarias);
-
-            targetUser.getJornada_trabalho().setBanco_de_horas(novo_banco_de_horas);
-            targetUserSQL.setBankOfHours(novo_banco_de_horas);
         }
-        
-        registryRepo.save(targetShift);
-        userRepo.save(targetUserSQL);
+    }
+
+    public void approveVacation(Long id_colaborador, Instant dataInicioFerias, Integer diasFerias) {
+        UserSessionEntity targetUser = userSessionRepo.findByColaborador(id_colaborador);
+        targetUser.getDados_usuario().setFerias_inicio(dataInicioFerias);
+        Instant feriasFinal = dataInicioFerias.plus(Duration.ofDays(diasFerias));
+        targetUser.getDados_usuario().setFerias_final(feriasFinal);
         userSessionRepo.save(targetUser);
-        if (register_warning) {
-            warningsService.registerWarning(id_colaborador,
-                                            tipo_aviso,
-                                            Optional.ofNullable(mensagem),
-                                            Optional.ofNullable(targetShift));
-        }
     }
 
     public void createSession(UserDetailsDTO userDetails) {
@@ -112,7 +140,8 @@ public class UserSessionService {
             userSessionRepo.delete(checkSession);
             systemServices.clearUserData(userDetails.getId());
         }
-        UserSessionEntity userSession = UserSessionEntity.fromUserDetailsDTO(userDetails);
+        UserSessionEntity userSession = new UserSessionEntity();
+        userSession = userDetails.toUserSessionEntity();
 
         userSessionRepo.save(userSession);
     }
@@ -154,17 +183,7 @@ public class UserSessionService {
     public void syncUsersWithSessions() {
         List<UserEntity> allUsers = userRepo.findAll();
         for (UserEntity user : allUsers) {
-            UserDetailsDTO userDetailsDTO =
-                                new UserDetailsDTO(
-                                    user.getId(),
-                                    user.getName(),
-                                    user.getCpf(),
-                                    user.getTitle(),
-                                    user.getDepartment(),
-                                    user.getWorkJourneyType(),
-                                    user.getBankOfHours(),
-                                    user.getDailyHours()
-                                );
+            UserDetailsDTO userDetailsDTO = user.toUserDetailsDTO();
             
             createSession(userDetailsDTO);
         }

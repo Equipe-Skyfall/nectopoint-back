@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.enums.TipoAviso;
-import com.nectopoint.backend.enums.TipoStatus;
+import com.nectopoint.backend.enums.TipoStatusAlerta;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 import com.nectopoint.backend.repositories.warnings.WarningsRepository;
 
@@ -40,7 +40,7 @@ public class WarningsController {
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
-        @RequestParam(required = false) TipoStatus statusAviso,
+        @RequestParam(required = false) TipoStatusAlerta statusAviso,
         @RequestParam(required = false) TipoAviso tipoAviso,
         @RequestParam(required = false) Long id_colaborador
     ) {

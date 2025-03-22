@@ -7,8 +7,9 @@ public enum TipoStatusTurno {
     TRABALHANDO,
     INTERVALO,
     ENCERRADO,
+    IRREGULAR,
     NAO_COMPARECEU,
-    IRREGULAR;
+    NAO_INICIADO;
 
     @JsonCreator
     public static TipoStatusTurno fromString(String value) {

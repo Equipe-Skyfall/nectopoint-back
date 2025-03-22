@@ -31,7 +31,7 @@ public class SystemServices {
     @Lazy
     private TicketsService ticketsService;
 
-    @Scheduled(cron = "0 0 22 * * ?")
+    @Scheduled(cron = "0 0 22 * * ?", zone = "America/Sao_Paulo")
     public void endOfDayProcesses() {
         registryService.endDayShifts();
     }

@@ -3,6 +3,9 @@ package com.nectopoint.backend.modules.user;
 
 import java.time.LocalDate;
 
+import org.modelmapper.ModelMapper;
+
+import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.enums.TipoCargo;
 
 import jakarta.persistence.Column;
@@ -71,6 +74,11 @@ public class UserEntity {
     @NotNull(message = "A data de nascimento não pode ser nula")
     @Past(message = "A data de nascimento deve ser uma data passada")
     private LocalDate birthDate;
+
+    public UserDetailsDTO toUserDetailsDTO() {
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(this, UserDetailsDTO.class);
+    }
 
     public void missedWorkDay() {
         this.bankOfHours = this.bankOfHours - this.dailyHours;

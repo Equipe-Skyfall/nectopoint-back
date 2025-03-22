@@ -7,12 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import com.nectopoint.backend.enums.TipoAviso;
-import com.nectopoint.backend.enums.TipoStatus;
+import com.nectopoint.backend.enums.TipoStatusAlerta;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 
 public class WarningsRepositoryCustomImpl implements WarningsRepositoryCustom {
@@ -22,7 +23,7 @@ public class WarningsRepositoryCustomImpl implements WarningsRepositoryCustom {
 
     @Override
     public Page<WarningsEntity> findByParamsDynamic(Long id_colaborador, Instant start, Instant end,
-                                                      TipoStatus status_aviso, TipoAviso tipo_aviso,
+                                                      TipoStatusAlerta status_aviso, TipoAviso tipo_aviso,
                                                       Pageable pageable) {
         Query query = new Query();
 
@@ -47,6 +48,7 @@ public class WarningsRepositoryCustomImpl implements WarningsRepositoryCustom {
         if (tipo_aviso != null) {
             query.addCriteria(Criteria.where("tipo_aviso").is(tipo_aviso));
         }
+        query.with(Sort.by(Sort.Order.desc("data_aviso")));
 
         // Count total results for pagination
         long total = mongoTemplate.count(query, WarningsEntity.class);
