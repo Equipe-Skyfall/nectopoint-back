@@ -4,6 +4,8 @@ import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.exceptions.DuplicateException;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.repositories.UserRepository;
+import com.nectopoint.backend.utils.DataTransferHelper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,15 +16,20 @@ import java.util.Optional;
 @Service
 public class UserService {
 
+    private final DataTransferHelper dataTransferHelper;
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private UserSessionService userSessionService;
 
-
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    public UserService (DataTransferHelper dataTransferHelper) {
+        this.dataTransferHelper = dataTransferHelper;
+    }
 
     // Cria Usuário
     public UserEntity createUser(UserEntity userEntity) {
@@ -38,7 +45,7 @@ public class UserService {
         
         UserEntity newUser = this.userRepository.save(userEntity);
 
-        UserDetailsDTO userDetailsDTO = newUser.toUserDetailsDTO();
+        UserDetailsDTO userDetailsDTO = dataTransferHelper.toUserDetailsDTO(newUser);
         this.userSessionService.createSession(userDetailsDTO);
 
         return newUser;
@@ -102,7 +109,7 @@ public class UserService {
             // var encodedPassword = passwordEncoder.encode(userDetails.getPassword());
             // existingUser.setPassword(encodedPassword);
           //update na user session
-            UserDetailsDTO userDetailsDTO = userDetails.toUserDetailsDTO();
+            UserDetailsDTO userDetailsDTO = dataTransferHelper.toUserDetailsDTO(userDetails);
             userSessionService.updateUser(userDetailsDTO);
             
             return userRepository.save(existingUser);

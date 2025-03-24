@@ -5,14 +5,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.nectopoint.backend.enums.TipoAbono;
 import com.nectopoint.backend.enums.TipoPonto;
 import com.nectopoint.backend.enums.TipoStatusTurno;
-import com.nectopoint.backend.modules.shared.PointRegistryStripped;
 
 import lombok.Data;
 
@@ -53,13 +52,8 @@ public class PointRegistryEntity {
 
     @Data
     public static class Abono {
-        String motivo_abono;
+        TipoAbono motivo_abono;
         String horarios_abono;
-    }
-
-    public PointRegistryStripped toPointRegistryStripped() {
-        ModelMapper modelMapper = new ModelMapper();
-        return modelMapper.map(this, PointRegistryStripped.class);
     }
     
     public void sortPontos() {

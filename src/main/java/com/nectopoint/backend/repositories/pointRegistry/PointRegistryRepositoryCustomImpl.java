@@ -22,7 +22,7 @@ public class PointRegistryRepositoryCustomImpl implements PointRegistryRepositor
 
     @Override
     public Page<PointRegistryEntity> findByParamsDynamic(Long id_colaborador, Instant start, Instant end,
-                                                    TipoStatusTurno status_turno, Pageable pageable
+                                                    List<TipoStatusTurno> lista_status_turno, Pageable pageable
     ) {
         Query query = new Query();
 
@@ -38,8 +38,8 @@ public class PointRegistryRepositoryCustomImpl implements PointRegistryRepositor
             query.addCriteria(Criteria.where("inicio_turno").lte(end));
         }
 
-        if (status_turno != null) {
-            query.addCriteria(Criteria.where("status_turno").is(status_turno));
+        if (lista_status_turno != null && !lista_status_turno.isEmpty()) {
+            query.addCriteria(Criteria.where("status_turno").in(lista_status_turno));
         }
 
         query.with(Sort.by(Sort.Order.desc("inicio_turno")));

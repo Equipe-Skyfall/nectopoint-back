@@ -1,6 +1,7 @@
 package com.nectopoint.backend.controllers.registry;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -79,13 +80,13 @@ public class TicketsController {
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
-        @RequestParam(required = false) TipoStatusTicket statusTicket,
+        @RequestParam(required = false) List<TipoStatusTicket> lista_status_ticket,
         @RequestParam(required = false) TipoTicket tipoTicket,
         @RequestParam(required = false) Long id_colaborador
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<TicketsEntity> ticketPage = ticketRepo.findByParamsDynamic(id_colaborador, startDate, endDate, statusTicket, tipoTicket, pageable);
+        Page<TicketsEntity> ticketPage = ticketRepo.findByParamsDynamic(id_colaborador, startDate, endDate, lista_status_ticket, tipoTicket, pageable);
 
         return new ResponseEntity<>(ticketPage, HttpStatus.OK);
     }

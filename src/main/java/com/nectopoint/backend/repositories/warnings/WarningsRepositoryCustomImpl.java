@@ -23,7 +23,7 @@ public class WarningsRepositoryCustomImpl implements WarningsRepositoryCustom {
 
     @Override
     public Page<WarningsEntity> findByParamsDynamic(Long id_colaborador, Instant start, Instant end,
-                                                      TipoStatusAlerta status_aviso, TipoAviso tipo_aviso,
+                                                      List<TipoStatusAlerta> lista_status_aviso, TipoAviso tipo_aviso,
                                                       Pageable pageable) {
         Query query = new Query();
 
@@ -41,8 +41,8 @@ public class WarningsRepositoryCustomImpl implements WarningsRepositoryCustom {
             query.addCriteria(Criteria.where("data_aviso").lte(end));
         }
 
-        if (status_aviso != null) {
-            query.addCriteria(Criteria.where("status_aviso").is(status_aviso));
+        if (lista_status_aviso != null && !lista_status_aviso.isEmpty()) {
+            query.addCriteria(Criteria.where("status_aviso").in(lista_status_aviso));
         }
 
         if (tipo_aviso != null) {

@@ -18,9 +18,12 @@ import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 import com.nectopoint.backend.repositories.UserRepository;
 import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
 import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
+import com.nectopoint.backend.utils.DataTransferHelper;
 
 @Service
 public class UserSessionService {
+
+    private final DataTransferHelper dataTransferHelper;
     
     @Autowired
     private UserSessionRepository userSessionRepo;
@@ -34,6 +37,9 @@ public class UserSessionService {
     @Autowired
     private WarningsService warningsService;
 
+    public UserSessionService (DataTransferHelper dataTransferHelper) {
+        this.dataTransferHelper = dataTransferHelper;
+    }
 
     public void finishShift(PointRegistryEntity targetShift) {
         WarningsEntity warning;
@@ -58,7 +64,7 @@ public class UserSessionService {
             targetShift.setStatus_turno(TipoStatusTurno.NAO_COMPARECEU);
             registryRepo.save(targetShift);
 
-            targetUser.getJornadas_historico().add(targetShift.toPointRegistryStripped());
+            targetUser.getJornadas_historico().add(dataTransferHelper.toPointRegistryStripped(targetShift));
 
             targetUserSQL.missedWorkDay();
             targetUser.missedWorkDay();
@@ -77,8 +83,8 @@ public class UserSessionService {
 
             registryRepo.save(targetShift);
 
-            targetUser.getJornadas_irregulares().add(targetShift.toPointRegistryStripped());
-            targetUser.getAlertas_usuario().add(warning.toWarningsStripped());
+            targetUser.getJornadas_irregulares().add(dataTransferHelper.toPointRegistryStripped(targetShift));
+            targetUser.getAlertas_usuario().add(dataTransferHelper.toWarningsStripped(warning));
 
             userSessionRepo.save(targetUser);
         } else {
@@ -103,8 +109,8 @@ public class UserSessionService {
 
                 registryRepo.save(targetShift);
 
-                targetUser.getJornadas_irregulares().add(targetShift.toPointRegistryStripped());
-                targetUser.getAlertas_usuario().add(warning.toWarningsStripped());
+                targetUser.getJornadas_irregulares().add(dataTransferHelper.toPointRegistryStripped(targetShift));
+                targetUser.getAlertas_usuario().add(dataTransferHelper.toWarningsStripped(warning));
 
                 Long novo_banco_de_horas = targetUser.getJornada_trabalho().getBanco_de_horas() + (horas_trabalhadas_turno - horas_diarias);
                 targetUser.getJornada_trabalho().setBanco_de_horas(novo_banco_de_horas);
@@ -114,7 +120,7 @@ public class UserSessionService {
             } else {
                 registryRepo.save(targetShift);
 
-                targetUser.getJornadas_historico().add(targetShift.toPointRegistryStripped());
+                targetUser.getJornadas_historico().add(dataTransferHelper.toPointRegistryStripped(targetShift));
 
                 Long novo_banco_de_horas = targetUser.getJornada_trabalho().getBanco_de_horas() + (horas_trabalhadas_turno - horas_diarias);
                 targetUser.getJornada_trabalho().setBanco_de_horas(novo_banco_de_horas);
@@ -141,7 +147,7 @@ public class UserSessionService {
             systemServices.clearUserData(userDetails.getId());
         }
         UserSessionEntity userSession = new UserSessionEntity();
-        userSession = userDetails.toUserSessionEntity();
+        userSession = dataTransferHelper.toUserSessionEntity(userDetails);
 
         userSessionRepo.save(userSession);
     }
@@ -183,7 +189,7 @@ public class UserSessionService {
     public void syncUsersWithSessions() {
         List<UserEntity> allUsers = userRepo.findAll();
         for (UserEntity user : allUsers) {
-            UserDetailsDTO userDetailsDTO = user.toUserDetailsDTO();
+            UserDetailsDTO userDetailsDTO = dataTransferHelper.toUserDetailsDTO(user);
             
             createSession(userDetailsDTO);
         }
