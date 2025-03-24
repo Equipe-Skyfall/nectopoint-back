@@ -37,7 +37,7 @@ public class UserSessionEntity {
         private String cpf;
         private TipoCargo cargo;
         private String departamento;
-        private TipoStatusUsuario status;
+        private TipoStatusUsuario status = TipoStatusUsuario.TRABALHANDO;
         private Instant ferias_inicio;
         private Instant ferias_final;
     }
