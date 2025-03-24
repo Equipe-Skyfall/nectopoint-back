@@ -1,6 +1,7 @@
 package com.nectopoint.backend.controllers.registry;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -58,12 +59,12 @@ public class PointRegistryController {
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
-        @RequestParam(required = false) TipoStatusTurno status_turno,
+        @RequestParam(required = false) List<TipoStatusTurno> lista_status_turno,
         @RequestParam(required = false) Long id_colaborador
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findByParamsDynamic(id_colaborador, startDate, endDate, status_turno, pageable);
+        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findByParamsDynamic(id_colaborador, startDate, endDate, lista_status_turno, pageable);
 
         return new ResponseEntity<>(pointRegistryPage, HttpStatus.OK);
     }

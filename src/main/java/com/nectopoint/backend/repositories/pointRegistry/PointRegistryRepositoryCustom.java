@@ -12,7 +12,7 @@ import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 
 public interface PointRegistryRepositoryCustom {
     Page<PointRegistryEntity> findByParamsDynamic(Long id_colaborador, Instant start, Instant end,
-                                                    TipoStatusTurno status_turno, Pageable pageable);
+                                                    List<TipoStatusTurno> lista_status_turno, Pageable pageable);
 
     List<PointRegistryEntity> findByDateCriterias(List<Criteria> criterias);
 }

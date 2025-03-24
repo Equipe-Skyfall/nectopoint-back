@@ -49,9 +49,19 @@ public class TicketValidator implements ConstraintValidator<ValidTicket, TicketD
                 }
                 break;
             case PEDIR_ABONO:
+                if (ticketDto.getMotivo_abono() == null) {
+                    context.buildConstraintViolationWithTemplate("Dia ou dias para abonar devem ser informados nesse tipo de ticket")
+                    .addPropertyNode("motivo_abono").addConstraintViolation();
+                    return false;
+                }
                 if (ticketDto.getDias_abono() == null) {
                     context.buildConstraintViolationWithTemplate("Dia ou dias para abonar devem ser informados nesse tipo de ticket")
                     .addPropertyNode("dias_abono").addConstraintViolation();
+                    return false;
+                }
+                if (ticketDto.getAbono_inicio() == null && ticketDto.getAbono_final() == null) {
+                    context.buildConstraintViolationWithTemplate("Dia ou dias para abonar devem ser informados nesse tipo de ticket")
+                    .addPropertyNode("abono_inicio").addPropertyNode("abono_final").addConstraintViolation();
                     return false;
                 }
                 break;

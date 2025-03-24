@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
+import com.nectopoint.backend.enums.TipoAbono;
 import com.nectopoint.backend.enums.TipoPonto;
 import com.nectopoint.backend.enums.TipoStatusTurno;
 import com.nectopoint.backend.modules.user.UserEntity;
@@ -24,9 +25,12 @@ import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity.Ponto;
 import com.nectopoint.backend.repositories.UserRepository;
 import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
 import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
+import com.nectopoint.backend.utils.DataTransferHelper;
 
 @Service
 public class PointRegistryService {
+
+    private final DataTransferHelper dataTransferHelper;
     
     @Autowired
     private PointRegistryRepository registryRepo;
@@ -37,6 +41,10 @@ public class PointRegistryService {
 
     @Autowired
     private UserSessionService userSessionService;
+
+    public PointRegistryService (DataTransferHelper dataTransferHelper) {
+        this.dataTransferHelper = dataTransferHelper;
+    }
 
     public PointRegistryEntity postPunch(Long id_colaborador) {
         UserSessionEntity currentUser = userSessionRepo.findByColaborador(id_colaborador);
@@ -62,7 +70,7 @@ public class PointRegistryService {
         }
 
         registryRepo.save(currentShift);
-        currentUser.setJornada_atual(currentShift.toPointRegistryStripped());
+        currentUser.setJornada_atual(dataTransferHelper.toPointRegistryStripped(currentShift));
 
         userSessionRepo.save(currentUser);
         return currentShift;
@@ -110,7 +118,7 @@ public class PointRegistryService {
         targetShift.sortPontos();
         
         targetUser.getJornadas_irregulares().removeIf(jornada -> jornada.getId_registro().equals(id_registro));
-        targetUser.getJornadas_historico().add(targetShift.toPointRegistryStripped());
+        targetUser.getJornadas_historico().add(dataTransferHelper.toPointRegistryStripped(targetShift));
 
         Long updateBankOfHours = targetUser.getJornada_trabalho().getBanco_de_horas() - time_between_entrada;
         targetUser.getJornada_trabalho().setBanco_de_horas(updateBankOfHours);
@@ -123,7 +131,7 @@ public class PointRegistryService {
         userRepo.save(userSQL);
     }
 
-    public void processExcusedAbsence(Long id_colaborador, String motivo_abono, List<Instant> dias_abono, Instant hora_inicio, Instant hora_final) {
+    public void processExcusedAbsence(Long id_colaborador, TipoAbono motivo_abono, List<Instant> dias_abono, Instant hora_inicio, Instant hora_final) {
         ZoneId zoneId = ZoneId.of("America/Sao_Paulo");
         List<Criteria> criteriaList = new ArrayList<>();
 
@@ -164,7 +172,7 @@ public class PointRegistryService {
                 targetUser.getJornada_trabalho().setBanco_de_horas(banco_atual + duracao_abono);
                 targetUserSql.setBankOfHours(banco_atual + duracao_abono);
             }
-            targetUser.updateRegistry(registry.toPointRegistryStripped());
+            targetUser.updateRegistry(dataTransferHelper.toPointRegistryStripped(registry));
         });
 
         registryRepo.saveAll(registryList);
@@ -178,7 +186,7 @@ public class PointRegistryService {
         for (UserSessionEntity user : userSessions) {
             Long id_colaborador = user.getId_colaborador();
             String nome_colaborador = user.getDados_usuario().getNome();
-            PointRegistryEntity entity = user.getJornada_atual().toPointRegistryEntity(id_colaborador, nome_colaborador);
+            PointRegistryEntity entity = dataTransferHelper.toPointRegistryEntity(id_colaborador, nome_colaborador, user.getJornada_atual());
             userSessionService.finishShift(entity);
         }
     }

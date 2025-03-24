@@ -23,7 +23,7 @@ public class TicketsRepositoryCustomImpl implements TicketsRepositoryCustom {
 
     @Override
     public Page<TicketsEntity> findByParamsDynamic(Long id_colaborador, Instant start, Instant end,
-                                                    TipoStatusTicket status_ticket, TipoTicket tipo_ticket,
+                                                    List<TipoStatusTicket> lista_status_ticket, TipoTicket tipo_ticket,
                                                     Pageable pageable
     ) {
         Query query = new Query();
@@ -40,8 +40,8 @@ public class TicketsRepositoryCustomImpl implements TicketsRepositoryCustom {
             query.addCriteria(Criteria.where("data_ticket").lte(end));
         }
 
-        if (status_ticket != null) {
-            query.addCriteria(Criteria.where("status_ticket").is(status_ticket));
+        if (lista_status_ticket != null && !lista_status_ticket.isEmpty()) {
+            query.addCriteria(Criteria.where("status_ticket").in(lista_status_ticket));
         }
 
         if (tipo_ticket != null) {

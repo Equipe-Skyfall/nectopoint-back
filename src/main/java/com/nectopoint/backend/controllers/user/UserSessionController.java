@@ -1,5 +1,7 @@
 package com.nectopoint.backend.controllers.user;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nectopoint.backend.dtos.UserSessionDTO;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
 
@@ -26,22 +30,23 @@ public class UserSessionController {
     private UserSessionRepository userSessionRepo;
 
     @GetMapping("/todos")
-    public ResponseEntity<Page<UserSessionEntity>> getUsersList(
+    public ResponseEntity<Page<UserSessionDTO>> getUsersList(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size,
-        @RequestParam(required = false) String cpf
+        @RequestParam(required = false) String cpf,
+        @RequestParam(required = false) List<TipoStatusUsuario> lista_status
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<UserSessionEntity> userSessionPage;
+        Page<UserSessionDTO> userSessionPage;
 
-        userSessionPage = userSessionRepo.findByParamsDynamic(cpf, pageable);
+        userSessionPage = userSessionRepo.findByParamsDynamic(cpf, lista_status, pageable);
 
         return new ResponseEntity<>(userSessionPage, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public UserSessionEntity getMethodName(@PathVariable Long id) {
-        return userSessionRepo.findByColaborador(id);
+    public ResponseEntity<UserSessionEntity> getMethodName(@PathVariable Long id) {
+        return ResponseEntity.ok().body(userSessionRepo.findByColaborador(id));
     }
     
 
@@ -60,7 +65,7 @@ public class UserSessionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        return ResponseEntity.ok(userSession);
+        return ResponseEntity.ok().body(userSession);
     }
 
 }

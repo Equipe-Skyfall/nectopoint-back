@@ -3,10 +3,8 @@ package com.nectopoint.backend.dtos;
 import java.time.Instant;
 import java.util.List;
 
-import org.modelmapper.ModelMapper;
-
+import com.nectopoint.backend.enums.TipoAbono;
 import com.nectopoint.backend.enums.TipoTicket;
-import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
 import com.nectopoint.backend.validators.tickets.ValidTicket;
 
 import jakarta.validation.constraints.NotNull;
@@ -31,7 +29,7 @@ public class TicketDTO {
 
     // Usado para PEDIR_ABONO, informando dia ou dias de abono,
     // o intervalo de horas (00:00h às 23:59h caso seja um dia inteiro) e o motivo
-    private String motivo_abono;
+    private TipoAbono motivo_abono;
     private List<Instant> dias_abono;
     private Instant abono_inicio;
     private Instant abono_final;
@@ -42,9 +40,4 @@ public class TicketDTO {
     // do tipo PONTOS_IMPAR ou SEM_ALMOCO
     private String id_registro;
     private String id_aviso;
-
-    public TicketsEntity toTicketsEntity() {
-        ModelMapper modelMapper = new ModelMapper();
-        return modelMapper.map(this, TicketsEntity.class);
-    }
 }

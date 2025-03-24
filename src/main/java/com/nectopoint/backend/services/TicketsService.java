@@ -14,9 +14,12 @@ import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 import com.nectopoint.backend.repositories.tickets.TicketsRepository;
 import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
+import com.nectopoint.backend.utils.DataTransferHelper;
 
 @Service
 public class TicketsService {
+
+    private final DataTransferHelper dataTransferHelper;
 
     @Autowired
     private TicketsRepository ticketsRepo;
@@ -30,21 +33,25 @@ public class TicketsService {
     @Autowired
     private UserSessionService userSessionService;
 
+    public TicketsService(DataTransferHelper dataTransferHelper) {
+        this.dataTransferHelper = dataTransferHelper;
+    }
+
     public TicketsEntity postTicket(Long id_colaborador, TicketDTO ticketDTO) {
         UserSessionEntity posterUser = userSessionRepo.findByColaborador(id_colaborador);
 
-        TicketsEntity newTicket = ticketDTO.toTicketsEntity();
+        TicketsEntity newTicket = dataTransferHelper.toTicketsEntity(ticketDTO);
 
         newTicket.setId_colaborador(id_colaborador);
         newTicket.setNome_colaborador(posterUser.getDados_usuario().getNome());
         newTicket.setCpf_colaborador(posterUser.getDados_usuario().getCpf());
         TicketsEntity postedTicket = ticketsRepo.save(newTicket);
 
-        posterUser.getTickets_usuario().add(postedTicket.toTicketsStripped());
+        posterUser.getTickets_usuario().add(dataTransferHelper.toTicketsStripped(postedTicket));
         
         if (postedTicket.getId_aviso() != null) {
             WarningsEntity warning = warningsService.changeStatus(postedTicket.getId_aviso(), TipoStatusAlerta.EM_AGUARDO);
-            posterUser.updateWarning(warning.toWarningsStripped());
+            posterUser.updateWarning(dataTransferHelper.toWarningsStripped(warning));
         }
 
         userSessionRepo.save(posterUser);
@@ -69,9 +76,9 @@ public class TicketsService {
             colaborador = userSessionRepo.findByColaborador(ticket.getId_colaborador());
             if (ticket.getId_aviso() != null) {
                 warning = warningsService.changeStatus(ticket.getId_aviso(), TipoStatusAlerta.PENDENTE);
-                colaborador.updateWarning(warning.toWarningsStripped());
+                colaborador.updateWarning(dataTransferHelper.toWarningsStripped(warning));
             }
-            colaborador.updateTicket(ticket.toTicketsStripped());
+            colaborador.updateTicket(dataTransferHelper.toTicketsStripped(ticket));
 
             userSessionRepo.save(colaborador);
         } else {
@@ -82,8 +89,8 @@ public class TicketsService {
                     warning = warningsService.changeStatus(ticket.getId_aviso(), TipoStatusAlerta.RESOLVIDO);
 
                     colaborador = userSessionRepo.findByColaborador(ticket.getId_colaborador());
-                    colaborador.removeWarning(warning.toWarningsStripped());
-                    colaborador.updateTicket(ticket.toTicketsStripped());
+                    colaborador.removeWarning(dataTransferHelper.toWarningsStripped(warning));
+                    colaborador.updateTicket(dataTransferHelper.toTicketsStripped(ticket));
 
                     userSessionRepo.save(colaborador);
                     break;
@@ -92,8 +99,8 @@ public class TicketsService {
                     warning = warningsService.changeStatus(ticket.getId_aviso(), TipoStatusAlerta.RESOLVIDO);
 
                     colaborador = userSessionRepo.findByColaborador(ticket.getId_colaborador());
-                    colaborador.removeWarning(warning.toWarningsStripped());
-                    colaborador.updateTicket(ticket.toTicketsStripped());
+                    colaborador.removeWarning(dataTransferHelper.toWarningsStripped(warning));
+                    colaborador.updateTicket(dataTransferHelper.toTicketsStripped(ticket));
 
                     userSessionRepo.save(colaborador);
                     break;
@@ -101,7 +108,7 @@ public class TicketsService {
                     userSessionService.approveVacation(ticket.getId_colaborador(), ticket.getData_inicio_ferias(), ticket.getDias_ferias());
 
                     colaborador = userSessionRepo.findByColaborador(ticket.getId_colaborador());
-                    colaborador.updateTicket(ticket.toTicketsStripped());
+                    colaborador.updateTicket(dataTransferHelper.toTicketsStripped(ticket));
 
                     userSessionRepo.save(colaborador);
                     break;
@@ -109,7 +116,7 @@ public class TicketsService {
                     registryService.processExcusedAbsence(ticket.getId_colaborador(), ticket.getMotivo_abono(), ticket.getDias_abono(), ticket.getAbono_inicio(), ticket.getAbono_final());
                     
                     colaborador = userSessionRepo.findByColaborador(ticket.getId_colaborador());
-                    colaborador.updateTicket(ticket.toTicketsStripped());
+                    colaborador.updateTicket(dataTransferHelper.toTicketsStripped(ticket));
 
                     userSessionRepo.save(colaborador);
                     break;
