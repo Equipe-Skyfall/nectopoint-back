@@ -82,11 +82,7 @@ public class PointRegistryService {
         Instant dataHoraTurno = targetShift.getInicio_turno();
         Instant data_hora = joinDateTime(dataHoraTurno, horario_saida);
 
-        targetShift = processNewEntry(targetShift, data_hora, true);
-
-        userSessionService.finishShift(targetShift);
-
-        registryRepo.save(targetShift);
+        processNewEntry(targetShift, data_hora, true);
     }
 
     public void addLunchTime(String id_registro, Instant inicio_intervalo, Instant fim_intervalo) {
@@ -181,7 +177,8 @@ public class PointRegistryService {
     }
 
     public void endDayShifts() {
-        List<UserSessionEntity> userSessions = userSessionRepo.findAll();
+        //Termina o turno para os funcionário que não estão de FOLGA ou Férias
+        List<UserSessionEntity> userSessions = userSessionRepo.findEmployeesNotOnLeave();
 
         for (UserSessionEntity user : userSessions) {
             Long id_colaborador = user.getId_colaborador();
@@ -191,12 +188,29 @@ public class PointRegistryService {
         }
     }
 
+    // Termina apenas o turno de um usuario
+    public void endDayShift(Long userId){
+        UserSessionEntity user = userSessionRepo.findByColaborador(userId);
+        String nome_colaborador = user.getDados_usuario().getNome();
+        PointRegistryEntity entity = dataTransferHelper.toPointRegistryEntity(userId,nome_colaborador,user.getJornada_atual());
+        if(!user.getJornada_atual().getStatus_turno().equals(TipoStatusTurno.NAO_INICIADO)){
+           if(user.getJornada_atual().getStatus_turno().equals(TipoStatusTurno.TRABALHANDO)){
+            processNewEntry(entity,Instant.now(),true);
+
+           }else{
+
+               userSessionService.finishShift(entity);
+           }
+           
+        }
+    }
+
     private PointRegistryEntity processNewEntry(PointRegistryEntity targetShift, Instant date_time, Boolean close_shift) {
         Ponto newPoint = new Ponto();
 
         int last_index = targetShift.getPontos_marcados().size()-1;
         Ponto last_entry = targetShift.getPontos_marcados().get(last_index);
-        
+
         newPoint.setData_hora(date_time);
         newPoint.setTipo_ponto(last_entry.getTipo_ponto().invert());
 
@@ -206,7 +220,7 @@ public class PointRegistryService {
 
         if (newPoint.getTipo_ponto() == TipoPonto.SAIDA) {
             targetShift.setTempo_trabalhado_min(targetShift.getTempo_trabalhado_min()+time_between);
-            targetShift.setStatus_turno(!close_shift ? TipoStatusTurno.INTERVALO : TipoStatusTurno.ENCERRADO);
+            targetShift.setStatus_turno(TipoStatusTurno.INTERVALO);
         } else {
             targetShift.setStatus_turno(TipoStatusTurno.TRABALHANDO);
             if (targetShift.getTirou_almoco() == false && newPoint.getTempo_entre_pontos() >= 60) {
@@ -216,6 +230,9 @@ public class PointRegistryService {
         }
 
         targetShift.getPontos_marcados().add(newPoint);
+        if (close_shift) {
+            userSessionService.finishShift(targetShift);
+        }
 
         return targetShift;
     }

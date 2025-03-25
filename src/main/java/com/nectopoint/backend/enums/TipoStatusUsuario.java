@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TipoStatusUsuario {
     TRABALHANDO("Trabalhando"),
-    EM_FERIAS("Em Férias"),
+    FERIAS("Em Férias"),
+    FOLGA("De Folga"),
+    INATIVO("Inativo"),//inativo para não deletar o usuario
     OUTROS("Outros");
 
     @JsonCreator

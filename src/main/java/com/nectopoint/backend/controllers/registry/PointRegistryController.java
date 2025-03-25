@@ -1,7 +1,9 @@
 package com.nectopoint.backend.controllers.registry;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.enums.TipoStatusTurno;
+import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
 import com.nectopoint.backend.services.PointRegistryService;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +39,8 @@ public class PointRegistryController {
     @Autowired
     private PointRegistryService registryService;
 
+
+
     @PostMapping("/bater-ponto")
     public ResponseEntity<PointRegistryEntity> postPunch() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -46,6 +52,24 @@ public class PointRegistryController {
         Long id_colaborador = Long.parseLong(authentication.getPrincipal().toString());
         
         return ResponseEntity.ok(registryService.postPunch(id_colaborador));
+    }
+    
+    //encerra o turno do usuário <<<<LOGADO>>>>
+    @PostMapping("/encerrar-turno")
+    public ResponseEntity<Map<String, Object>> endUserShift() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long id_colaborador = Long.parseLong(authentication.getPrincipal().toString());
+        registryService.endDayShift(id_colaborador);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("userId", id_colaborador);
+
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping("/{id}")

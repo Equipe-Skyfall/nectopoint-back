@@ -1,5 +1,6 @@
 package com.nectopoint.backend.repositories.userSession;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,4 +60,27 @@ public class UserSessionRepositoryCustomImpl implements UserSessionRepositoryCus
 
         return new PageImpl<>(users, pageable, total);
     }
+
+
+//Busca quem estiver ativo
+public List<UserSessionEntity> findEmployeesNotOnLeave() {
+    Query query = new Query();
+   
+    List<TipoStatusUsuario> leaveStatuses = Arrays.asList(
+        TipoStatusUsuario.FERIAS, 
+        TipoStatusUsuario.FOLGA,
+        TipoStatusUsuario.INATIVO
+    );
+   
+
+    //Buscando usuário que não tem os status acima
+    query.addCriteria(Criteria.where("dados_usuario.status").nin(leaveStatuses));
+    
+    
+    query.with(Sort.by(Sort.Order.asc("dados_usuario.nome")));
+    
+
+    return mongoTemplate.find(query, UserSessionEntity.class);
+}
+
 }
