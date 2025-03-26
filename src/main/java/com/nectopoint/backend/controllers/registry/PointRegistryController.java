@@ -65,6 +65,7 @@ public class PointRegistryController {
 
         Long id_colaborador = Long.parseLong(authentication.getPrincipal().toString());
         registryService.endDayShift(id_colaborador);
+        // registryService.endDayShifts(); -> teste para terminar todos os turnos
 
         Map<String, Object> response = new HashMap<>();
         response.put("userId", id_colaborador);

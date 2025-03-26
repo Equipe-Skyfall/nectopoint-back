@@ -60,7 +60,7 @@ public class UserSessionService {
             targetShift.setNome_colaborador(nome_colaborador);
             targetShift.setCpf_colaborador(cpf_colaborador);
 
-            targetShift.setInicio_turno(Instant.now());
+            // targetShift.setInicio_turno(Instant.now());
             targetShift.setStatus_turno(TipoStatusTurno.NAO_COMPARECEU);
             registryRepo.save(targetShift);
 
