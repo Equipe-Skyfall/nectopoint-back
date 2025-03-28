@@ -170,14 +170,15 @@ public class UserSessionService {
     public void updateUser(UserDetailsDTO newData) {
         UserSessionEntity updateTarget = userSessionRepo.findByColaborador(newData.getId());
         
-        updateTarget.getDados_usuario().setCargo(newData.getTitle());
-        updateTarget.getDados_usuario().setDepartamento(newData.getDepartment());
+        if (updateTarget != null) {
+            userSessionRepo.delete(updateTarget);
+            systemServices.clearUserData(newData.getId());
+        }
 
-        updateTarget.getJornada_trabalho().setBanco_de_horas(newData.getBankOfHours());
-        updateTarget.getJornada_trabalho().setHoras_diarias(newData.getDailyHours());
-        updateTarget.getJornada_trabalho().setTipo_jornada(newData.getWorkJourneyType());
-
-        userSessionRepo.save(updateTarget);
+        UserSessionEntity userSession = new UserSessionEntity();
+        userSession = dataTransferHelper.toUserSessionEntity(newData);
+        userSessionRepo.save(userSession);
+        // userSessionRepo.save(updateTarget);
     }
 
     public void deleteUserData(Long id_colaborador) {
