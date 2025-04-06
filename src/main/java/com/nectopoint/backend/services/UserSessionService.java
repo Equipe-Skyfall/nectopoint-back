@@ -170,14 +170,8 @@ public class UserSessionService {
     public void updateUser(UserDetailsDTO newData) {
         UserSessionEntity updateTarget = userSessionRepo.findByColaborador(newData.getId());
         
-        if (updateTarget != null) {
-            userSessionRepo.delete(updateTarget);
-            systemServices.clearUserData(newData.getId());
-        }
-
-        UserSessionEntity userSession = new UserSessionEntity();
-        userSession = dataTransferHelper.toUserSessionEntity(newData);
-        userSessionRepo.save(userSession);
+        updateTarget = dataTransferHelper.toUserSessionEntityUpdate(updateTarget, newData);
+        userSessionRepo.save(updateTarget);
         // userSessionRepo.save(updateTarget);
     }
 

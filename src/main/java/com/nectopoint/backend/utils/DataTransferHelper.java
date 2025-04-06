@@ -32,6 +32,11 @@ public class DataTransferHelper {
         return modelMapper.map(userDetails, UserSessionEntity.class);
     }
 
+    public UserSessionEntity toUserSessionEntityUpdate(UserSessionEntity targetEntity, UserDetailsDTO userDetails) {
+        modelMapper.map(userDetails, targetEntity);
+        return targetEntity;
+    }
+
     public UserSessionDTO toUserSessionDTO(UserSessionEntity userSession) {
         return modelMapper.map(userSession, UserSessionDTO.class);
     }
