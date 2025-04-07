@@ -11,7 +11,7 @@ import com.nectopoint.backend.enums.TipoStatusTurno;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 
 public interface PointRegistryRepositoryCustom {
-    Page<PointRegistryEntity> findByParamsDynamic(Long id_colaborador, Instant start, Instant end,
+    Page<PointRegistryEntity> findByParamsDynamic(String nome_colaborador, Instant start, Instant end,
                                                     List<TipoStatusTurno> lista_status_turno, Pageable pageable);
 
     List<PointRegistryEntity> findByDateCriterias(List<Criteria> criterias);

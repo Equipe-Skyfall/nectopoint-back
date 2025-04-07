@@ -10,7 +10,7 @@ import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 
 public interface UserSessionRepositoryCustom {
-    Page<UserSessionDTO> findByParamsDynamic(String cpf, List<TipoStatusUsuario> lista_status, Pageable pageable);
+    Page<UserSessionDTO> findByParamsDynamic(String cpf, String nome_colaborador, List<TipoStatusUsuario> lista_status, Pageable pageable);
     // List<UserSessionDTO> findEmployeesOnLeave();
     List<UserSessionEntity> findEmployeesNotOnLeave();
 }
