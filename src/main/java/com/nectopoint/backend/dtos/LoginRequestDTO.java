@@ -11,3 +11,4 @@ public class LoginRequestDTO {
     private String password;
 
 }
+

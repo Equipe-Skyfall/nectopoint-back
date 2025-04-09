@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.enums.TipoStatusTurno;
-import com.nectopoint.backend.modules.user.UserSessionEntity;
+
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
-import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
+
 import com.nectopoint.backend.services.PointRegistryService;
 
 import org.springframework.web.bind.annotation.PostMapping;
