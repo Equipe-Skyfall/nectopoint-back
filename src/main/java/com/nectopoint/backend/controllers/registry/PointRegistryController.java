@@ -17,10 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.enums.TipoStatusTurno;
-
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
-
 import com.nectopoint.backend.services.PointRegistryService;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -85,11 +83,11 @@ public class PointRegistryController {
         @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
         @RequestParam(required = false) List<TipoStatusTurno> lista_status_turno,
-        @RequestParam(required = false) Long id_colaborador
+        @RequestParam(required = false) String nome_colaborador
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findByParamsDynamic(id_colaborador, startDate, endDate, lista_status_turno, pageable);
+        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findByParamsDynamic(nome_colaborador, startDate, endDate, lista_status_turno, pageable);
 
         return new ResponseEntity<>(pointRegistryPage, HttpStatus.OK);
     }

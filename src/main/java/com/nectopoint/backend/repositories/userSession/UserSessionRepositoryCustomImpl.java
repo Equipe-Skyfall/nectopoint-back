@@ -29,11 +29,14 @@ public class UserSessionRepositoryCustomImpl implements UserSessionRepositoryCus
         this.dataTransferHelper = dataTransferHelper;
     }
 
-    public Page<UserSessionDTO> findByParamsDynamic(String cpf, List<TipoStatusUsuario> lista_status, Pageable pageable) {
+    public Page<UserSessionDTO> findByParamsDynamic(String cpf, String nome_colaborador, List<TipoStatusUsuario> lista_status, Pageable pageable) {
         Query query = new Query();
 
         if (cpf != null) {
             query.addCriteria(Criteria.where("dados_usuario.cpf").is(cpf));
+        }
+        if (nome_colaborador != null) {
+            query.addCriteria(Criteria.where("dados_usuario.nome").in(nome_colaborador));
         }
         if (lista_status != null && !lista_status.isEmpty()) {
             query.addCriteria(Criteria.where("dados_usuario.status").in(lista_status));

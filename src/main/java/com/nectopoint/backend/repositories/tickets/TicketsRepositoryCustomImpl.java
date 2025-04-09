@@ -22,14 +22,14 @@ public class TicketsRepositoryCustomImpl implements TicketsRepositoryCustom {
     private MongoTemplate mongoTemplate;
 
     @Override
-    public Page<TicketsEntity> findByParamsDynamic(Long id_colaborador, Instant start, Instant end,
+    public Page<TicketsEntity> findByParamsDynamic(String nome_colaborador, Instant start, Instant end,
                                                     List<TipoStatusTicket> lista_status_ticket, TipoTicket tipo_ticket,
                                                     Pageable pageable
     ) {
         Query query = new Query();
 
-        if (id_colaborador != null) {
-            query.addCriteria(Criteria.where("id_colaborador").is(id_colaborador));
+        if (nome_colaborador != null) {
+            query.addCriteria(Criteria.where("nome_colaborador").in(nome_colaborador));
         }
 
         if (start != null && end != null) {

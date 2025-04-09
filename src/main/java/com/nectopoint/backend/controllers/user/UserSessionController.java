@@ -34,12 +34,13 @@ public class UserSessionController {
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) String cpf,
+        @RequestParam(required = false) String nome_colaborador,
         @RequestParam(required = false) List<TipoStatusUsuario> lista_status
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<UserSessionDTO> userSessionPage;
 
-        userSessionPage = userSessionRepo.findByParamsDynamic(cpf, lista_status, pageable);
+        userSessionPage = userSessionRepo.findByParamsDynamic(cpf, nome_colaborador, lista_status, pageable);
 
         return new ResponseEntity<>(userSessionPage, HttpStatus.OK);
     }
