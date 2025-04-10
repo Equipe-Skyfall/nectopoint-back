@@ -88,10 +88,9 @@ public class SystemServices {
             superUser.setCpf("00000000000");
             superUser.setTitle(TipoCargo.GERENTE);
             superUser.setDepartment("Super department");
-            superUser.setWorkJourneyType("When the world most needs him.");
+            superUser.setWorkJourneyType(TipoEscala.CINCO_X_DOIS);
             superUser.setEmployeeNumber("SUD000");
             superUser.setDailyHours(25);
-            superUser.setTipo_escala(TipoEscala.CINCO_X_DOIS);
             superUser.setBirthDate(LocalDate.of(2000, 1, 1));
 
             userService.createUser(superUser);

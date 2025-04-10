@@ -25,9 +25,9 @@ public class ModelMapperConfig {
                 map().getDados_usuario().setCargo(source.getTitle());
                 map().getDados_usuario().setDepartamento(source.getDepartment());
 
-                map().getJornada_trabalho().setTipo_jornada(source.getWorkJourneyType());
                 map().getJornada_trabalho().setBanco_de_horas(source.getBankOfHours());
                 map().getJornada_trabalho().setHoras_diarias(source.getDailyHours());
+                map().getJornada_trabalho().setTipo_escala(source.getWorkJourneyType());;
             }      
         });
 

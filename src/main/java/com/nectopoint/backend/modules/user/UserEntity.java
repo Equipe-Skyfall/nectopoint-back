@@ -55,8 +55,8 @@ public class UserEntity {
     private String department;
     
     @Column(nullable = false)
-    @NotBlank(message = "O campo jornada de trabalho não pode ser nulo ou vazio")
-    private String workJourneyType;
+    @NotNull(message = "O campo jornada de trabalho não pode ser nulo ou vazio")
+    private TipoEscala workJourneyType;
     
     @Column(nullable = false,unique=true)
     @NotBlank(message = "O campo número do funcionário não pode ser nulo ou vazio")
@@ -65,10 +65,6 @@ public class UserEntity {
     @Column(nullable = false)
     @NotNull(message = "O campo horas diárias não pode ser nulo")
     private Integer dailyHours;
-
-    @Column(nullable = false)
-    @NotNull(message = "A escala é obrigatória")
-    private TipoEscala tipo_escala;
     
     private Long bankOfHours = (long)0;
 

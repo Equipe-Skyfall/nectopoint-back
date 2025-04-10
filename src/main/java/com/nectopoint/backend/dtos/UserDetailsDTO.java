@@ -1,6 +1,7 @@
 package com.nectopoint.backend.dtos;
 
 import com.nectopoint.backend.enums.TipoCargo;
+import com.nectopoint.backend.enums.TipoEscala;
 
 import lombok.Data;
 
@@ -11,7 +12,7 @@ public class UserDetailsDTO {
     private String cpf;
     private TipoCargo title;
     private String department;
-    private String workJourneyType;
+    private TipoEscala workJourneyType;
     private Long bankOfHours;
     private Integer dailyHours;
 }

@@ -208,7 +208,7 @@ public class UserSessionService {
 
         userSession.getJornada_trabalho().setBanco_de_horas(userDetails.getBankOfHours());
         userSession.getJornada_trabalho().setHoras_diarias(userDetails.getDailyHours());
-        userSession.getJornada_trabalho().setTipo_jornada(userDetails.getWorkJourneyType());
+        userSession.getJornada_trabalho().setTipo_escala(userDetails.getWorkJourneyType());
 
         userSessionRepo.save(userSession);
     }

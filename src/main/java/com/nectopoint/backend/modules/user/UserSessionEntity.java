@@ -45,7 +45,6 @@ public class UserSessionEntity {
     
     @Data
     public static class JornadaTrabalho {
-        private String tipo_jornada;
         private Long banco_de_horas;
         private Integer horas_diarias;
         private TipoEscala tipo_escala;
