@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.nectopoint.backend.dtos.UserDetailsDTO;
+import com.nectopoint.backend.dtos.UserVacationDTO;
 import com.nectopoint.backend.enums.TipoAviso;
+import com.nectopoint.backend.enums.TipoEscala;
 import com.nectopoint.backend.enums.TipoStatusTurno;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.modules.shared.PointRegistryStripped;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
@@ -146,6 +149,41 @@ public class UserSessionService {
         Instant feriasFinal = dataInicioFerias.plus(Duration.ofDays(diasFerias));
         targetUser.getDados_usuario().setFerias_final(feriasFinal);
         userSessionRepo.save(targetUser);
+    }
+
+    public void startVacation(Instant date) {
+        List<UserVacationDTO> users = userSessionRepo.findEmployeesStartingOrEndingVacation(date);
+
+        for (UserVacationDTO user : users) {
+            UserSessionEntity updatingUser = user.getUser();
+            
+            TipoStatusUsuario newStatus = user.isStartVacation()
+                ? TipoStatusUsuario.FERIAS
+                : TipoStatusUsuario.FORA_DO_EXPEDIENTE;
+
+            updatingUser.getDados_usuario().setStatus(newStatus);
+            userSessionRepo.save(updatingUser);
+        }
+    }
+
+    public void startWeekend(TipoEscala escala) {
+        List<UserSessionEntity> userSessions = userSessionRepo.findEmployeesByWorkSchedule(escala);
+
+        for (UserSessionEntity user : userSessions) {
+            user.getDados_usuario().setStatus(TipoStatusUsuario.FOLGA);
+
+            userSessionRepo.save(user);
+        }
+    }
+
+    public void endWeekend() {
+        List<UserSessionEntity> userSessions = userSessionRepo.findEmployeesNotOnLeave(null);
+
+        for (UserSessionEntity user : userSessions) {
+            user.getDados_usuario().setStatus(TipoStatusUsuario.FORA_DO_EXPEDIENTE);
+
+            userSessionRepo.save(user);
+        }
     }
 
     public void createSession(UserDetailsDTO userDetails) {

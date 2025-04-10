@@ -4,6 +4,7 @@ package com.nectopoint.backend.modules.user;
 import java.time.LocalDate;
 
 import com.nectopoint.backend.enums.TipoCargo;
+import com.nectopoint.backend.enums.TipoEscala;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -64,6 +65,10 @@ public class UserEntity {
     @Column(nullable = false)
     @NotNull(message = "O campo horas diárias não pode ser nulo")
     private Integer dailyHours;
+
+    @Column(nullable = false)
+    @NotNull(message = "A escala é obrigatória")
+    private TipoEscala tipo_escala;
     
     private Long bankOfHours = (long)0;
 

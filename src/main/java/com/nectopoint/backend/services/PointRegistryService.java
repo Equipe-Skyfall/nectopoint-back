@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.nectopoint.backend.enums.TipoAbono;
 import com.nectopoint.backend.enums.TipoPonto;
 import com.nectopoint.backend.enums.TipoStatusTurno;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
@@ -145,9 +146,18 @@ public class PointRegistryService {
         userRepo.save(targetUserSql);
     }
 
+    public void startDayShifts() {
+        List<UserSessionEntity> userSessions = userSessionRepo.findEmployeesNotOnLeave(TipoStatusUsuario.FOLGA);
+
+        for (UserSessionEntity user : userSessions) {
+            user.getDados_usuario().setStatus(TipoStatusUsuario.ESCALADO);
+            userSessionRepo.save(user);
+        }
+    }
+
     public void endDayShifts() {
         //Termina o turno para os funcionário que não estão de FOLGA ou Férias
-        List<UserSessionEntity> userSessions = userSessionRepo.findEmployeesNotOnLeave();
+        List<UserSessionEntity> userSessions = userSessionRepo.findEmployeesNotOnLeave(TipoStatusUsuario.FOLGA);
 
         for (UserSessionEntity user : userSessions) {
             Long id_colaborador = user.getId_colaborador();
@@ -156,6 +166,8 @@ public class PointRegistryService {
 
             PointRegistryEntity entity = dataTransferHelper.toPointRegistryEntity(id_colaborador, nome_colaborador, cpf_colaborador, user.getJornada_atual());
             userSessionService.finishShift(entity);
+            user.getDados_usuario().setStatus(TipoStatusUsuario.FORA_DO_EXPEDIENTE);
+            userSessionRepo.save(user);
         }
     }
 
@@ -170,9 +182,13 @@ public class PointRegistryService {
             if(user.getJornada_atual().getStatus_turno().equals(TipoStatusTurno.TRABALHANDO)){
                 entity = processPostPunch(user);
                 userSessionService.finishShift(entity);
+                user.getDados_usuario().setStatus(TipoStatusUsuario.FORA_DO_EXPEDIENTE);
+                userSessionRepo.save(user);
             }else{
                 entity = dataTransferHelper.toPointRegistryEntity(userId, nome_colaborador, cpf_colaborador, user.getJornada_atual());
                 userSessionService.finishShift(entity);
+                user.getDados_usuario().setStatus(TipoStatusUsuario.FORA_DO_EXPEDIENTE);
+                userSessionRepo.save(user);
             }
         }
     }

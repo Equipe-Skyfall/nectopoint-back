@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.nectopoint.backend.enums.TipoCargo;
+import com.nectopoint.backend.enums.TipoEscala;
 import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.modules.shared.PointRegistryStripped;
 import com.nectopoint.backend.modules.shared.TicketsStripped;
@@ -47,6 +48,7 @@ public class UserSessionEntity {
         private String tipo_jornada;
         private Long banco_de_horas;
         private Integer horas_diarias;
+        private TipoEscala tipo_escala;
     }
 
     public void updateRegistry(PointRegistryStripped registryStripped) {
