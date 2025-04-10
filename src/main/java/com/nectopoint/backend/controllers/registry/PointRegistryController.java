@@ -37,8 +37,6 @@ public class PointRegistryController {
     @Autowired
     private PointRegistryService registryService;
 
-
-
     @PostMapping("/bater-ponto")
     public ResponseEntity<PointRegistryEntity> postPunch() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

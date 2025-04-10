@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TipoTicket {
-    PONTOS_IMPAR,
-    SEM_ALMOCO,
+    ALTERAR_PONTOS,
     PEDIR_FERIAS,
     PEDIR_ABONO;
 

@@ -45,10 +45,11 @@ public class DataTransferHelper {
         return modelMapper.map(registry, PointRegistryStripped.class);
     }
 
-    public PointRegistryEntity toPointRegistryEntity(Long id_colaborador, String nome_colaborador, PointRegistryStripped registryStripped) {
+    public PointRegistryEntity toPointRegistryEntity(Long id_colaborador, String nome_colaborador, String cpf_colaborador, PointRegistryStripped registryStripped) {
         PointRegistryEntity entity = modelMapper.map(registryStripped, PointRegistryEntity.class);
         entity.setId_colaborador(id_colaborador);
         entity.setNome_colaborador(nome_colaborador);
+        entity.setCpf_colaborador(cpf_colaborador);
         return entity;
     }
 

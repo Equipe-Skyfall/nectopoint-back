@@ -3,10 +3,7 @@ package com.nectopoint.backend.services;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,86 +45,71 @@ public class PointRegistryService {
 
     public PointRegistryEntity postPunch(Long id_colaborador) {
         UserSessionEntity currentUser = userSessionRepo.findByColaborador(id_colaborador);
+
+        return processPostPunch(currentUser);
+    }
+
+    public PointRegistryEntity processPostPunch(UserSessionEntity currentUser) {
         PointRegistryEntity currentShift;
 
-        String checkShift = currentUser.getJornada_atual().getId_registro();
         Instant data_hora = Instant.now();
         
-        if ("inativo".equals(checkShift)) {
+        if (currentUser.getJornada_atual().getStatus_turno().equals(TipoStatusTurno.NAO_INICIADO)) {
             currentShift = new PointRegistryEntity();
-            currentShift.setId_colaborador(id_colaborador);
+            currentShift.setId_colaborador(currentUser.getId_colaborador());
             currentShift.setNome_colaborador(currentUser.getDados_usuario().getNome());
             currentShift.setCpf_colaborador(currentUser.getDados_usuario().getCpf());
-            Ponto ponto_atual = new Ponto();
 
             currentShift.setInicio_turno(data_hora);
-            ponto_atual.setData_hora(data_hora);
-            ponto_atual.setTipo_ponto(TipoPonto.ENTRADA);
-            currentShift.getPontos_marcados().add(ponto_atual);
+            currentShift.getPontos_marcados().add(processNewEntry(null, data_hora));
             currentShift.setStatus_turno(TipoStatusTurno.TRABALHANDO);
         } else {
-            currentShift = processNewEntry(registryRepo.findById(checkShift).get(), data_hora, false);
+            currentShift = dataTransferHelper.toPointRegistryEntity(
+                currentUser.getId_colaborador(),
+                currentUser.getDados_usuario().getNome(),
+                currentUser.getDados_usuario().getCpf(),
+                currentUser.getJornada_atual()
+            );
+            
+            int last_index = currentShift.getPontos_marcados().size()-1;
+            Ponto last_entry = currentShift.getPontos_marcados().get(last_index);
+            Ponto new_entry = processNewEntry(last_entry, data_hora);
+
+            currentShift.getPontos_marcados().add(new_entry);
+            currentShift = updateEntity(currentShift, last_index, new_entry);
         }
 
         registryRepo.save(currentShift);
-        currentUser.setJornada_atual(dataTransferHelper.toPointRegistryStripped(currentShift));
 
+        currentUser.setJornada_atual(dataTransferHelper.toPointRegistryStripped(currentShift));
         userSessionRepo.save(currentUser);
+
         return currentShift;
     }
 
-    public void correctPointPunch(String id_registro, Instant horario_saida) {
+    public void editShift(String id_registro, List<Instant> lista_horas) {
         PointRegistryEntity targetShift = registryRepo.findById(id_registro).get();
-
-        Instant dataHoraTurno = targetShift.getInicio_turno();
-        Instant data_hora = joinDateTime(dataHoraTurno, horario_saida);
-
-        processNewEntry(targetShift, data_hora, true);
-    }
-
-    public void addLunchTime(String id_registro, Instant inicio_intervalo, Instant fim_intervalo) {
-        PointRegistryEntity targetShift = registryRepo.findById(id_registro).get();
-        UserSessionEntity targetUser = userSessionRepo.findByColaborador(targetShift.getId_colaborador());
-
-        Instant dataHoraTurno = targetShift.getInicio_turno();
-        Instant saida_instant = joinDateTime(dataHoraTurno, inicio_intervalo);
-        Instant entrada_instant = joinDateTime(dataHoraTurno, fim_intervalo);
-
-        Long time_between_entrada = Duration.between(saida_instant, entrada_instant).toMinutes();
-        Ponto entrada = new Ponto();
-        entrada.setData_hora(entrada_instant);
-        entrada.setTempo_entre_pontos(time_between_entrada);
-        entrada.setTipo_ponto(TipoPonto.ENTRADA);
-
-        Long time_between_saida = Duration.between(dataHoraTurno, saida_instant).toMinutes();
-        Ponto saida = new Ponto();
-        saida.setData_hora(saida_instant);
-        saida.setTempo_entre_pontos(time_between_saida);
-        saida.setTipo_ponto(TipoPonto.SAIDA);
-        saida.setAlmoco(true);
-
-        targetShift.setTirou_almoco(true);
-        targetShift.setTempo_trabalhado_min(targetShift.getTempo_trabalhado_min() - time_between_entrada);
-        targetShift.setStatus_turno(TipoStatusTurno.ENCERRADO);
-        targetShift.getPontos_marcados().add(saida);
-        targetShift.getPontos_marcados().add(entrada);
-        targetShift.sortPontos();
         
-        targetUser.getJornadas_irregulares().removeIf(jornada -> jornada.getId_registro().equals(id_registro));
-        targetUser.getJornadas_historico().add(dataTransferHelper.toPointRegistryStripped(targetShift));
+        targetShift.getPontos_marcados().clear();
+        targetShift.setTempo_trabalhado_min((long)0);
+        targetShift.setTirou_almoco(false);
+        targetShift.setInicio_turno(lista_horas.get(0));
 
-        Long updateBankOfHours = targetUser.getJornada_trabalho().getBanco_de_horas() - time_between_entrada;
-        targetUser.getJornada_trabalho().setBanco_de_horas(updateBankOfHours);
+        for (int i = 0; i < lista_horas.size() - 1; i++ ) {
+            if (i==0) {
+                targetShift.getPontos_marcados().add(processNewEntry(null, lista_horas.get(i)));
+            } else {
+                targetShift.getPontos_marcados().add(
+                    processNewEntry(targetShift.getPontos_marcados().get(i-1), lista_horas.get(i))
+                );
+                targetShift = updateEntity(targetShift, i-1, targetShift.getPontos_marcados().get(i));
+            }
+        }
 
-        UserEntity userSQL = userRepo.findById(targetUser.getId_colaborador()).get();
-        userSQL.setBankOfHours(updateBankOfHours);
-
-        registryRepo.save(targetShift);
-        userSessionRepo.save(targetUser);
-        userRepo.save(userSQL);
+        userSessionService.finishShift(targetShift);
     }
 
-    public void processExcusedAbsence(Long id_colaborador, TipoAbono motivo_abono, List<Instant> dias_abono, Instant hora_inicio, Instant hora_final) {
+    public void processExcusedAbsence(Long id_colaborador, TipoAbono motivo_abono, List<Instant> dias_abono) {
         ZoneId zoneId = ZoneId.of("America/Sao_Paulo");
         List<Criteria> criteriaList = new ArrayList<>();
 
@@ -147,27 +129,14 @@ public class PointRegistryService {
         }
 
         List<PointRegistryEntity> registryList = registryRepo.findByDateCriterias(criteriaList);
-        Long duracao_abono = Duration.between(hora_inicio, hora_final).toMinutes();
-        
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 
         registryList.forEach(registry -> {
             registry.setAbono(new Abono());
             registry.getAbono().setMotivo_abono(motivo_abono);
-            if (duracao_abono >= horas_diarias) {
-                registry.getAbono().setHorarios_abono("Abonado pelo dia.");
+            registry.getAbono().setHorarios_abono("Abonado pelo dia.");
 
-                targetUser.getJornada_trabalho().setBanco_de_horas(banco_atual + horas_diarias);
-                targetUserSql.setBankOfHours(banco_atual + horas_diarias);
-            } else {
-                LocalTime localTimeInicio = hora_inicio.atZone(zoneId).toLocalTime();
-                LocalTime localTimeFinal = hora_final.atZone(zoneId).toLocalTime();
-                String horarios_string = String.format("%s-%s", localTimeInicio.format(formatter), localTimeFinal.format(formatter));
-                registry.getAbono().setHorarios_abono(horarios_string);
-
-                targetUser.getJornada_trabalho().setBanco_de_horas(banco_atual + duracao_abono);
-                targetUserSql.setBankOfHours(banco_atual + duracao_abono);
-            }
+            targetUser.getJornada_trabalho().setBanco_de_horas(banco_atual + horas_diarias);
+            targetUserSql.setBankOfHours(banco_atual + horas_diarias);
             targetUser.updateRegistry(dataTransferHelper.toPointRegistryStripped(registry));
         });
 
@@ -183,7 +152,9 @@ public class PointRegistryService {
         for (UserSessionEntity user : userSessions) {
             Long id_colaborador = user.getId_colaborador();
             String nome_colaborador = user.getDados_usuario().getNome();
-            PointRegistryEntity entity = dataTransferHelper.toPointRegistryEntity(id_colaborador, nome_colaborador, user.getJornada_atual());
+            String cpf_colaborador = user.getDados_usuario().getCpf();
+
+            PointRegistryEntity entity = dataTransferHelper.toPointRegistryEntity(id_colaborador, nome_colaborador, cpf_colaborador, user.getJornada_atual());
             userSessionService.finishShift(entity);
         }
     }
@@ -192,63 +163,50 @@ public class PointRegistryService {
     public void endDayShift(Long userId){
         UserSessionEntity user = userSessionRepo.findByColaborador(userId);
         String nome_colaborador = user.getDados_usuario().getNome();
-        PointRegistryEntity entity = dataTransferHelper.toPointRegistryEntity(userId,nome_colaborador,user.getJornada_atual());
+        String cpf_colaborador = user.getDados_usuario().getCpf();
+        PointRegistryEntity entity;
+
         if(!user.getJornada_atual().getStatus_turno().equals(TipoStatusTurno.NAO_INICIADO)){
-           if(user.getJornada_atual().getStatus_turno().equals(TipoStatusTurno.TRABALHANDO)){
-            processNewEntry(entity,Instant.now(),true);
-
-           }else{
-
-               userSessionService.finishShift(entity);
-           }
-           
+            if(user.getJornada_atual().getStatus_turno().equals(TipoStatusTurno.TRABALHANDO)){
+                entity = processPostPunch(user);
+                userSessionService.finishShift(entity);
+            }else{
+                entity = dataTransferHelper.toPointRegistryEntity(userId, nome_colaborador, cpf_colaborador, user.getJornada_atual());
+                userSessionService.finishShift(entity);
+            }
         }
     }
 
-    private PointRegistryEntity processNewEntry(PointRegistryEntity targetShift, Instant date_time, Boolean close_shift) {
+    public Ponto processNewEntry(Ponto last_entry, Instant date_time) {
         Ponto newPoint = new Ponto();
 
-        int last_index = targetShift.getPontos_marcados().size()-1;
-        Ponto last_entry = targetShift.getPontos_marcados().get(last_index);
-
         newPoint.setData_hora(date_time);
-        newPoint.setTipo_ponto(last_entry.getTipo_ponto().invert());
-
-        Instant time_last_entry = last_entry.getData_hora();
-        Long time_between = Duration.between(time_last_entry, date_time).toMinutes();
-        newPoint.setTempo_entre_pontos(time_between);
-
-        if (newPoint.getTipo_ponto() == TipoPonto.SAIDA) {
-            targetShift.setTempo_trabalhado_min(targetShift.getTempo_trabalhado_min()+time_between);
-            targetShift.setStatus_turno(TipoStatusTurno.INTERVALO);
+        if (last_entry == null) {
+            newPoint.setTipo_ponto(TipoPonto.ENTRADA);
         } else {
-            targetShift.setStatus_turno(TipoStatusTurno.TRABALHANDO);
-            if (targetShift.getTirou_almoco() == false && newPoint.getTempo_entre_pontos() >= 60) {
-                targetShift.setTirou_almoco(true);
-                targetShift.getPontos_marcados().get(last_index).setAlmoco(true);
+            newPoint.setTipo_ponto(last_entry.getTipo_ponto().invert());
+
+            Instant time_last_entry = last_entry.getData_hora();
+            Long time_between = Duration.between(time_last_entry, date_time).toMinutes();
+            newPoint.setTempo_entre_pontos(time_between);
+        }
+
+        return newPoint;
+    }
+
+    private PointRegistryEntity updateEntity(PointRegistryEntity targetEntity, int last_index, Ponto new_entry) {
+        if (new_entry.getTipo_ponto() == TipoPonto.SAIDA) {
+            targetEntity.setTempo_trabalhado_min(targetEntity.getTempo_trabalhado_min()+new_entry.getTempo_entre_pontos());
+            targetEntity.setStatus_turno(TipoStatusTurno.INTERVALO);
+        } else {
+            targetEntity.setStatus_turno(TipoStatusTurno.TRABALHANDO);
+            if (targetEntity.getTirou_almoco() == false && new_entry.getTempo_entre_pontos() >= 60) {
+                targetEntity.setTirou_almoco(true);
+                targetEntity.getPontos_marcados().get(last_index).setAlmoco(true);
             }
         }
 
-        targetShift.getPontos_marcados().add(newPoint);
-        if (close_shift) {
-            userSessionService.finishShift(targetShift);
-        }
-
-        return targetShift;
-    }
-
-    private Instant joinDateTime(Instant dia, Instant hora) {
-        ZoneId zone = ZoneId.of("America/Sao_Paulo");
-    
-        // Extract the date part from 'dia' and the time part from 'hora'
-        LocalDate datePart = dia.atZone(zone).toLocalDate();
-        LocalTime timePart = hora.atZone(zone).toLocalTime();
-        
-        // Combine them into a LocalDateTime
-        LocalDateTime combined = LocalDateTime.of(datePart, timePart);
-        
-        // Convert back to an Instant
-        return combined.atZone(zone).toInstant();
+        return targetEntity;
     }
 
     //Deletar TODOS os registros de pontos de um usuário

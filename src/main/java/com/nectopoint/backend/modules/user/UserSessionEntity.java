@@ -37,7 +37,7 @@ public class UserSessionEntity {
         private String cpf;
         private TipoCargo cargo;
         private String departamento;
-        private TipoStatusUsuario status = TipoStatusUsuario.TRABALHANDO;
+        private TipoStatusUsuario status = TipoStatusUsuario.ESCALADO;
         private Instant ferias_inicio;
         private Instant ferias_final;
     }
@@ -51,8 +51,8 @@ public class UserSessionEntity {
 
     public void updateRegistry(PointRegistryStripped registryStripped) {
         PointRegistryStripped target = jornadas_historico.stream()
-        .filter(registry -> registry.getId_registro().equals(registryStripped.getId_registro()))
-        .findFirst().get();
+            .filter(registry -> registry.getId_registro().equals(registryStripped.getId_registro()))
+            .findFirst().get();
 
         jornadas_historico.set(jornadas_historico.indexOf(target), registryStripped);
     }

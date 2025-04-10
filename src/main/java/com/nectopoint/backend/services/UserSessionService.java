@@ -3,6 +3,7 @@ package com.nectopoint.backend.services;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -88,18 +89,36 @@ public class UserSessionService {
 
             userSessionRepo.save(targetUser);
         } else {
+            Long horas_diarias = (long)targetUser.getJornada_trabalho().getHoras_diarias() * 60;
+            Long banco_de_horas = targetUser.getJornada_trabalho().getBanco_de_horas();
+            Long horas_trabalhadas_turno;
+            
             if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
                 targetUser.setJornada_atual(new PointRegistryStripped());
             } else {
-                targetUser.getJornadas_irregulares().removeIf(jornada -> jornada.getId_registro().equals(id_registro));
+                Optional<PointRegistryStripped> jornada_irregular = targetUser.getJornadas_irregulares().stream()
+                .filter(jornada -> jornada.getId_registro().equals(id_registro))
+                .findFirst();
+                PointRegistryStripped jornadaIrregular = jornada_irregular.get();
+                
+                if (jornadaIrregular.getTirou_almoco().equals(Boolean.FALSE)) {
+                    horas_trabalhadas_turno = jornadaIrregular.getTempo_trabalhado_min();
+                    banco_de_horas = banco_de_horas - (horas_trabalhadas_turno - horas_diarias);
+                }
+                
+                targetUser.getJornadas_irregulares().remove(jornadaIrregular);
             }
-
-            Long horas_trabalhadas_turno = targetShift.getTempo_trabalhado_min();
-            Long horas_diarias = (long)targetUser.getJornada_trabalho().getHoras_diarias() * 60;
+            
             Instant fim_turno = targetShift.getPontos_marcados().get(targetShift.getPontos_marcados().size()-1).getData_hora();
-
+            
             targetShift.setStatus_turno(TipoStatusTurno.ENCERRADO);
             targetShift.setFim_turno(fim_turno);
+            
+            horas_trabalhadas_turno = targetShift.getTempo_trabalhado_min();
+            Long novo_banco_de_horas = banco_de_horas + (horas_trabalhadas_turno - horas_diarias);
+
+            targetUser.getJornada_trabalho().setBanco_de_horas(novo_banco_de_horas);
+            targetUserSQL.setBankOfHours(novo_banco_de_horas);
 
             if (targetShift.getTirou_almoco() == false && Math.abs(horas_trabalhadas_turno - horas_diarias) < 60) {
                 targetShift.setStatus_turno(TipoStatusTurno.IRREGULAR);
@@ -111,24 +130,13 @@ public class UserSessionService {
 
                 targetUser.getJornadas_irregulares().add(dataTransferHelper.toPointRegistryStripped(targetShift));
                 targetUser.getAlertas_usuario().add(dataTransferHelper.toWarningsStripped(warning));
-
-                Long novo_banco_de_horas = targetUser.getJornada_trabalho().getBanco_de_horas() + (horas_trabalhadas_turno - horas_diarias);
-                targetUser.getJornada_trabalho().setBanco_de_horas(novo_banco_de_horas);
-                targetUserSQL.setBankOfHours(novo_banco_de_horas);
-
-                userSessionRepo.save(targetUser);
             } else {
                 registryRepo.save(targetShift);
 
                 targetUser.getJornadas_historico().add(dataTransferHelper.toPointRegistryStripped(targetShift));
-
-                Long novo_banco_de_horas = targetUser.getJornada_trabalho().getBanco_de_horas() + (horas_trabalhadas_turno - horas_diarias);
-                targetUser.getJornada_trabalho().setBanco_de_horas(novo_banco_de_horas);
-                targetUserSQL.setBankOfHours(novo_banco_de_horas);
-
-                userRepo.save(targetUserSQL);
-                userSessionRepo.save(targetUser);
             }
+            userRepo.save(targetUserSQL);
+            userSessionRepo.save(targetUser);
         }
     }
 

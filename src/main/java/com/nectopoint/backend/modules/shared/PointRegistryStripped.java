@@ -4,9 +4,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.nectopoint.backend.enums.TipoPonto;
 import com.nectopoint.backend.enums.TipoStatusTurno;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity.Abono;
+import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity.Ponto;
 
 import lombok.Data;
 
@@ -25,12 +25,4 @@ public class PointRegistryStripped {
     private List<Ponto> pontos_marcados = new ArrayList<>();
 
     private Abono abono;
-
-    @Data
-    public static class Ponto {
-        private TipoPonto tipo_ponto;
-        private Instant data_hora;
-        private Long tempo_entre_pontos;
-        private Boolean almoco;
-    }
 }

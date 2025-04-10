@@ -70,8 +70,7 @@ public List<UserSessionEntity> findEmployeesNotOnLeave() {
     Query query = new Query();
    
     List<TipoStatusUsuario> leaveStatuses = Arrays.asList(
-        TipoStatusUsuario.FERIAS, 
-        TipoStatusUsuario.FOLGA,
+        TipoStatusUsuario.FERIAS,
         TipoStatusUsuario.INATIVO
     );
    
