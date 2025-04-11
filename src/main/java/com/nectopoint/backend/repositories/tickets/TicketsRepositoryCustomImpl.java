@@ -2,6 +2,7 @@ package com.nectopoint.backend.repositories.tickets;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,7 +30,7 @@ public class TicketsRepositoryCustomImpl implements TicketsRepositoryCustom {
         Query query = new Query();
 
         if (nome_colaborador != null) {
-            query.addCriteria(Criteria.where("nome_colaborador").in(nome_colaborador));
+            query.addCriteria(Criteria.where("nome_colaborador").regex(".*" + Pattern.quote(nome_colaborador) + ".*", "i"));
         }
 
         if (start != null && end != null) {
