@@ -4,6 +4,7 @@ package com.nectopoint.backend.modules.user;
 import java.time.LocalDate;
 
 import com.nectopoint.backend.enums.TipoCargo;
+import com.nectopoint.backend.enums.TipoEscala;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -54,8 +55,8 @@ public class UserEntity {
     private String department;
     
     @Column(nullable = false)
-    @NotBlank(message = "O campo jornada de trabalho não pode ser nulo ou vazio")
-    private String workJourneyType;
+    @NotNull(message = "O campo jornada de trabalho não pode ser nulo ou vazio")
+    private TipoEscala workJourneyType;
     
     @Column(nullable = false,unique=true)
     @NotBlank(message = "O campo número do funcionário não pode ser nulo ou vazio")

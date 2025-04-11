@@ -2,6 +2,7 @@ package com.nectopoint.backend.repositories.pointRegistry;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,13 +22,13 @@ public class PointRegistryRepositoryCustomImpl implements PointRegistryRepositor
     private MongoTemplate mongoTemplate;
 
     @Override
-    public Page<PointRegistryEntity> findByParamsDynamic(Long id_colaborador, Instant start, Instant end,
+    public Page<PointRegistryEntity> findByParamsDynamic(String nome_colaborador, Instant start, Instant end,
                                                     List<TipoStatusTurno> lista_status_turno, Pageable pageable
     ) {
         Query query = new Query();
 
-        if (id_colaborador != null) {
-            query.addCriteria(Criteria.where("id_colaborador").is(id_colaborador));
+        if (nome_colaborador != null) {
+            query.addCriteria(Criteria.where("nome_colaborador").regex("." + Pattern.quote(nome_colaborador) + ".", "i"));
         }
 
         if (start != null && end != null) {

@@ -8,6 +8,7 @@ public enum TipoStatusTurno {
     INTERVALO,
     ENCERRADO,
     IRREGULAR,
+    AGUARDANDO_AJUSTE,
     NAO_COMPARECEU,
     NAO_INICIADO;
 

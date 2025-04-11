@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.nectopoint.backend.enums.TipoAbono;
 import com.nectopoint.backend.enums.TipoStatusTicket;
 import com.nectopoint.backend.enums.TipoTicket;
+import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity.Ponto;
 
 import lombok.Data;
 
@@ -35,12 +36,10 @@ public class TicketsEntity {
     private String nome_gerente;
     private String justificativa;
 
-    // Usado para resolver tipo PONTOS_IMPAR
-    private Instant horario_saida;
-
-    // Usado para resolver tipo SEM_ALMOCO
-    private Instant inicio_intervalo;
-    private Instant fim_intervalo;
+    // Usado para resolver tipo ALTERAR_PONTOS
+    private List<Ponto> pontos_anterior;
+    private List<Ponto> pontos_ajustado;
+    private List<Instant> lista_horas;
 
     // Usado para PEDIR_FERIAS
     private Instant data_inicio_ferias;
@@ -50,13 +49,12 @@ public class TicketsEntity {
     // o intervalo de horas (00:00h às 23:59h caso seja um dia inteiro) e o motivo
     private TipoAbono motivo_abono;
     private List<Instant> dias_abono;
-    private Instant abono_inicio;
-    private Instant abono_final;
 
     private String mensagem;
 
-    // Ids de turno e alertas devem estar atrelados caso ticket seja
-    // do tipo PONTOS_IMPAR ou SEM_ALMOCO
+    // Id do turno deve estar atrelado caso ticket seja
+    // do tipo ALTERAR_PONTOS
     private String id_registro;
+    // Id do aviso deve estar atrelado caso turno à ser alterado esteja IRREGULAR
     private String id_aviso;
 }

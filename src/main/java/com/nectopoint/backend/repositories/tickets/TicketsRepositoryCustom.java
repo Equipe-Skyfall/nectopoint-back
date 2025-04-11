@@ -11,7 +11,7 @@ import com.nectopoint.backend.enums.TipoTicket;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
 
 public interface TicketsRepositoryCustom {
-    Page<TicketsEntity> findByParamsDynamic(Long id_colaborador, Instant start, Instant end,
+    Page<TicketsEntity> findByParamsDynamic(String nome_colaborador, Instant start, Instant end,
                                                List<TipoStatusTicket> lista_status_ticket, TipoTicket tipo_ticket,
                                                Pageable pageable);
 }

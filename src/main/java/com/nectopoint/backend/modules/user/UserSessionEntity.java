@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.nectopoint.backend.enums.TipoCargo;
+import com.nectopoint.backend.enums.TipoEscala;
 import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.modules.shared.PointRegistryStripped;
 import com.nectopoint.backend.modules.shared.TicketsStripped;
@@ -37,22 +38,22 @@ public class UserSessionEntity {
         private String cpf;
         private TipoCargo cargo;
         private String departamento;
-        private TipoStatusUsuario status = TipoStatusUsuario.TRABALHANDO;
+        private TipoStatusUsuario status = TipoStatusUsuario.ESCALADO;
         private Instant ferias_inicio;
         private Instant ferias_final;
     }
     
     @Data
     public static class JornadaTrabalho {
-        private String tipo_jornada;
         private Long banco_de_horas;
         private Integer horas_diarias;
+        private TipoEscala tipo_escala;
     }
 
     public void updateRegistry(PointRegistryStripped registryStripped) {
         PointRegistryStripped target = jornadas_historico.stream()
-        .filter(registry -> registry.getId_registro().equals(registryStripped.getId_registro()))
-        .findFirst().get();
+            .filter(registry -> registry.getId_registro().equals(registryStripped.getId_registro()))
+            .findFirst().get();
 
         jornadas_historico.set(jornadas_historico.indexOf(target), registryStripped);
     }

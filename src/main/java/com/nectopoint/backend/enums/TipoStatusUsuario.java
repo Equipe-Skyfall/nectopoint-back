@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TipoStatusUsuario {
-    TRABALHANDO("Trabalhando"),
-    FERIAS("Em Férias"),
+    ESCALADO("Trabalhando"),
+    FORA_DO_EXPEDIENTE("Fora do expediente"),
     FOLGA("De Folga"),
+    FERIAS("Em Férias"),
     INATIVO("Inativo"),//inativo para não deletar o usuario
     OUTROS("Outros");
 
