@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class UserSessionRepositoryCustomImpl implements UserSessionRepositoryCus
             query.addCriteria(Criteria.where("dados_usuario.cpf").is(cpf));
         }
         if (nome_colaborador != null) {
-            query.addCriteria(Criteria.where("dados_usuario.nome").in(nome_colaborador));
+            query.addCriteria(Criteria.where("dados_usuario.nome").regex("." + Pattern.quote(nome_colaborador) + ".", "i"));
         }
         if (lista_status != null && !lista_status.isEmpty()) {
             query.addCriteria(Criteria.where("dados_usuario.status").in(lista_status));
