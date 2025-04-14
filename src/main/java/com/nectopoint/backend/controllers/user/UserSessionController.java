@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nectopoint.backend.dtos.DashboardDTO;
 import com.nectopoint.backend.dtos.UserSessionDTO;
 import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
@@ -34,14 +35,22 @@ public class UserSessionController {
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) String cpf,
+        @RequestParam(required = false) String nome_colaborador,
         @RequestParam(required = false) List<TipoStatusUsuario> lista_status
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<UserSessionDTO> userSessionPage;
 
-        userSessionPage = userSessionRepo.findByParamsDynamic(cpf, lista_status, pageable);
+        userSessionPage = userSessionRepo.findByParamsDynamic(cpf, nome_colaborador, lista_status, pageable);
 
         return new ResponseEntity<>(userSessionPage, HttpStatus.OK);
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<DashboardDTO> getUsersCount() {
+        DashboardDTO dashboardData = userSessionRepo.countUserStatuses();
+
+        return new ResponseEntity<>(dashboardData, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
