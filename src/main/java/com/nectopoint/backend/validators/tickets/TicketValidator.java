@@ -184,7 +184,7 @@ public class TicketValidator implements ConstraintValidator<ValidTicket, TicketD
                     return false;
                 }
             case PEDIR_HORA_EXTRA:
-                if(ticketDto.getStatus_usuario() != TipoStatusUsuario.ESCALADO) {
+                if(ticketDto.getStatus_usuario() != TipoStatusUsuario.FORA_DO_EXPEDIENTE) {
                     context.buildConstraintViolationWithTemplate("Esse usuário não pode pedir hora extra.")
                     .addPropertyNode("status_usuario").addConstraintViolation();
                     return false;

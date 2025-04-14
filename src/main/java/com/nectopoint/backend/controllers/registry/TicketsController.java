@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nectopoint.backend.dtos.TicketAnswerDTO;
 import com.nectopoint.backend.dtos.TicketDTO;
 import com.nectopoint.backend.enums.TipoStatusTicket;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.enums.TipoTicket;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
 import com.nectopoint.backend.repositories.tickets.TicketsRepository;
@@ -51,6 +52,8 @@ public class TicketsController {
         }
 
         Long id_colaborador = Long.parseLong(authentication.getPrincipal().toString());
+
+        ticketDTO.setStatus_usuario(TipoStatusUsuario.FORA_DO_EXPEDIENTE);
 
         return ResponseEntity.ok(ticketsService.postTicket(id_colaborador, ticketDTO));
     }
