@@ -1,6 +1,7 @@
 package com.nectopoint.backend.dtos;
 
 import com.nectopoint.backend.enums.TipoCargo;
+import com.nectopoint.backend.enums.TipoEscala;
 import com.nectopoint.backend.enums.TipoStatusUsuario;
 
 import lombok.Data;
@@ -15,4 +16,5 @@ public class UserSessionDTO {
     private TipoStatusUsuario status;
     private Long banco_de_horas;
     private Integer horas_diarias;
+    private TipoEscala tipo_escala;
 }

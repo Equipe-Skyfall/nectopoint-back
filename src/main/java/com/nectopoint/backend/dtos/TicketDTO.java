@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 import com.nectopoint.backend.enums.TipoAbono;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.enums.TipoTicket;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity.Ponto;
 import com.nectopoint.backend.validators.tickets.ValidTicket;
@@ -40,6 +41,10 @@ public class TicketDTO {
     private String id_registro;
     // Id do aviso deve estar atrelado caso turno à ser alterado esteja IRREGULAR
     private String id_aviso;
+
+    private Instant dia_folga;
+
+    private TipoStatusUsuario status_usuario;
 
     @Data
     public static class Pares {

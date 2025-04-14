@@ -12,6 +12,7 @@ import com.nectopoint.backend.dtos.TicketDTO;
 import com.nectopoint.backend.dtos.TicketDTO.Pares;
 import com.nectopoint.backend.enums.TipoStatusAlerta;
 import com.nectopoint.backend.enums.TipoStatusTicket;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.enums.TipoTicket;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
@@ -133,6 +134,17 @@ public class TicketsService {
 
                     userSessionRepo.save(colaborador);
                     break;
+                case SOLICITAR_FOLGA:
+                    colaborador = userSessionRepo.findByColaborador(ticket.getId_colaborador());
+                    colaborador.updateTicket(dataTransferHelper.toTicketsStripped(ticket));
+
+                    userSessionRepo.save(colaborador);
+                case PEDIR_HORA_EXTRA:
+                    colaborador = userSessionRepo.findByColaborador(ticket.getId_colaborador());
+                    colaborador.getDados_usuario().setStatus(TipoStatusUsuario.ESCALADO);
+                    colaborador.updateTicket(dataTransferHelper.toTicketsStripped(ticket));
+
+                    userSessionRepo.save(colaborador);
             }
         }
     }

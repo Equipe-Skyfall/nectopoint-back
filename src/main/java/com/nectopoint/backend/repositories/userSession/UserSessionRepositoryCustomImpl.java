@@ -59,7 +59,8 @@ public class UserSessionRepositoryCustomImpl implements UserSessionRepositoryCus
             .include("dados_usuario.departamento")
             .include("dados_usuario.status")
             .include("jornada_trabalho.banco_de_horas")
-            .include("jornada_trabalho.horas_diarias");
+            .include("jornada_trabalho.horas_diarias")
+            .include("jornada_trabalho.tipo_escala");
 
         long total = mongoTemplate.count(query, UserSessionEntity.class);
 

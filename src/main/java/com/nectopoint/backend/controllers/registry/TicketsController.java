@@ -80,13 +80,13 @@ public class TicketsController {
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
-        @RequestParam(required = false) List<TipoStatusTicket> lista_status_ticket,
-        @RequestParam(required = false) TipoTicket tipoTicket,
+        @RequestParam(required = false) List<TipoStatusTicket> lista_status,
+        @RequestParam(required = false) TipoTicket tipo_ticket,
         @RequestParam(required = false) String nome_colaborador
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<TicketsEntity> ticketPage = ticketRepo.findByParamsDynamic(nome_colaborador, startDate, endDate, lista_status_ticket, tipoTicket, pageable);
+        Page<TicketsEntity> ticketPage = ticketRepo.findByParamsDynamic(nome_colaborador, startDate, endDate, lista_status, tipo_ticket, pageable);
 
         return new ResponseEntity<>(ticketPage, HttpStatus.OK);
     }

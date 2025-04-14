@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.nectopoint.backend.dtos.TicketDTO;
 import com.nectopoint.backend.dtos.TicketDTO.Pares;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity.Ponto;
 import com.nectopoint.backend.utils.DateTimeHelper;
 
@@ -176,6 +177,18 @@ public class TicketValidator implements ConstraintValidator<ValidTicket, TicketD
                     return false;
                 }
                 break;
+            case SOLICITAR_FOLGA:
+                if(ticketDto.getDia_folga() == null) {
+                    context.buildConstraintViolationWithTemplate("Você deve escolher um dia de folga para esse tipo de ticket")
+                    .addPropertyNode("dia_folga").addConstraintViolation();
+                    return false;
+                }
+            case PEDIR_HORA_EXTRA:
+                if(ticketDto.getStatus_usuario() != TipoStatusUsuario.ESCALADO) {
+                    context.buildConstraintViolationWithTemplate("Esse usuário não pode pedir hora extra.")
+                    .addPropertyNode("status_usuario").addConstraintViolation();
+                    return false;
+                }
         }
         return true;
     }
