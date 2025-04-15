@@ -13,8 +13,11 @@ import org.springframework.stereotype.Service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.nectopoint.backend.dtos.LoginRequestDTO;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.providers.JWTProvider;
 import com.nectopoint.backend.repositories.UserRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepositoryCustom;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,6 +27,9 @@ public class AuthorizationService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserSessionRepository userSessionRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -60,8 +66,11 @@ public class AuthorizationService {
         var user = this.userRepository.findById(Long.parseLong(userId))
             .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
         
+        var userSession = this.userSessionRepository.findByColaborador(Long.parseLong(userId));
+        TipoStatusUsuario status = userSession.getDados_usuario().getStatus();
+        System.out.println(status.toString());
         // Generate token using JWTProvider
-        String token = jwtProvider.generateToken(userId, user.getTitle().toString());
+        String token = jwtProvider.generateToken(userId, user.getTitle().toString(),status.toString());
     
         // Add token to cookie
         Cookie cookie = new Cookie(COOKIE_NAME, token);
