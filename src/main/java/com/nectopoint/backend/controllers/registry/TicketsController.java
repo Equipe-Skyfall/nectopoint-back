@@ -2,7 +2,10 @@ package com.nectopoint.backend.controllers.registry;
 
 import java.time.Instant;
 import java.util.List;
-
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nectopoint.backend.providers.JWTProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,13 +41,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class TicketsController {
     
     @Autowired
+    private JWTProvider jwtProvider;
+
+    @Autowired
     private TicketsRepository ticketRepo;
 
     @Autowired
     private TicketsService ticketsService;
 
     @PostMapping("/postar")
-    public ResponseEntity<TicketsEntity> postTicket(@Valid @RequestBody TicketDTO ticketDTO) {
+    public ResponseEntity<TicketsEntity> postTicket(@Valid @RequestBody TicketDTO ticketDTO, 
+    HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || authentication.getPrincipal() == null) {
@@ -52,8 +59,28 @@ public class TicketsController {
         }
 
         Long id_colaborador = Long.parseLong(authentication.getPrincipal().toString());
+        //pega o cookie
+        Cookie[] cookies = request.getCookies();
+        String token = null;
+        //tira o jwt do cookie
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt_token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        // descriptografa o cookie
+        DecodedJWT decodedToken = jwtProvider.validateToken(token);
+        // pega o status do cookie
+        String statusStr = decodedToken.getClaim("status").asString();
+        TipoStatusUsuario status = TipoStatusUsuario.valueOf(statusStr);
 
-        ticketDTO.setStatus_usuario(TipoStatusUsuario.FORA_DO_EXPEDIENTE);
+        ticketDTO.setStatus_usuario(status);
 
         return ResponseEntity.ok(ticketsService.postTicket(id_colaborador, ticketDTO));
     }
