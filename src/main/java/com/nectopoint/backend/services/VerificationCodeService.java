@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class VerificationCodeService {
 
-    // Store codes with expiration (in a production app, you'd use Redis or a database)
+    
     private final Map<String, CodeInfo> codes = new ConcurrentHashMap<>();
     private static final int CODE_LENGTH = 6;
     private static final int EXPIRATION_MINUTES = 10;
