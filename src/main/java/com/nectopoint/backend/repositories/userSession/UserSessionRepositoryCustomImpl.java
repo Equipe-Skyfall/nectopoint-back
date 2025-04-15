@@ -37,7 +37,7 @@ public class UserSessionRepositoryCustomImpl implements UserSessionRepositoryCus
         this.dataTransferHelper = dataTransferHelper;
     }
 
-    public Page<UserSessionDTO> findByParamsDynamic(String cpf, String nome_colaborador, List<TipoStatusUsuario> lista_status, Pageable pageable) {
+    public Page<UserSessionDTO> findByParamsDynamic(String cpf, String nome_colaborador, TipoEscala tipo_escala, List<TipoStatusUsuario> lista_status, Pageable pageable) {
         Query query = new Query();
 
         if (cpf != null) {
@@ -45,6 +45,9 @@ public class UserSessionRepositoryCustomImpl implements UserSessionRepositoryCus
         }
         if (nome_colaborador != null) {
             query.addCriteria(Criteria.where("dados_usuario.nome").regex(".*" + Pattern.quote(nome_colaborador) + ".*", "i"));
+        }
+        if (tipo_escala != null) {
+            query.addCriteria(Criteria.where("jornada_trabalho.tipo_escala").is(tipo_escala));
         }
         if (lista_status != null && !lista_status.isEmpty()) {
             query.addCriteria(Criteria.where("dados_usuario.status").in(lista_status));
