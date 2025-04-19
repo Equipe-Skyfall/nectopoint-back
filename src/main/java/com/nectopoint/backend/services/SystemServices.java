@@ -70,7 +70,6 @@ public class SystemServices {
         registryService.startDayShifts();
     }
 
-
     public void clearUserData(Long id) {
         registryService.deleteAllByColaborador(id);
         ticketsService.deleteAllByColaborador(id);
