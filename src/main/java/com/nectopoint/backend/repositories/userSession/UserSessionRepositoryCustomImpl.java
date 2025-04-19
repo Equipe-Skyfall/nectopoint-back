@@ -3,6 +3,7 @@ package com.nectopoint.backend.repositories.userSession;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -81,10 +82,10 @@ public class UserSessionRepositoryCustomImpl implements UserSessionRepositoryCus
     public List<UserSessionEntity> findEmployeesNotOnLeave(TipoStatusUsuario optionalStatus) {
         Query query = new Query();
     
-        List<TipoStatusUsuario> leaveStatuses = Arrays.asList(
+        List<TipoStatusUsuario> leaveStatuses = new ArrayList<>(Arrays.asList(
             TipoStatusUsuario.FERIAS,
             TipoStatusUsuario.INATIVO
-        );
+        ));
 
         if (optionalStatus != null) {
             leaveStatuses.add(optionalStatus);

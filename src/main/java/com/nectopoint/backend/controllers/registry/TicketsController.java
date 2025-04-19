@@ -8,10 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.nectopoint.backend.providers.JWTProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -34,8 +31,10 @@ import com.nectopoint.backend.dtos.TicketEntityDTO;
 import com.nectopoint.backend.enums.TipoStatusTicket;
 import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.enums.TipoTicket;
+import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
 import com.nectopoint.backend.repositories.tickets.TicketsRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
 import com.nectopoint.backend.services.TicketsService;
 
 import jakarta.validation.ConstraintViolation;
@@ -54,12 +53,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/tickets")
 public class TicketsController {
-    
-    @Autowired
-    private JWTProvider jwtProvider;
 
     @Autowired
     private TicketsRepository ticketRepo;
+    @Autowired
+    private UserSessionRepository userSessionRepo;
 
     @Autowired
     private TicketsService ticketsService;
@@ -81,26 +79,8 @@ public class TicketsController {
 
         Long id_colaborador = Long.parseLong(authentication.getPrincipal().toString());
 
-        // pega o cookie
-        Cookie[] cookies = request.getCookies();
-        String token = null;
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("jwt_token".equals(cookie.getName())) {
-                    token = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
-        if (token == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        DecodedJWT decodedToken = jwtProvider.validateToken(token);
-        String statusStr = decodedToken.getClaim("status").asString();
-        TipoStatusUsuario status = TipoStatusUsuario.valueOf(statusStr);
+        UserSessionEntity user = userSessionRepo.findByColaborador(id_colaborador);
+        TipoStatusUsuario status = user.getDados_usuario().getStatus();
 
         ticketDTO.setStatus_usuario(status);
 
