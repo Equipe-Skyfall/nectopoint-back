@@ -1,5 +1,6 @@
 package com.nectopoint.backend.services;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -76,16 +77,16 @@ public class TicketsService {
 
         if (file.isPresent() && !file.get().isEmpty()) {
             try {
-                String uploadDir = "uploads/tickets/";
-
+                String uploadDir = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "tickets";
+        
                 String originalFileName = file.get().getOriginalFilename();
                 String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName;
-
-                Path path = Paths.get(uploadDir + uniqueFileName);
+        
+                Path path = Paths.get(uploadDir, uniqueFileName);
                 Files.createDirectories(path.getParent());
                 file.get().transferTo(path.toFile());
-
-                newTicket.setFilePath(uploadDir + uniqueFileName);
+        
+                newTicket.setFilePath("uploads/tickets/" + uniqueFileName); // store relative path for portability
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException("Error saving file: " + e.getMessage());
