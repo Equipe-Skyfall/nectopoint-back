@@ -23,12 +23,14 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth ->{
                 auth.requestMatchers("/usuario/auth").permitAll();
-                auth.requestMatchers("/usuario/verify").permitAll(); 
+                auth.requestMatchers("/usuario/verify").permitAll();
+                auth.requestMatchers("/usuario/{id}/senha").authenticated();
+                auth.requestMatchers("/usuario/**").hasRole("GERENTE");
                 auth.anyRequest().authenticated();
             })
             .addFilterBefore(securityUserFilter,UsernamePasswordAuthenticationFilter.class);
             
-            ;
+     
         return http.build();
     }
 
