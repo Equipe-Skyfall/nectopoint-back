@@ -1,9 +1,12 @@
 package com.nectopoint.backend.services;
 
 import com.nectopoint.backend.dtos.UserDetailsDTO;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.exceptions.DuplicateException;
 import com.nectopoint.backend.modules.user.UserEntity;
+import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.repositories.UserRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
 import com.nectopoint.backend.utils.DataTransferHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,9 @@ import java.util.Optional;
 public class UserService {
 
     private final DataTransferHelper dataTransferHelper;
+
+    @Autowired
+    private UserSessionRepository userSessionRepo;
 
     @Autowired
     private UserRepository userRepository;
@@ -56,8 +62,12 @@ public class UserService {
         Optional<UserEntity> userOptional = userRepository.findById(id);
         
         if (userOptional.isPresent()) {
-            userRepository.deleteById(id);
-            userSessionService.deleteUserData(id);
+
+            // Update the user session to mark as inactive
+            // We can leverage your existing UserSessionService methods
+            userSessionService.updateUserStatus(id, TipoStatusUsuario.INATIVO);
+            
+            return;
         } else {
             throw new RuntimeException("User not found");
         }
