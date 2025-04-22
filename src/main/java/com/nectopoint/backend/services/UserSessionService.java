@@ -221,6 +221,16 @@ public class UserSessionService {
         // userSessionRepo.save(updateTarget);
     }
 
+    public void updateUserStatus(Long userId, TipoStatusUsuario status) {
+        UserSessionEntity userSession = this.userSessionRepo.findByColaborador(userId);
+        if (userSession != null && userSession.getDados_usuario() != null) {
+            userSession.getDados_usuario().setStatus(status);
+            this.userSessionRepo.save(userSession);
+        } else {
+            throw new RuntimeException("User session not found");
+        }
+    }
+
     public void deleteUserData(Long id_colaborador) {
         UserSessionEntity deleteTarget = userSessionRepo.findByColaborador(id_colaborador);
 
