@@ -39,7 +39,7 @@ public class TicketsRepositoryCustomImpl implements TicketsRepositoryCustom {
         Query query = new Query();
 
         if (nome_colaborador != null) {
-            query.addCriteria(Criteria.where("nome_colaborador").in(nome_colaborador));
+            query.addCriteria(Criteria.where("nome_colaborador").regex(".*" + Pattern.quote(nome_colaborador) + ".*", "i"));
         }
 
         if (start != null && end != null) {
