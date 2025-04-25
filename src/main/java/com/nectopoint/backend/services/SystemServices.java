@@ -70,7 +70,6 @@ public class SystemServices {
         registryService.startDayShifts();
     }
 
-
     public void clearUserData(Long id) {
         registryService.deleteAllByColaborador(id);
         ticketsService.deleteAllByColaborador(id);
@@ -83,7 +82,7 @@ public class SystemServices {
         if (superUserOpt.isEmpty()) {
             UserEntity superUser = new UserEntity();
             superUser.setName("Super User");
-            superUser.setEmail("necto@necto.com");
+            superUser.setEmail("nectopointfatec@gmail.com");
             superUser.setPassword("Necto-123");
             superUser.setCpf("00000000000");
             superUser.setTitle(TipoCargo.GERENTE);

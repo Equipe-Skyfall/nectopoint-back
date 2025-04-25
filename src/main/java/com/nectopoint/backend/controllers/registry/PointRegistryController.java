@@ -4,7 +4,10 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.nectopoint.backend.providers.JWTProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,9 +39,11 @@ public class PointRegistryController {
     private PointRegistryRepository registryRepo;
     @Autowired
     private PointRegistryService registryService;
+    @Autowired
+    private JWTProvider jwtProvider;
 
     @PostMapping("/bater-ponto")
-    public ResponseEntity<PointRegistryEntity> postPunch() {
+    public ResponseEntity<?> postPunch(HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || authentication.getPrincipal() == null) {
@@ -46,7 +51,27 @@ public class PointRegistryController {
         }
 
         Long id_colaborador = Long.parseLong(authentication.getPrincipal().toString());
-        
+        //pega o cookie
+        Cookie[] cookies = request.getCookies();
+        String token = null;
+        //tira o jwt do cookie
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt_token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        //descriptografa o cookie
+        DecodedJWT decodedToken = jwtProvider.validateToken(token);
+        String status = decodedToken.getClaim("status").asString();
+        // se não estiver escalado não permite a batida de ponto
+        if (status == null || !status.equals("ESCALADO")) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Operação não permitida. Status do usuário não é ESCALADO.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
         return ResponseEntity.ok(registryService.postPunch(id_colaborador));
     }
     
@@ -80,12 +105,12 @@ public class PointRegistryController {
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
-        @RequestParam(required = false) List<TipoStatusTurno> lista_status_turno,
+        @RequestParam(required = false) List<TipoStatusTurno> lista_status,
         @RequestParam(required = false) String nome_colaborador
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findByParamsDynamic(nome_colaborador, startDate, endDate, lista_status_turno, pageable);
+        Page<PointRegistryEntity> pointRegistryPage = registryRepo.findByParamsDynamic(nome_colaborador, startDate, endDate, lista_status, pageable);
 
         return new ResponseEntity<>(pointRegistryPage, HttpStatus.OK);
     }

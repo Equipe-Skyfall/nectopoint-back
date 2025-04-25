@@ -67,6 +67,7 @@ GET    http://localhost:8080/usuario/
 GET    http://localhost:8080/usuario/{id}
 PUT    http://localhost:8080/usuario/{id}
 PUT    http://localhost:8080/usuario/{id}/senha
+
 ```
 
 [ Rotas sessão usuário (usar para salvar informações relevantes do usuário nos cookies etc.) ](#rotas-sessão-usuário)
@@ -78,7 +79,8 @@ GET http://localhost:8080/sessao/usuario/me
 
 Rotas de login (em desenvolvimento, no momento usado somente para simular login)
 ```sh
-POST http://localhost:8080/login
+POST   http://localhost:8080/usuario/auth
+POST   http://localhost:8080/usuario/verify
 ```
 
 [ Rotas dos pontos ](#rotas-dos-pontos)
@@ -244,17 +246,31 @@ http://localhost:8080/usuario/1
 
 **Post:** Autentique um usuário em http://localhost:8080/usuario/auth
 
-❗️ **NOTA: Essa rota retornará um cookie(expira em 2 horas) de autenticação para o FrontEnd que será necessário para todas as requisições.**
+
 
 
 formate seu JSON da seguinte maneira para autenticar o usuário: (esse usuário gerente é padrão do sistema)
 ```sh
 {
-    "cpf": "Necto-123",
+    "cpf": "00000000000",
     "password": "Necto-123"
 }
 ```
-    <summary>Clique para ver o JSON retornado</summary>
+
+**Post:** verifique o código de autenticação enviado para seu email em : http://localhost:8080/usuario/verify
+ 
+❗️ **NOTA: Essa rota retornará um cookie(expira em 2 horas) de autenticação para o FrontEnd que será necessário para todas as requisições.** 
+
+formate seu JSON da seguinte maneira para autenticar o usuário:
+```sh
+{
+    "userId":"1",
+    "verificationCode":"403036"
+}
+
+```
+ 
+   <summary>  Clique para ver o JSON retornado </summary>
 <details>
 
 ```sh
@@ -290,6 +306,7 @@ formate seu JSON da seguinte maneira para autenticar o usuário: (esse usuário 
 
 ---
 ---
+
 ### Rotas sessão usuário
 
 **GET:** Puxe uma lista paginada com todos os usuários em http://localhost:8080/sessao/usuario

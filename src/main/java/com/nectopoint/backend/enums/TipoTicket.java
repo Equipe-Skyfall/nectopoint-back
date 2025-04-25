@@ -6,7 +6,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum TipoTicket {
     ALTERAR_PONTOS,
     PEDIR_FERIAS,
-    PEDIR_ABONO;
+    PEDIR_ABONO,
+    SOLICITAR_FOLGA,
+    PEDIR_HORA_EXTRA;
 
     @JsonCreator
     public static TipoTicket fromString(String value) {

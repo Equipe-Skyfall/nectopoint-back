@@ -164,10 +164,10 @@ public class PointRegistryService {
             String nome_colaborador = user.getDados_usuario().getNome();
             String cpf_colaborador = user.getDados_usuario().getCpf();
 
-            PointRegistryEntity entity = dataTransferHelper.toPointRegistryEntity(id_colaborador, nome_colaborador, cpf_colaborador, user.getJornada_atual());
-            userSessionService.finishShift(entity);
             user.getDados_usuario().setStatus(TipoStatusUsuario.FORA_DO_EXPEDIENTE);
             userSessionRepo.save(user);
+            PointRegistryEntity entity = dataTransferHelper.toPointRegistryEntity(id_colaborador, nome_colaborador, cpf_colaborador, user.getJornada_atual());
+            userSessionService.finishShift(entity);
         }
     }
 
@@ -180,15 +180,15 @@ public class PointRegistryService {
 
         if(!user.getJornada_atual().getStatus_turno().equals(TipoStatusTurno.NAO_INICIADO)){
             if(user.getJornada_atual().getStatus_turno().equals(TipoStatusTurno.TRABALHANDO)){
+                user.getDados_usuario().setStatus(TipoStatusUsuario.FORA_DO_EXPEDIENTE);
+                userSessionRepo.save(user);
                 entity = processPostPunch(user);
                 userSessionService.finishShift(entity);
+            }else{
                 user.getDados_usuario().setStatus(TipoStatusUsuario.FORA_DO_EXPEDIENTE);
                 userSessionRepo.save(user);
-            }else{
                 entity = dataTransferHelper.toPointRegistryEntity(userId, nome_colaborador, cpf_colaborador, user.getJornada_atual());
                 userSessionService.finishShift(entity);
-                user.getDados_usuario().setStatus(TipoStatusUsuario.FORA_DO_EXPEDIENTE);
-                userSessionRepo.save(user);
             }
         }
     }

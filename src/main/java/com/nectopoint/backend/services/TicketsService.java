@@ -1,17 +1,25 @@
 package com.nectopoint.backend.services;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.nectopoint.backend.dtos.TicketAnswerDTO;
 import com.nectopoint.backend.dtos.TicketDTO;
 import com.nectopoint.backend.dtos.TicketDTO.Pares;
 import com.nectopoint.backend.enums.TipoStatusAlerta;
 import com.nectopoint.backend.enums.TipoStatusTicket;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.enums.TipoTicket;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
@@ -45,7 +53,7 @@ public class TicketsService {
         this.dateTimeHelper = dateTimeHelper;
     }
 
-    public TicketsEntity postTicket(Long id_colaborador, TicketDTO ticketDTO) {
+    public TicketsEntity postTicket(Long id_colaborador, TicketDTO ticketDTO, Optional<MultipartFile> file) {
         UserSessionEntity posterUser = userSessionRepo.findByColaborador(id_colaborador);
 
         if (ticketDTO.getTipo_ticket().equals(TipoTicket.ALTERAR_PONTOS)) {
@@ -66,6 +74,25 @@ public class TicketsService {
         newTicket.setId_colaborador(id_colaborador);
         newTicket.setNome_colaborador(posterUser.getDados_usuario().getNome());
         newTicket.setCpf_colaborador(posterUser.getDados_usuario().getCpf());
+
+        if (file.isPresent() && !file.get().isEmpty()) {
+            try {
+                String uploadDir = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "tickets";
+        
+                String originalFileName = file.get().getOriginalFilename();
+                String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName;
+        
+                Path path = Paths.get(uploadDir, uniqueFileName);
+                Files.createDirectories(path.getParent());
+                file.get().transferTo(path.toFile());
+        
+                newTicket.setFilePath("uploads/tickets/" + uniqueFileName); // store relative path for portability
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error saving file: " + e.getMessage());
+            }
+        }
+
         TicketsEntity postedTicket = ticketsRepo.save(newTicket);
 
         posterUser.getTickets_usuario().add(dataTransferHelper.toTicketsStripped(postedTicket));
@@ -133,6 +160,17 @@ public class TicketsService {
 
                     userSessionRepo.save(colaborador);
                     break;
+                case SOLICITAR_FOLGA:
+                    colaborador = userSessionRepo.findByColaborador(ticket.getId_colaborador());
+                    colaborador.updateTicket(dataTransferHelper.toTicketsStripped(ticket));
+
+                    userSessionRepo.save(colaborador);
+                case PEDIR_HORA_EXTRA:
+                    colaborador = userSessionRepo.findByColaborador(ticket.getId_colaborador());
+                    colaborador.getDados_usuario().setStatus(TipoStatusUsuario.ESCALADO);
+                    colaborador.updateTicket(dataTransferHelper.toTicketsStripped(ticket));
+
+                    userSessionRepo.save(colaborador);
             }
         }
     }

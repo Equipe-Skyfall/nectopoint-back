@@ -1,5 +1,7 @@
 package com.nectopoint.backend.providers;
 
+import java.time.Duration;
+import java.time.Instant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -32,5 +34,16 @@ public class JWTProvider {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    public String generateToken(String userId, String role, String status) {
+        Algorithm algorithm = Algorithm.HMAC256(secretKey);
+        return JWT.create()
+                .withExpiresAt(Instant.now().plus(Duration.ofHours(2)))
+                .withIssuer("Nectopoint")
+                .withSubject(userId)
+                .withClaim("roles", role)
+                .withClaim("status", status)
+                .sign(algorithm);
     }
 }

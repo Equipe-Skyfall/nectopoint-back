@@ -57,4 +57,6 @@ public class TicketsEntity {
     private String id_registro;
     // Id do aviso deve estar atrelado caso turno à ser alterado esteja IRREGULAR
     private String id_aviso;
+
+    private String filePath;
 }

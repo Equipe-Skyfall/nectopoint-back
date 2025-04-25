@@ -4,6 +4,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 import com.nectopoint.backend.dtos.TicketDTO;
+import com.nectopoint.backend.dtos.TicketEntityDTO;
 import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.dtos.UserSessionDTO;
 import com.nectopoint.backend.modules.shared.PointRegistryStripped;
@@ -55,6 +56,10 @@ public class DataTransferHelper {
 
     public TicketsEntity toTicketsEntity(TicketDTO ticketDTO) {
         return modelMapper.map(ticketDTO, TicketsEntity.class);
+    }
+
+    public TicketEntityDTO toTicketEntityDTO(TicketsEntity ticket) {
+        return modelMapper.map(ticket, TicketEntityDTO.class);
     }
 
     public TicketsStripped toTicketsStripped(TicketsEntity ticket) {

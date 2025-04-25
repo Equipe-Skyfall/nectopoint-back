@@ -13,7 +13,11 @@ import org.springframework.stereotype.Service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.nectopoint.backend.dtos.LoginRequestDTO;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
+import com.nectopoint.backend.providers.JWTProvider;
 import com.nectopoint.backend.repositories.UserRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepositoryCustom;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,7 +29,13 @@ public class AuthorizationService {
     private UserRepository userRepository;
 
     @Autowired
+    private UserSessionRepository userSessionRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private JWTProvider jwtProvider;
 
     @Value("${security.token}")
     private String secretKey;
@@ -35,8 +45,8 @@ public class AuthorizationService {
     private static final int COOKIE_MAX_AGE = 7200; // 2 hours in seconds
     private static final String COOKIE_PATH = "/";
 
-    //  LoginResponseDTO casa queira mandar o Bearer token sem ser por cookies 
-    public String execute(LoginRequestDTO loginRequestDTO, HttpServletResponse response) throws AuthenticationException {
+    //Valida usuário e senha
+    public String validateCredentials(LoginRequestDTO loginRequestDTO) throws AuthenticationException {
         var user = this.userRepository.findByCpf(loginRequestDTO.getCpf()).orElseThrow(() -> {
             throw new UsernameNotFoundException("usuário ou senha incorretos");
         });
@@ -47,15 +57,20 @@ public class AuthorizationService {
         if (!passwordMatch) {
             throw new AuthenticationException(); // 403 Forbidden
         }
+        
+        return user.getId().toString();
+    }
     
-        // Criação do token
-        Algorithm algorithm = Algorithm.HMAC256(secretKey);
-        var token = JWT.create()
-                    .withExpiresAt(Instant.now().plus(Duration.ofHours(2)))
-                    .withIssuer("Nectopoint")
-                    .withSubject(user.getId().toString())
-                    .withClaim("roles", user.getTitle().toString())
-                    .sign(algorithm);
+    // Gera e Retorna o token após o usuário ser verificado
+    public void generateAndSetToken(String userId, HttpServletResponse response) {
+        var user = this.userRepository.findById(Long.parseLong(userId))
+            .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+        
+        var userSession = this.userSessionRepository.findByColaborador(Long.parseLong(userId));
+        TipoStatusUsuario status = userSession.getDados_usuario().getStatus();
+        System.out.println(status.toString());
+        // Generate token using JWTProvider
+        String token = jwtProvider.generateToken(userId, user.getTitle().toString(),status.toString());
     
         // Add token to cookie
         Cookie cookie = new Cookie(COOKIE_NAME, token);
@@ -67,13 +82,12 @@ public class AuthorizationService {
         
         // Add cookie to response
         response.addCookie(cookie);
-        
-        // Still returning token in response body for backward compatibility
-        // You can remove this if you want to rely only on cookies
-        // var userWithAccessToken = LoginResponseDTO.builder()
-        //                                        .access_token(token)
-        //                                        .build();
-        
-        return user.getId().toString();
+    }
+
+    
+    public String execute(LoginRequestDTO loginRequestDTO, HttpServletResponse response) throws AuthenticationException {
+        var userId = validateCredentials(loginRequestDTO);
+        generateAndSetToken(userId, response);
+        return userId;
     }
 }

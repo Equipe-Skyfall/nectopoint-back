@@ -64,7 +64,7 @@ public class UserSessionService {
             targetShift.setNome_colaborador(nome_colaborador);
             targetShift.setCpf_colaborador(cpf_colaborador);
 
-            // targetShift.setInicio_turno(Instant.now());
+            targetShift.setInicio_turno(Instant.now());
             targetShift.setStatus_turno(TipoStatusTurno.NAO_COMPARECEU);
             registryRepo.save(targetShift);
 
@@ -219,6 +219,16 @@ public class UserSessionService {
         updateTarget = dataTransferHelper.toUserSessionEntityUpdate(updateTarget, newData);
         userSessionRepo.save(updateTarget);
         // userSessionRepo.save(updateTarget);
+    }
+
+    public void updateUserStatus(Long userId, TipoStatusUsuario status) {
+        UserSessionEntity userSession = this.userSessionRepo.findByColaborador(userId);
+        if (userSession != null && userSession.getDados_usuario() != null) {
+            userSession.getDados_usuario().setStatus(status);
+            this.userSessionRepo.save(userSession);
+        } else {
+            throw new RuntimeException("User session not found");
+        }
     }
 
     public void deleteUserData(Long id_colaborador) {

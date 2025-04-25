@@ -3,6 +3,7 @@ package com.nectopoint.backend.repositories.userSession;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -37,14 +38,17 @@ public class UserSessionRepositoryCustomImpl implements UserSessionRepositoryCus
         this.dataTransferHelper = dataTransferHelper;
     }
 
-    public Page<UserSessionDTO> findByParamsDynamic(String cpf, String nome_colaborador, List<TipoStatusUsuario> lista_status, Pageable pageable) {
+    public Page<UserSessionDTO> findByParamsDynamic(String cpf, String nome_colaborador, TipoEscala tipo_escala, List<TipoStatusUsuario> lista_status, Pageable pageable) {
         Query query = new Query();
 
         if (cpf != null) {
             query.addCriteria(Criteria.where("dados_usuario.cpf").is(cpf));
         }
         if (nome_colaborador != null) {
-            query.addCriteria(Criteria.where("dados_usuario.nome").regex("." + Pattern.quote(nome_colaborador) + ".", "i"));
+            query.addCriteria(Criteria.where("dados_usuario.nome").regex(".*" + Pattern.quote(nome_colaborador) + ".*", "i"));
+        }
+        if (tipo_escala != null) {
+            query.addCriteria(Criteria.where("jornada_trabalho.tipo_escala").is(tipo_escala));
         }
         if (lista_status != null && !lista_status.isEmpty()) {
             query.addCriteria(Criteria.where("dados_usuario.status").in(lista_status));
@@ -59,7 +63,8 @@ public class UserSessionRepositoryCustomImpl implements UserSessionRepositoryCus
             .include("dados_usuario.departamento")
             .include("dados_usuario.status")
             .include("jornada_trabalho.banco_de_horas")
-            .include("jornada_trabalho.horas_diarias");
+            .include("jornada_trabalho.horas_diarias")
+            .include("jornada_trabalho.tipo_escala");
 
         long total = mongoTemplate.count(query, UserSessionEntity.class);
 
@@ -77,10 +82,10 @@ public class UserSessionRepositoryCustomImpl implements UserSessionRepositoryCus
     public List<UserSessionEntity> findEmployeesNotOnLeave(TipoStatusUsuario optionalStatus) {
         Query query = new Query();
     
-        List<TipoStatusUsuario> leaveStatuses = Arrays.asList(
+        List<TipoStatusUsuario> leaveStatuses = new ArrayList<>(Arrays.asList(
             TipoStatusUsuario.FERIAS,
             TipoStatusUsuario.INATIVO
-        );
+        ));
 
         if (optionalStatus != null) {
             leaveStatuses.add(optionalStatus);

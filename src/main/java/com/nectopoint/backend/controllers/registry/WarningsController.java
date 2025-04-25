@@ -41,13 +41,13 @@ public class WarningsController {
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(required = false) Instant startDate,
         @RequestParam(required = false) Instant endDate,
-        @RequestParam(required = false) List<TipoStatusAlerta> lista_status_aviso,
-        @RequestParam(required = false) TipoAviso tipoAviso,
+        @RequestParam(required = false) List<TipoStatusAlerta> lista_status,
+        @RequestParam(required = false) TipoAviso tipo_aviso,
         @RequestParam(required = false) Long id_colaborador
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<WarningsEntity> warningPage = warningsRepo.findByParamsDynamic(id_colaborador, startDate, endDate, lista_status_aviso, tipoAviso, pageable);
+        Page<WarningsEntity> warningPage = warningsRepo.findByParamsDynamic(id_colaborador, startDate, endDate, lista_status, tipo_aviso, pageable);
 
         return new ResponseEntity<>(warningPage, HttpStatus.OK);
     }

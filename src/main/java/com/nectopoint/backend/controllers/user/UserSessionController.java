@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.dtos.DashboardDTO;
 import com.nectopoint.backend.dtos.UserSessionDTO;
+import com.nectopoint.backend.enums.TipoEscala;
 import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
@@ -34,14 +35,15 @@ public class UserSessionController {
     public ResponseEntity<Page<UserSessionDTO>> getUsersList(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size,
-        @RequestParam(required = false) String cpf,
+        @RequestParam(required = false) String cpf_colaborador,
         @RequestParam(required = false) String nome_colaborador,
+        @RequestParam(required = false) TipoEscala tipo_escala,
         @RequestParam(required = false) List<TipoStatusUsuario> lista_status
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<UserSessionDTO> userSessionPage;
 
-        userSessionPage = userSessionRepo.findByParamsDynamic(cpf, nome_colaborador, lista_status, pageable);
+        userSessionPage = userSessionRepo.findByParamsDynamic(cpf_colaborador, nome_colaborador, tipo_escala, lista_status, pageable);
 
         return new ResponseEntity<>(userSessionPage, HttpStatus.OK);
     }

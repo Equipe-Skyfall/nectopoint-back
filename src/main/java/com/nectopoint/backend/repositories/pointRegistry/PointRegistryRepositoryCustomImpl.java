@@ -28,7 +28,7 @@ public class PointRegistryRepositoryCustomImpl implements PointRegistryRepositor
         Query query = new Query();
 
         if (nome_colaborador != null) {
-            query.addCriteria(Criteria.where("nome_colaborador").regex("." + Pattern.quote(nome_colaborador) + ".", "i"));
+            query.addCriteria(Criteria.where("nome_colaborador").regex(".*" + Pattern.quote(nome_colaborador) + ".*", "i"));
         }
 
         if (start != null && end != null) {

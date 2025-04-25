@@ -8,8 +8,7 @@ public enum TipoStatusUsuario {
     FORA_DO_EXPEDIENTE("Fora do expediente"),
     FOLGA("De Folga"),
     FERIAS("Em Férias"),
-    INATIVO("Inativo"),//inativo para não deletar o usuario
-    OUTROS("Outros");
+    INATIVO("Inativo");//inativo para não deletar o usuario
 
     @JsonCreator
     public static TipoStatusUsuario fromString(String value) {
