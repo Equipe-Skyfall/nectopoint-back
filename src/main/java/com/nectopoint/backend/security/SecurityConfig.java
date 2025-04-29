@@ -24,6 +24,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth ->{
                 auth.requestMatchers("/usuario/auth").permitAll();
                 auth.requestMatchers("/usuario/verify").permitAll();
+                auth.requestMatchers("/test/sync-databases").permitAll();
                 auth.requestMatchers("/usuario/{id}/senha").authenticated();
                 auth.requestMatchers("/usuario/**").hasRole("GERENTE");
                 auth.anyRequest().authenticated();
