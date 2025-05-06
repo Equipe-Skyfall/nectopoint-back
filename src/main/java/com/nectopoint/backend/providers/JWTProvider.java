@@ -39,7 +39,7 @@ public class JWTProvider {
     public String generateToken(String userId, String role, String status) {
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
         return JWT.create()
-                .withExpiresAt(Instant.now().plus(Duration.ofHours(2)))
+                .withExpiresAt(Instant.now().plus(Duration.ofHours(10)))
                 .withIssuer("Nectopoint")
                 .withSubject(userId)
                 .withClaim("roles", role)
