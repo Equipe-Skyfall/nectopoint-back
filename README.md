@@ -816,6 +816,192 @@ Enum tipoTicket = PONTOS_IMPAR, SEM_ALMOCO
 
 ---
 ---
+
+## 📅 Sistema de Feriados
+
+O Sistema de Feriados permite gerenciar calendários de trabalho, estabelecendo períodos de folga globais (para todos os usuários) ou específicos (para usuários selecionados).
+
+### Rotas de Feriados
+
+```sh
+POST   http://localhost:8080/feriados/              # Cria um novo feriado
+PUT    http://localhost:8080/feriados/{id}          # Atualiza um feriado existente
+DELETE http://localhost:8080/feriados/{id}          # Remove um feriado
+GET    http://localhost:8080/feriados/{id}          # Busca um feriado pelo ID
+GET    http://localhost:8080/feriados/              # Lista todos os feriados
+GET    http://localhost:8080/feriados/listar        # Lista feriados com paginação e filtros
+GET    http://localhost:8080/feriados/verificar     # Verifica se hoje é feriado
+GET    http://localhost:8080/feriados/verificar-data # Verifica se uma data é feriado
+GET    http://localhost:8080/feriados/verificar-usuario # Verifica se uma data é feriado para um usuário
+POST   http://localhost:8080/feriados/aplicar       # Aplica status de feriado para hoje
+POST   http://localhost:8080/feriados/aplicar-data  # Aplica status de feriado para uma data específica
+POST   http://localhost:8080/feriados/folga-usuario/{userId} # Aplica status de folga para um usuário específico
+```
+
+---
+
+### Criando um Feriado
+
+**POST:** Cadastre um feriado em http://localhost:8080/feriados/ usando o seguinte formato JSON:
+
+```sh
+{
+  "name": "Natal",
+  "startDate": "2025-12-25",
+  "endDate": "2025-12-25",
+  "description": "Comemoração de Natal",
+  "repeatsYearly": true,
+  "userIds": []
+}
+```
+
+- **name**: Nome do feriado (obrigatório)
+- **startDate**: Data de início do feriado (obrigatório)
+- **endDate**: Data de término do feriado (obrigatório)
+- **description**: Descrição opcional do feriado
+- **repeatsYearly**: Define se o feriado se repete anualmente (mesmo dia/mês em todos os anos)
+- **userIds**: Lista de IDs de usuários para os quais este feriado se aplica. Se vazio, o feriado é global (aplica-se a todos)
+
+---
+
+### Atualizando um Feriado
+
+**PUT:** Atualize um feriado existente em http://localhost:8080/feriados/{id} com o mesmo formato JSON usado para criação.
+
+---
+
+### Listando Feriados
+
+**GET:** Busque feriados com filtros e paginação em http://localhost:8080/feriados/listar
+
+<details>
+    <summary>Clique para ver o JSON retornado</summary>
+
+```sh
+{
+    "content": [
+        {
+            "id": "65a4b7d7f741b53e157f3c55",
+            "name": "Natal",
+            "startDate": "2025-12-25",
+            "endDate": "2025-12-25",
+            "description": "Comemoração de Natal",
+            "repeatsYearly": true,
+            "userIds": []
+        },
+        {
+            "id": "65a4b800f741b53e157f3c56",
+            "name": "Dia do Trabalho",
+            "startDate": "2025-05-01",
+            "endDate": "2025-05-01",
+            "description": "Feriado Nacional",
+            "repeatsYearly": true,
+            "userIds": []
+        }
+    ],
+    "pageable": {
+        "pageNumber": 0,
+        "pageSize": 10,
+        "sort": {
+            "empty": false,
+            "sorted": true,
+            "unsorted": false
+        },
+        "offset": 0,
+        "paged": true,
+        "unpaged": false
+    },
+    "last": true,
+    "totalElements": 2,
+    "totalPages": 1,
+    "size": 10,
+    "number": 0,
+    "sort": {
+        "empty": false,
+        "sorted": true,
+        "unsorted": false
+    },
+    "first": true,
+    "numberOfElements": 2,
+    "empty": false
+}
+```
+
+</details>
+
+❔ **Parâmetros:** `(int page), (int size), (string nome), (LocalDate data), (boolean repeticaoAnual)`
+
+---
+
+### Verificando Feriados
+
+**GET:** Verifique se uma data é um feriado em http://localhost:8080/feriados/verificar-data?data=2025-12-25
+
+<details>
+    <summary>Clique para ver o retorno</summary>
+
+```sh
+true
+```
+
+</details>
+
+---
+
+**GET:** Verifique se uma data é feriado para um usuário específico em http://localhost:8080/feriados/verificar-usuario?data=2025-12-25&userId=1
+
+<details>
+    <summary>Clique para ver o retorno</summary>
+
+```sh
+true
+```
+
+</details>
+
+---
+
+### Aplicando Status de Feriado
+
+**POST:** Aplique status de feriado para todos os usuários elegíveis para uma data específica em http://localhost:8080/feriados/aplicar-data?data=2025-12-25
+
+<details>
+    <summary>Clique para ver o retorno</summary>
+
+```sh
+"Status de feriado aplicado aos usuários!"
+```
+
+</details>
+
+---
+
+### Funcionamento Interno do Sistema de Feriados
+
+O sistema de feriados tem as seguintes características importantes:
+
+1. **Feriados Globais vs. Específicos**
+   - Feriados globais (userIds vazio) aplicam-se a todos os usuários
+   - Feriados específicos (userIds preenchido) aplicam-se apenas aos usuários listados
+
+2. **Feriados Anuais**
+   - Se repeatsYearly=true, o feriado repete-se anualmente no mesmo dia/mês
+   - Útil para feriados fixos como Natal, Ano Novo, etc.
+
+3. **Aplicação Automática**
+   - À meia-noite (00:00), o sistema verifica se o dia atual é feriado e configura os usuários para FOLGA
+   - Às 22:00, o sistema verifica se o próximo dia é feriado e prepara os status de usuário
+   - Às 06:00, o sistema atualiza o status dos usuários, respeitando o calendário de feriados
+
+4. **Suporte a Períodos**
+   - Um feriado pode durar vários dias (startDate até endDate)
+   - Útil para períodos como Carnaval, Semana Santa, recesso, etc.
+
+
+
+
+---
+---
 ### Rotas de teste
 
 **GET:** Execute os procedimentos que ocorrem ao final do dia (00:00h) usando a rota http://127.0.0.1:8080/test/finalizar-dia
