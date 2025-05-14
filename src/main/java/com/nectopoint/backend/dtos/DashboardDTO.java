@@ -4,11 +4,11 @@ import lombok.Data;
 
 @Data
 public class DashboardDTO {
-    Integer de_folga;
-    Integer de_ferias;
-    Integer trabalhando;
-    Integer no_intervalo;
-    Integer nao_iniciado;
+    Integer de_folga =0;
+    Integer de_ferias=0;
+    Integer trabalhando=0;
+    Integer no_intervalo=0;
+    Integer nao_iniciado=0;
 
     public void incrementDeFolga() {
         this.de_folga++;
