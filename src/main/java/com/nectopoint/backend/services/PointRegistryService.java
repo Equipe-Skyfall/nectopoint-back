@@ -1,20 +1,24 @@
 package com.nectopoint.backend.services;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
-
+import com.nectopoint.backend.repositories.holidays.HolidayRepository;
 import com.nectopoint.backend.enums.TipoAbono;
+import com.nectopoint.backend.enums.TipoEscala;
 import com.nectopoint.backend.enums.TipoPonto;
 import com.nectopoint.backend.enums.TipoStatusTurno;
 import com.nectopoint.backend.enums.TipoStatusUsuario;
+import com.nectopoint.backend.modules.holidays.HolidayEntity;
 import com.nectopoint.backend.modules.user.UserEntity;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
@@ -36,6 +40,8 @@ public class PointRegistryService {
     private UserSessionRepository userSessionRepo;
     @Autowired
     private UserRepository userRepo;
+    @Autowired
+    private HolidayRepository holidayRepository;
 
     @Autowired
     private UserSessionService userSessionService;
@@ -146,14 +152,115 @@ public class PointRegistryService {
         userRepo.save(targetUserSql);
     }
 
-    public void startDayShifts() {
-        List<UserSessionEntity> userSessions = userSessionRepo.findEmployeesNotOnLeave(TipoStatusUsuario.FOLGA);
+    //    @Transactional
+ public void startDayShifts() {
+    // pega todos os user sessions
+    List<UserSessionEntity> userSessions = userSessionRepo.findAll();
+    LocalDate today = LocalDate.now();
+    DayOfWeek dayOfWeek = today.getDayOfWeek();
+    
+    // pega os feriados pra hoje
+    List<HolidayEntity> todayHolidays = holidayRepository.findHolidaysForDate(today);
+    
+    List<HolidayEntity> globalHolidays = todayHolidays.stream()
+        .filter(HolidayEntity::isGlobalHoliday)
+        .collect(Collectors.toList());
+        
+    List<HolidayEntity> userSpecificHolidays = todayHolidays.stream()
+        .filter(h -> !h.isGlobalHoliday())
+        .collect(Collectors.toList());
+        
+    System.out.println("Today has " + globalHolidays.size() + " global holidays and " +
+                      userSpecificHolidays.size() + " user-specific holidays");
+ 
+    boolean hasGlobalHoliday = !globalHolidays.isEmpty();
+    
+    // Lista todos os usuários com folga hoje
+    List<Long> userIdsWithHoliday = new ArrayList<>();
+    for (HolidayEntity holiday : userSpecificHolidays) {
+        userIdsWithHoliday.addAll(holiday.getUserIds());
+    }
+    
+    System.out.println("Users with specific holidays today: " + userIdsWithHoliday);
+    
+    int updatedCount = 0;
+    int skippedCount = 0;
+    int holidayCount = 0;
+    int weekendCount = 0;
+    
+    // são setados meia noite ou as dez -> ambos setam feriado
+    if (hasGlobalHoliday) {
+        System.out.println("Global holiday today - all users stay in FOLGA status");
+        return;
+    }
+    
+    // processa cada usuário
+    for (UserSessionEntity user : userSessions) {
+        Long userId = user.getId_colaborador();
+        TipoStatusUsuario currentStatus = user.getDados_usuario().getStatus();
+        TipoEscala userSchedule = user.getJornada_trabalho().getTipo_escala();
+        
+        System.out.println("Processing user ID: " + userId + 
+                          ", Name: " + user.getDados_usuario().getNome() + 
+                          ", Current Status: " + currentStatus +
+                          ", Schedule: " + userSchedule);
+      
+        // pula usuários em férias ou inativos
+        if (currentStatus == TipoStatusUsuario.FERIAS || currentStatus == TipoStatusUsuario.INATIVO) {
+            System.out.println("Skipping user " + userId + " with status " + currentStatus);
+            skippedCount++;
+            continue;
+        }
 
-        for (UserSessionEntity user : userSessions) {
-            user.getDados_usuario().setStatus(TipoStatusUsuario.ESCALADO);
-            userSessionRepo.save(user);
+       
+        if (userIdsWithHoliday.contains(userId)) {
+            if (currentStatus != TipoStatusUsuario.FOLGA) {
+                user.getDados_usuario().setStatus(TipoStatusUsuario.FOLGA);
+                userSessionRepo.save(user);
+                System.out.println("User " + userId + " has holiday today - set to FOLGA status");
+            } else {
+                System.out.println("User " + userId + " already in FOLGA status for holiday");
+            }
+            holidayCount++;
+            continue; 
+        }
+        
+        // Checar se hoje é fim de semana na escala do usuário
+        boolean isWeekendForUser = 
+            (userSchedule == TipoEscala.CINCO_X_DOIS && 
+             (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY)) ||
+            (userSchedule == TipoEscala.SEIS_X_UM && 
+             dayOfWeek == DayOfWeek.SUNDAY);
+        
+    
+        if (isWeekendForUser) {
+            if (currentStatus != TipoStatusUsuario.FOLGA) {
+                user.getDados_usuario().setStatus(TipoStatusUsuario.FOLGA);
+                userSessionRepo.save(user);
+                System.out.println("User " + userId + " has weekend day - set to FOLGA status");
+            } else {
+                System.out.println("User " + userId + " already in FOLGA status for weekend");
+            }
+            weekendCount++;
+        } 
+        
+        else {
+            if (currentStatus != TipoStatusUsuario.ESCALADO) {
+                user.getDados_usuario().setStatus(TipoStatusUsuario.ESCALADO);
+                userSessionRepo.save(user);
+                updatedCount++;
+                System.out.println("Updated user " + userId + " status to ESCALADO");
+            } else {
+                System.out.println("User " + userId + " already in ESCALADO status");
+            }
         }
     }
+    
+    System.out.println("Start day process complete. Updated: " + updatedCount + 
+                       ", Skipped: " + skippedCount + 
+                       ", Holiday users: " + holidayCount +
+                       ", Weekend users: " + weekendCount);
+}
 
     public void endDayShifts() {
         //Termina o turno para os funcionário que não estão de FOLGA ou Férias
