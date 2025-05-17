@@ -4,10 +4,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.nectopoint.backend.providers.JWTProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nectopoint.backend.enums.TipoStatusTurno;
+import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
+import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
 import com.nectopoint.backend.services.PointRegistryService;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,9 +37,9 @@ public class PointRegistryController {
     @Autowired
     private PointRegistryRepository registryRepo;
     @Autowired
-    private PointRegistryService registryService;
+    private UserSessionRepository userSessionRepo;
     @Autowired
-    private JWTProvider jwtProvider;
+    private PointRegistryService registryService;
 
     @PostMapping("/bater-ponto")
     public ResponseEntity<?> postPunch(HttpServletRequest request) {
@@ -51,23 +50,10 @@ public class PointRegistryController {
         }
 
         Long id_colaborador = Long.parseLong(authentication.getPrincipal().toString());
-        //pega o cookie
-        Cookie[] cookies = request.getCookies();
-        String token = null;
-        //tira o jwt do cookie
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("jwt_token".equals(cookie.getName())) {
-                    token = cookie.getValue();
-                    break;
-                }
-            }
-        }
-        //descriptografa o cookie
-        DecodedJWT decodedToken = jwtProvider.validateToken(token);
-        String status = decodedToken.getClaim("status").asString();
+        
+        TipoStatusUsuario status = userSessionRepo.findByColaborador(id_colaborador).getDados_usuario().getStatus();
         // se não estiver escalado não permite a batida de ponto
-        if (status == null || !status.equals("ESCALADO")) {
+        if (status == null || !status.equals(TipoStatusUsuario.ESCALADO)) {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Operação não permitida. Status do usuário não é ESCALADO.");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);

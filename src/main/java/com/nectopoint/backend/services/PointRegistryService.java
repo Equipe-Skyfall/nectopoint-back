@@ -102,7 +102,7 @@ public class PointRegistryService {
         targetShift.setTirou_almoco(false);
         targetShift.setInicio_turno(lista_horas.get(0));
 
-        for (int i = 0; i < lista_horas.size() - 1; i++ ) {
+        for (int i = 0; i < lista_horas.size(); i++ ) {
             if (i==0) {
                 targetShift.getPontos_marcados().add(processNewEntry(null, lista_horas.get(i)));
             } else {

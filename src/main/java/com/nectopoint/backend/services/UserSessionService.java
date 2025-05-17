@@ -79,6 +79,7 @@ public class UserSessionService {
             if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
                 targetUser.setJornada_atual(new PointRegistryStripped());
             }
+            targetUser.getJornadas_irregulares().removeIf(jornada -> jornada.getId_registro() == id_registro);
 
             targetShift.setStatus_turno(TipoStatusTurno.IRREGULAR);
             tipo_aviso = TipoAviso.PONTOS_IMPAR;

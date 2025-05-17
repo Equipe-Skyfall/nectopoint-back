@@ -181,9 +181,11 @@ public class TicketsService {
         for (Ponto ponto : pontos_ajustado) {
             time_list.add(dateTimeHelper.joinDateTime(shiftDay, ponto.getData_hora()));
         }
-        for (Pares par : pares_pontos) {
-            time_list.add(dateTimeHelper.joinDateTime(shiftDay, par.getHorario_saida()));
-            time_list.add(dateTimeHelper.joinDateTime(shiftDay, par.getHorario_entrada()));
+        if (pares_pontos != null) {
+            for (Pares par : pares_pontos) {
+                time_list.add(dateTimeHelper.joinDateTime(shiftDay, par.getHorario_saida()));
+                time_list.add(dateTimeHelper.joinDateTime(shiftDay, par.getHorario_entrada()));
+            }
         }
 
         return time_list.stream().sorted().toList();
@@ -192,7 +194,7 @@ public class TicketsService {
     private List<Ponto> buildPointList(List<Instant> time_list) {
         List<Ponto> lista_pontos = new ArrayList<>();
 
-        for (int i = 0; i < time_list.size()-1; i++) {
+        for (int i = 0; i < time_list.size(); i++) {
             if (i == 0) {
                 lista_pontos.add(registryService.processNewEntry(null, time_list.get(i)));
             } else {
