@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.nectopoint.backend.controllers.sse.SseController;
 import com.nectopoint.backend.dtos.UserDetailsDTO;
 import com.nectopoint.backend.dtos.UserVacationDTO;
 import com.nectopoint.backend.enums.TipoAviso;
@@ -28,6 +29,9 @@ import com.nectopoint.backend.utils.DataTransferHelper;
 public class UserSessionService {
 
     private final DataTransferHelper dataTransferHelper;
+
+    @Autowired
+    private SseController sseController;
     
     @Autowired
     private UserSessionRepository userSessionRepo;
@@ -79,6 +83,7 @@ public class UserSessionService {
             if (id_registro.equals(targetUser.getJornada_atual().getId_registro())) {
                 targetUser.setJornada_atual(new PointRegistryStripped());
             }
+            targetUser.getJornadas_irregulares().removeIf(jornada -> jornada.getId_registro() == id_registro);
 
             targetShift.setStatus_turno(TipoStatusTurno.IRREGULAR);
             tipo_aviso = TipoAviso.PONTOS_IMPAR;
@@ -219,6 +224,7 @@ public class UserSessionService {
         updateTarget = dataTransferHelper.toUserSessionEntityUpdate(updateTarget, newData);
         userSessionRepo.save(updateTarget);
         // userSessionRepo.save(updateTarget);
+        sseController.sendPing("Usuário atualizado");
     }
 
     public void updateUserStatus(Long userId, TipoStatusUsuario status) {
@@ -235,6 +241,7 @@ public class UserSessionService {
         UserSessionEntity deleteTarget = userSessionRepo.findByColaborador(id_colaborador);
 
         userSessionRepo.delete(deleteTarget);
+        sseController.sendPing("Usuário deletado");
     }
 
     public void syncUsersWithSessions() {

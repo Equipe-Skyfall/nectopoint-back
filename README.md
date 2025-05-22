@@ -1002,11 +1002,3 @@ O sistema de feriados tem as seguintes características importantes:
 
 ---
 ---
-### Rotas de teste
-
-**GET:** Execute os procedimentos que ocorrem ao final do dia (00:00h) usando a rota http://127.0.0.1:8080/test/finalizar-dia
-
-*No momento somente a contagem de pontos e geração de alertas está implementado nessa função*
-
----
-**GET:** Sincronizar os usuários na tabela MySQL usando a rota http://127.0.0.1:8080/test/sync-databases

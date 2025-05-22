@@ -13,7 +13,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import com.nectopoint.backend.controllers.sse.SseController;
 import com.nectopoint.backend.dtos.TicketAnswerDTO;
 import com.nectopoint.backend.dtos.TicketDTO;
 import com.nectopoint.backend.dtos.TicketDTO.Pares;
@@ -33,6 +33,9 @@ import com.nectopoint.backend.utils.DateTimeHelper;
 @Service
 public class TicketsService {
 
+    @Autowired
+    private final SseController sseController;
+
     private final DataTransferHelper dataTransferHelper;
     private final DateTimeHelper dateTimeHelper;
 
@@ -48,9 +51,10 @@ public class TicketsService {
     @Autowired
     private UserSessionService userSessionService;
 
-    public TicketsService(DataTransferHelper dataTransferHelper, DateTimeHelper dateTimeHelper) {
+    public TicketsService(DataTransferHelper dataTransferHelper, DateTimeHelper dateTimeHelper, SseController sseController) {
         this.dataTransferHelper = dataTransferHelper;
         this.dateTimeHelper = dateTimeHelper;
+        this.sseController = sseController;
     }
 
     public TicketsEntity postTicket(Long id_colaborador, TicketDTO ticketDTO, Optional<MultipartFile> file) {
@@ -103,6 +107,7 @@ public class TicketsService {
         }
 
         userSessionRepo.save(posterUser);
+        sseController.sendPing("Ticket postado");
         return postedTicket;
     }
 
@@ -173,6 +178,7 @@ public class TicketsService {
                     userSessionRepo.save(colaborador);
             }
         }
+        sseController.sendPing("Ticket respondido");
     }
 
     private List<Instant> buildTimeList(Instant shiftDay, List<Ponto> pontos_ajustado, List<Pares> pares_pontos) {
@@ -181,9 +187,11 @@ public class TicketsService {
         for (Ponto ponto : pontos_ajustado) {
             time_list.add(dateTimeHelper.joinDateTime(shiftDay, ponto.getData_hora()));
         }
-        for (Pares par : pares_pontos) {
-            time_list.add(dateTimeHelper.joinDateTime(shiftDay, par.getHorario_saida()));
-            time_list.add(dateTimeHelper.joinDateTime(shiftDay, par.getHorario_entrada()));
+        if (pares_pontos != null) {
+            for (Pares par : pares_pontos) {
+                time_list.add(dateTimeHelper.joinDateTime(shiftDay, par.getHorario_saida()));
+                time_list.add(dateTimeHelper.joinDateTime(shiftDay, par.getHorario_entrada()));
+            }
         }
 
         return time_list.stream().sorted().toList();
@@ -192,7 +200,7 @@ public class TicketsService {
     private List<Ponto> buildPointList(List<Instant> time_list) {
         List<Ponto> lista_pontos = new ArrayList<>();
 
-        for (int i = 0; i < time_list.size()-1; i++) {
+        for (int i = 0; i < time_list.size(); i++) {
             if (i == 0) {
                 lista_pontos.add(registryService.processNewEntry(null, time_list.get(i)));
             } else {
