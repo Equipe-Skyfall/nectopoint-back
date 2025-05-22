@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 import com.nectopoint.backend.repositories.holidays.HolidayRepository;
+import com.nectopoint.backend.controllers.sse.SseController;
 import com.nectopoint.backend.enums.TipoAbono;
 import com.nectopoint.backend.enums.TipoEscala;
 import com.nectopoint.backend.enums.TipoPonto;
@@ -33,6 +34,9 @@ import com.nectopoint.backend.utils.DataTransferHelper;
 public class PointRegistryService {
 
     private final DataTransferHelper dataTransferHelper;
+
+    @Autowired
+    private SseController sseController;
     
     @Autowired
     private PointRegistryRepository registryRepo;
@@ -53,7 +57,10 @@ public class PointRegistryService {
     public PointRegistryEntity postPunch(Long id_colaborador) {
         UserSessionEntity currentUser = userSessionRepo.findByColaborador(id_colaborador);
 
-        return processPostPunch(currentUser);
+        PointRegistryEntity currentShift = processPostPunch(currentUser);
+
+        sseController.sendPing("Ponto batido");
+        return currentShift;
     }
 
     public PointRegistryEntity processPostPunch(UserSessionEntity currentUser) {

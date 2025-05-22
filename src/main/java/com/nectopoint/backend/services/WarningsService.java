@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.nectopoint.backend.controllers.sse.SseController;
 import com.nectopoint.backend.enums.TipoAviso;
 import com.nectopoint.backend.enums.TipoStatusAlerta;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
@@ -13,6 +14,9 @@ import com.nectopoint.backend.repositories.warnings.WarningsRepository;
 @Service
 public class WarningsService {
     
+    @Autowired
+    private SseController sseController;
+
     @Autowired
     private WarningsRepository warningsRepo;
 
@@ -24,6 +28,7 @@ public class WarningsService {
         warning.setCpf_colaborador(cpf_colaborador);
         warning.setTipo_aviso(tipo_aviso);
 
+        sseController.sendPing("alerta registrado");
         return warningsRepo.save(warning);
     }
     
