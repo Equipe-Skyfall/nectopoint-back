@@ -31,6 +31,13 @@ public class UserSessionEntity {
 
     private List<TicketsStripped> tickets_usuario = new ArrayList<>();
     private List<WarningsStripped> alertas_usuario = new ArrayList<>();
+
+   public void setAlertas_usuario(List<WarningsStripped> newWarnings) {
+    this.alertas_usuario = newWarnings; // ✅ CORRETO
+    // ❌ REMOVER: throw new UnsupportedOperationException("Not supported yet.");
+}
+
+    // Removed duplicate getAlertas_usuario() method to resolve compilation error.
     
     @Data
     public static class DadosUsuario {
@@ -73,7 +80,17 @@ public class UserSessionEntity {
 
         alertas_usuario.set(alertas_usuario.indexOf(target), warningsStripped);
     }
-
+    public void updateUserWarnings(List<WarningsStripped> warningsStripped) {
+        for (WarningsStripped warning : warningsStripped) {
+            WarningsStripped target = alertas_usuario.stream()
+            .filter(w -> w.getId_aviso().equals(warning.getId_aviso()))
+            .findFirst().get();
+            alertas_usuario.set(alertas_usuario.indexOf(target), warning);
+        }
+    }
+    public List<WarningsStripped> getAlertas_usuario(){
+        return (alertas_usuario);
+    }
     public void removeWarning(WarningsStripped warningsStripped) {
         alertas_usuario.remove(warningsStripped);
     }
