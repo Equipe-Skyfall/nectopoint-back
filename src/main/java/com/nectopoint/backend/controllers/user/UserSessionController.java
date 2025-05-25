@@ -19,10 +19,16 @@ import com.nectopoint.backend.enums.TipoEscala;
 import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
 import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
+import com.nectopoint.backend.services.UserSessionService;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.nectopoint.backend.modules.shared.WarningsStripped;
+
 
 @RestController
 @RequestMapping("/sessao/usuario")
@@ -30,7 +36,6 @@ public class UserSessionController {
 
     @Autowired
     private UserSessionRepository userSessionRepo;
-
     @GetMapping("/todos")
     public ResponseEntity<Page<UserSessionDTO>> getUsersList(
         @RequestParam(defaultValue = "0") int page,
@@ -60,6 +65,22 @@ public class UserSessionController {
         return ResponseEntity.ok().body(userSessionRepo.findByColaborador(id));
     }
     
+    @PutMapping("/alertas/{id}")
+    public ResponseEntity<UserSessionEntity> updateUserWarnings(@PathVariable Long id, @RequestBody UserSessionEntity userSessionNew) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+         if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Long id_colaborador = Long.parseLong(authentication.getPrincipal().toString());
+        UserSessionEntity userSession = userSessionRepo.findByColaborador(id_colaborador);
+        if (userSession == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        List<WarningsStripped> newWarnings = userSessionNew.getAlertas_usuario();
+        userSession.setAlertas_usuario(newWarnings);
+        UserSessionEntity savedUserSession = userSessionRepo.save(userSession);
+        return ResponseEntity.ok().body(savedUserSession);
+    }
 
     @GetMapping("/me")
     public ResponseEntity<UserSessionEntity> getUserSession() {
