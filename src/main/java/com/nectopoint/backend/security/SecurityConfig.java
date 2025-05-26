@@ -24,7 +24,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth ->{
                 auth.requestMatchers("/usuario/auth").permitAll();
                 auth.requestMatchers("/usuario/verify").permitAll();
+                auth.requestMatchers("/tickets/**").permitAll();
                 auth.requestMatchers("/test/**").permitAll();
+                auth.requestMatchers("/api/**").permitAll();
                 auth.requestMatchers("/usuario/{id}/senha").authenticated();
                 auth.requestMatchers("/usuario/**").hasRole("GERENTE");
                 auth.requestMatchers("/feriados/**").permitAll();
