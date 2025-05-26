@@ -107,14 +107,17 @@ public class UserSessionService {
                 Optional<PointRegistryStripped> jornada_irregular = targetUser.getJornadas_irregulares().stream()
                 .filter(jornada -> jornada.getId_registro().equals(id_registro))
                 .findFirst();
-                PointRegistryStripped jornadaIrregular = jornada_irregular.get();
-                
-                if (jornadaIrregular.getTirou_almoco().equals(Boolean.FALSE)) {
-                    horas_trabalhadas_turno = jornadaIrregular.getTempo_trabalhado_min();
-                    banco_de_horas = banco_de_horas - (horas_trabalhadas_turno - horas_diarias);
+
+                if (jornada_irregular.isPresent()) {
+                    PointRegistryStripped jornadaIrregular = jornada_irregular.get();
+                    
+                    if (jornadaIrregular.getTirou_almoco().equals(Boolean.FALSE)) {
+                        horas_trabalhadas_turno = jornadaIrregular.getTempo_trabalhado_min();
+                        banco_de_horas = banco_de_horas - (horas_trabalhadas_turno - horas_diarias);
+                    }
+                    
+                    targetUser.getJornadas_irregulares().remove(jornadaIrregular);
                 }
-                
-                targetUser.getJornadas_irregulares().remove(jornadaIrregular);
             }
             
             Instant fim_turno = targetShift.getPontos_marcados().get(targetShift.getPontos_marcados().size()-1).getData_hora();
@@ -128,7 +131,7 @@ public class UserSessionService {
             targetUser.getJornada_trabalho().setBanco_de_horas(novo_banco_de_horas);
             targetUserSQL.setBankOfHours(novo_banco_de_horas);
 
-            if (targetShift.getTirou_almoco() == false && Math.abs(horas_trabalhadas_turno - horas_diarias) < 60) {
+            if (targetShift.getTirou_almoco() == false && (Math.abs(horas_trabalhadas_turno - horas_diarias) < 60 || horas_trabalhadas_turno > horas_diarias )) {
                 targetShift.setStatus_turno(TipoStatusTurno.IRREGULAR);
                 tipo_aviso = TipoAviso.SEM_ALMOCO;
                 warning = warningsService.registerWarning(id_colaborador, nome_colaborador, cpf_colaborador, tipo_aviso);

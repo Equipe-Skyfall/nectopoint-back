@@ -62,6 +62,13 @@ public class TicketValidator implements ConstraintValidator<ValidTicket, TicketD
                     ticketDto.getPontos_ajustado().get(ticketDto.getPontos_ajustado().size() - 1).getData_hora()
                 );
 
+                if (isNotBefore(inicio_turno, fim_turno)) {
+                    context.buildConstraintViolationWithTemplate("Você está inserindo uma saída antes do início do turno")
+                    .addPropertyNode("pontos_ajustado")
+                    .addConstraintViolation();
+                    return false;
+                }
+
                 List<Pares> pares_pontos = new ArrayList<>();
                 
                 // Validando os pontos editados e inserindo-os na lista de pares, excluindo o primeiro e último índice
