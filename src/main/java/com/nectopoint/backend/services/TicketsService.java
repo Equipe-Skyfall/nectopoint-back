@@ -45,7 +45,7 @@ public class TicketsService {
     private TicketsRepository ticketsRepo;
     @Autowired
     private UserSessionRepository userSessionRepo;
-
+    @Autowired
     private PointRegistryRepository repo;
 
     @Autowired
