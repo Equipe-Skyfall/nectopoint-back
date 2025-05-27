@@ -66,6 +66,9 @@ public class TicketsService {
 
         if (ticketDTO.getTipo_ticket().equals(TipoTicket.ALTERAR_PONTOS)) {
             PointRegistryEntity turno = repo.findById(ticketDTO.getId_registro()).get();
+
+            ticketDTO.setPontos_anterior(turno.getPontos_marcados());
+
             List<Instant> time_list = buildTimeList(
                 ticketDTO.getPontos_anterior().get(0).getData_hora(),
                 ticketDTO.getPontos_ajustado(),
