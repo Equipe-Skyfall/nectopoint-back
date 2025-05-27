@@ -14,5 +14,5 @@ public interface PointRegistryRepositoryCustom {
     Page<PointRegistryEntity> findByParamsDynamic(String nome_colaborador, Instant start, Instant end,
                                                     List<TipoStatusTurno> lista_status_turno, Pageable pageable);
 
-    List<PointRegistryEntity> findByDateCriterias(List<Criteria> criterias);
+    List<PointRegistryEntity> findByDateCriterias(Long id_colaborador, List<Criteria> criterias);
 }

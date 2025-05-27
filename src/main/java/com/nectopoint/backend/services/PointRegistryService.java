@@ -4,7 +4,9 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -134,25 +136,36 @@ public class PointRegistryService {
         UserEntity targetUserSql = userRepo.findById(id_colaborador).get();
 
         for (Instant date : dias_abono) {
-            LocalDate localDate = date.atZone(zoneId).toLocalDate();
+            // Reinterpret the UTC midnight as São Paulo midnight
+            // 1. Convert the Instant to LocalDateTime in UTC
+            // 2. Then treat that LocalDateTime as if it was in São Paulo
+            LocalDate localDate = LocalDateTime.ofInstant(date, ZoneOffset.UTC)
+                .atZone(zoneId) // interpret the naive time as São Paulo
+                .toLocalDate();
+
             Instant startOfDay = localDate.atStartOfDay(zoneId).toInstant();
             Instant endOfDay = localDate.plusDays(1).atStartOfDay(zoneId).toInstant().minusNanos(1);
-    
+
             Criteria dateCriteria = Criteria.where("inicio_turno").gte(startOfDay).lte(endOfDay);
             criteriaList.add(dateCriteria);
         }
 
-        List<PointRegistryEntity> registryList = registryRepo.findByDateCriterias(criteriaList);
 
-        registryList.forEach(registry -> {
-            registry.setAbono(new Abono());
-            registry.getAbono().setMotivo_abono(motivo_abono);
-            registry.getAbono().setHorarios_abono("Abonado pelo dia.");
+        List<PointRegistryEntity> registryList = new ArrayList<>();
+        registryList = registryRepo.findByDateCriterias(id_colaborador, criteriaList);
+        System.out.println(registryList);
 
-            targetUser.getJornada_trabalho().setBanco_de_horas(banco_atual + horas_diarias);
-            targetUserSql.setBankOfHours(banco_atual + horas_diarias);
-            targetUser.updateRegistry(dataTransferHelper.toPointRegistryStripped(registry));
-        });
+        if (!registryList.isEmpty()) {
+            registryList.forEach(registry -> {
+                registry.setAbono(new Abono());
+                registry.getAbono().setMotivo_abono(motivo_abono);
+                registry.getAbono().setHorarios_abono("Abonado pelo dia.");
+
+                targetUser.getJornada_trabalho().setBanco_de_horas(banco_atual + horas_diarias);
+                targetUserSql.setBankOfHours(banco_atual + horas_diarias);
+                targetUser.updateRegistry(dataTransferHelper.toPointRegistryStripped(registry));
+            });
+        }
 
         registryRepo.saveAll(registryList);
         userSessionRepo.save(targetUser);

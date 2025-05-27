@@ -1,6 +1,7 @@
 package com.nectopoint.backend.repositories.pointRegistry;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -53,10 +54,21 @@ public class PointRegistryRepositoryCustomImpl implements PointRegistryRepositor
         return new PageImpl<>(registry, pageable, total);
     }
 
-    public List<PointRegistryEntity> findByDateCriterias(List<Criteria> criterias) {
-        Criteria combinedCriteria = new Criteria().orOperator(criterias.toArray(new Criteria[0]));
+    public List<PointRegistryEntity> findByDateCriterias(Long id_colaborador, List<Criteria> dateCriterias) {
+        List<Criteria> combinedOrs = new ArrayList<>();
 
-        Query query = new Query(combinedCriteria);
+        for (Criteria dateCriteria : dateCriterias) {
+            combinedOrs.add(
+                new Criteria().andOperator(
+                    Criteria.where("id_colaborador").is(id_colaborador),
+                    Criteria.where("status_turno").is(TipoStatusTurno.NAO_COMPARECEU),
+                    dateCriteria
+                )
+            );
+        }
+
+        Criteria finalCriteria = new Criteria().orOperator(combinedOrs.toArray(new Criteria[0]));
+        Query query = new Query(finalCriteria);
 
         return mongoTemplate.find(query, PointRegistryEntity.class);
     }
