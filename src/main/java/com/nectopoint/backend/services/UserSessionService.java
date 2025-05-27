@@ -107,7 +107,7 @@ public class UserSessionService {
                 Optional<PointRegistryStripped> jornada_irregular = targetUser.getJornadas_irregulares().stream()
                 .filter(jornada -> jornada.getId_registro().equals(id_registro))
                 .findFirst();
-                Optional<PointRegistryStripped> jornada_historico = targetUser.getJornadas_irregulares().stream()
+                Optional<PointRegistryStripped> jornada_historico = targetUser.getJornadas_historico().stream()
                 .filter(jornada -> jornada.getId_registro().equals(id_registro))
                 .findFirst();
 
