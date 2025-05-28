@@ -75,7 +75,11 @@ public class UserSessionEntity {
     }
 
     public void removeWarning(WarningsStripped warningsStripped) {
-        alertas_usuario.remove(warningsStripped);
+        WarningsStripped target = alertas_usuario.stream()
+        .filter(warning -> warning.getId_aviso().equals(warningsStripped.getId_aviso()))
+        .findFirst().get();
+
+        alertas_usuario.remove(target);
     }
 
     public void missedWorkDay() {

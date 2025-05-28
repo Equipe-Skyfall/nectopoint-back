@@ -110,6 +110,7 @@ public class PointRegistryService {
         targetShift.setTempo_trabalhado_min((long)0);
         targetShift.setTirou_almoco(false);
         targetShift.setInicio_turno(lista_horas.get(0));
+        targetShift.setId_aviso(null);
 
         for (int i = 0; i < lista_horas.size(); i++ ) {
             if (i==0) {

@@ -107,6 +107,9 @@ public class UserSessionService {
                 Optional<PointRegistryStripped> jornada_irregular = targetUser.getJornadas_irregulares().stream()
                 .filter(jornada -> jornada.getId_registro().equals(id_registro))
                 .findFirst();
+                Optional<PointRegistryStripped> jornada_historico = targetUser.getJornadas_irregulares().stream()
+                .filter(jornada -> jornada.getId_registro().equals(id_registro))
+                .findFirst();
 
                 if (jornada_irregular.isPresent()) {
                     PointRegistryStripped jornadaIrregular = jornada_irregular.get();
@@ -117,6 +120,14 @@ public class UserSessionService {
                     }
                     
                     targetUser.getJornadas_irregulares().remove(jornadaIrregular);
+                }
+                if (jornada_historico.isPresent()) {
+                    PointRegistryStripped jornadaHistorico = jornada_historico.get();
+                    
+                    horas_trabalhadas_turno = jornadaHistorico.getTempo_trabalhado_min();
+                    banco_de_horas = banco_de_horas - (horas_trabalhadas_turno - horas_diarias);
+                    
+                    targetUser.getJornadas_historico().remove(jornadaHistorico);
                 }
             }
             

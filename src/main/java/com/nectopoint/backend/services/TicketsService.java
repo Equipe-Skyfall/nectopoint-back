@@ -22,9 +22,11 @@ import com.nectopoint.backend.enums.TipoStatusTicket;
 import com.nectopoint.backend.enums.TipoStatusUsuario;
 import com.nectopoint.backend.enums.TipoTicket;
 import com.nectopoint.backend.modules.user.UserSessionEntity;
+import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity;
 import com.nectopoint.backend.modules.usersRegistry.TicketsEntity;
 import com.nectopoint.backend.modules.usersRegistry.WarningsEntity;
 import com.nectopoint.backend.modules.usersRegistry.PointRegistryEntity.Ponto;
+import com.nectopoint.backend.repositories.pointRegistry.PointRegistryRepository;
 import com.nectopoint.backend.repositories.tickets.TicketsRepository;
 import com.nectopoint.backend.repositories.userSession.UserSessionRepository;
 import com.nectopoint.backend.utils.DataTransferHelper;
@@ -44,6 +46,8 @@ public class TicketsService {
     @Autowired
     private UserSessionRepository userSessionRepo;
 
+    private PointRegistryRepository repo;
+
     @Autowired
     private WarningsService warningsService;
     @Autowired
@@ -61,6 +65,7 @@ public class TicketsService {
         UserSessionEntity posterUser = userSessionRepo.findByColaborador(id_colaborador);
 
         if (ticketDTO.getTipo_ticket().equals(TipoTicket.ALTERAR_PONTOS)) {
+            PointRegistryEntity turno = repo.findById(ticketDTO.getId_registro()).get();
             List<Instant> time_list = buildTimeList(
                 ticketDTO.getPontos_anterior().get(0).getData_hora(),
                 ticketDTO.getPontos_ajustado(),
@@ -68,6 +73,10 @@ public class TicketsService {
             );
 
             List<Ponto> final_pontos_ajustado = buildPointList(time_list);
+
+            if (turno.getId_aviso() != null) {
+                ticketDTO.setId_aviso(turno.getId_aviso());
+            }
 
             ticketDTO.setPontos_ajustado(final_pontos_ajustado);
             ticketDTO.setLista_horas(time_list);
